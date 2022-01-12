@@ -26,7 +26,7 @@ public class LoginController {
     public String loginByNameAndPassword(@RequestParam(name = "name",required = true)String name, @RequestParam(name = "password",required = true) String password){
         log.info("进入loginByNameAndPassword的controller层");
         User user = loginService.loginByNameAndPassword(name,password);
-        if(user.getName() == null){
+        if(user == null){
             return "false";
         }
         return "true";

@@ -2,15 +2,15 @@ package com.vcoffeebeta.DAO;
 
 import com.vcoffeebeta.domain.User;
 import com.vcoffeebeta.util.BaseDAO;
-import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 /**
- *
+ * 登录DAO
  * @author zhangshenming
  * @date 2022/1/11 22:20
  * @version 1.0
  */
-@Mapper
+@Repository
 public interface LoginDAO extends BaseDAO {
     /**
      * 根据用户名和密码查询用户信息

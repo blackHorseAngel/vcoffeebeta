@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.vcoffeebeta.DAO.LoginDAO">
+
+    <resultMap id="userMap" type="com.vcoffeebeta.domain.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+        <result property="telephoneNumber" column="telephone_number"/>
+        <result property="email" column="email"/>
+        <result property="isAdmin" column="isAdmin"/>
+        <result property="companyId" column="company_id"/>
+        <result property="accountId" column="account_id"/>
+        <result property="equipId" column="equip_id"/>
+        <result property="created" column="created"/>
+        <result property="modified" column="modified"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="modifiedTime" column="modified_time"/>
+    </resultMap>
+
+    <!-- 根据名字和密码查询用户信息-->
+    <select id="queryByNameAndPassword" parameterType="string" resultMap="userMap">
+        select
+        u.id,
+        u.name,
+        u.telephone_number,
+        u.email,
+        u.isAdmin,
+        u.company_id,
+        u.account_id,
+        u.equip_id,
+        u.created,
+        u.modified,
+        u.created_time,
+        u.modified_time
+        from user u
+        <where>
+            u.name = #{name} and u.password = #{password}
+        </where>
+    </select>
+
+</mapper>
