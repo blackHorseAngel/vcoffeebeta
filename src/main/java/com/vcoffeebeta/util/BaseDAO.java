@@ -1,4 +1,4 @@
-package com.vcoffee.com.vcoffeebeta.util;
+package com.vcoffeebeta.util;
 
 import java.util.List;
 

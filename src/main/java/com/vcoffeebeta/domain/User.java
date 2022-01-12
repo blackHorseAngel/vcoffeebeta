@@ -1,8 +1,9 @@
-package com.vcoffee.com.vcoffeebeta.domain;
+package com.vcoffeebeta.domain;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.ibatis.type.Alias;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +17,7 @@ import java.util.Date;
 @Setter
 @Getter
 @ToString
+//@Alias("user")
 public class User implements Serializable {
     /**
      * 用户id

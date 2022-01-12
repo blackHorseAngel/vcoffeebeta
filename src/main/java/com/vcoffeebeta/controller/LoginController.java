@@ -1,7 +1,7 @@
-package com.vcoffee.com.vcoffeebeta.controller;
+package com.vcoffeebeta.controller;
 
-import com.vcoffee.com.vcoffeebeta.domain.User;
-import com.vcoffee.com.vcoffeebeta.service.LoginService;
+import com.vcoffeebeta.domain.User;
+import com.vcoffeebeta.service.LoginService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;

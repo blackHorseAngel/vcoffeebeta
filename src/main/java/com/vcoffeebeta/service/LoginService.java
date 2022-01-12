@@ -1,6 +1,6 @@
-package com.vcoffee.com.vcoffeebeta.service;
+package com.vcoffeebeta.service;
 
-import com.vcoffee.com.vcoffeebeta.domain.User;
+import com.vcoffeebeta.domain.User;
 
 /**
  * 登录业务层接口
