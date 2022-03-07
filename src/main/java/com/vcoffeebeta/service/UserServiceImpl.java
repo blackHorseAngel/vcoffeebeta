@@ -14,21 +14,26 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-public class LoginServiceImpl implements LoginService {
+public class UserServiceImpl implements UserService {
 
     @Autowired
     private LoginDAO loginDAO;
 
     @Override
-    public User loginByNameAndPassword(String name, String password) {
+    public User loginByNameAndPassword(String username, String password) {
         log.info("进入loginByNameAndPassword的service层");
-        return loginDAO.queryByNameAndPassword(name,password);
+        return loginDAO.queryByNameAndPassword(username,password);
     }
 
-  public static void main(String[] args) {
-    //
-    LoginServiceImpl loginServiceImpl = new LoginServiceImpl();
-    User user = loginServiceImpl.loginByNameAndPassword("admin","admin");
-    System.out.println(user.toString());
-  }
+    @Override
+    public boolean isExist(String username) {
+        User user = findByUserName(username);
+        return null != user;
+    }
+
+    @Override
+    public User findByUserName(String username) {
+        return loginDAO.findByUsername(username);
+    }
+
 }

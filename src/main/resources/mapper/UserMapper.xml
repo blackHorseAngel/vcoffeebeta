@@ -6,7 +6,7 @@
 
     <resultMap id="userMap" type="com.vcoffeebeta.domain.User">
         <id property="id" column="id"/>
-        <result property="name" column="name"/>
+        <result property="username" column="username"/>
         <result property="password" column="password"/>
         <result property="telephoneNumber" column="telephone_number"/>
         <result property="email" column="email"/>
@@ -24,7 +24,7 @@
     <select id="queryByNameAndPassword" parameterType="string" resultMap="userMap">
         select
         u.id,
-        u.name,
+        u.username,
         u.telephone_number,
         u.email,
         u.isAdmin,
@@ -37,7 +37,26 @@
         u.modified_time
         from user u
         <where>
-            u.name = #{name} and u.password = #{password}
+            u.username = #{username} and u.password = #{password}
+        </where>
+    </select>
+    <select id="findByUsername" resultType="com.vcoffeebeta.domain.User">
+        select
+        u.id,
+        u.username,
+        u.telephone_number,
+        u.email,
+        u.isAdmin,
+        u.company_id,
+        u.account_id,
+        u.equip_id,
+        u.created,
+        u.modified,
+        u.created_time,
+        u.modified_time
+        from user u
+        <where>
+            u.username = #{username}
         </where>
     </select>
 

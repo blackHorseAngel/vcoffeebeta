@@ -16,9 +16,11 @@ public interface LoginDAO extends BaseDAO {
      * 根据用户名和密码查询用户信息
      * @author zhangshenming
      * @date 2022/1/7 14:44
-     * @param name
+     * @param username
      * @param password
      * @return com.example.zam.vcoffee.domain.User
      */
-    public User queryByNameAndPassword(String name, String password);
+    public User queryByNameAndPassword(String username, String password);
+
+    public User findByUsername(String username);
 }
