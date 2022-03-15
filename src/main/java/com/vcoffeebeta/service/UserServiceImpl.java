@@ -26,6 +26,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean  insertUser(User user) {
+        log.info("进入insertUser");
+        int num = loginDAO.insert(user);
+        return num == 0 ? true:false;
+    }
+
+    @Override
     public boolean isExist(String username) {
         User user = findByUserName(username);
         return null != user;
@@ -33,6 +40,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByUserName(String username) {
+        log.info("进入findByUserName");
         return loginDAO.findByUsername(username);
     }
 

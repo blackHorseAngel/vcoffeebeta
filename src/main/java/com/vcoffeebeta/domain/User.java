@@ -31,6 +31,10 @@ public class User implements Serializable {
      */
     private String password;
     /**
+     * 二次确认密码
+     */
+    private String confirmPassword;
+    /**
      * 用户联系方式
      */
     private String telephoneNumber;
