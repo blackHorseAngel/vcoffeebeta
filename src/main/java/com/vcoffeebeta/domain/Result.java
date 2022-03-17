@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
-public class Result {
+public class Result<T> {
     /**
      * 返回响应码
      */
@@ -20,10 +20,19 @@ public class Result {
      * 返回响应码信息
      */
     private String message;
+    /**
+     * 返回数据
+     */
+    private T data;
 
     public Result(int code,String message) {
         this.code = code;
         this.message = message;
     }
 
+    public Result(int code, String message, T data) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
+    }
 }

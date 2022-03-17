@@ -17,7 +17,7 @@ import java.util.Date;
 @Setter
 @Getter
 @ToString
-public class User implements Serializable {
+public class  User implements Serializable {
     /**
      * 用户id
      */

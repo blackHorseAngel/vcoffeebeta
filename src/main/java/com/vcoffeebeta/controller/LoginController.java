@@ -33,17 +33,14 @@ public class LoginController {
     @ResponseBody
     public Result login(@RequestBody User requestUser,HttpSession session){
         log.info("进入login的Controller层");
-        String username = requestUser.getUsername();
-        username = HtmlUtils.htmlEscape(username);
-        String password = requestUser.getPassword();
-        boolean flag = userService.isExist(username);
+        boolean flag = userService.isExist(requestUser);
         log.info("-------------------------"+flag+"------------------------------------");
         if(!flag){
-            return new Result(ResultCodeEnum.NONEXIT.getCode(),ResultCodeEnum.NONEXIT.getMessage());
+            return new Result(ResultCodeEnum.NONEXIST.getCode(),ResultCodeEnum.NONEXIST.getMessage());
         }
         User user = null;
         try{
-             user = userService.loginByNameAndPassword(username,password);
+             user = userService.loginByNameAndPassword(requestUser);
             log.info(user.toString());
         }catch(Exception e){
             log.error("登录时根据用户名和密码查找信息报错",e);
@@ -65,11 +62,9 @@ public class LoginController {
     public Result register(@RequestBody User requestUser,HttpSession session){
         log.info("进入register的Controller层");
         log.info("---------------------------------------"+requestUser.toString()+"-------------------------------");
-        String username = requestUser.getUsername();
-        username = HtmlUtils.htmlEscape(username);
-        boolean validateUsername = userService.isExist(username);
+        boolean validateUsername = userService.isExist(requestUser);
         if(validateUsername){
-            return new Result(ResultCodeEnum.USERNAMEEXIT.getCode(),ResultCodeEnum.USERNAMEEXIT.getMessage());
+            return new Result(ResultCodeEnum.USERNAMEEXIST.getCode(),ResultCodeEnum.USERNAMEEXIST.getMessage());
         }
         String password = requestUser.getPassword();
         String confirmPassword = requestUser.getConfirmPassword();
@@ -88,6 +83,8 @@ public class LoginController {
             return new Result(ResultCodeEnum.EMAILERROR.getCode(),ResultCodeEnum.EMAILERROR.getMessage());
         }
         requestUser.setIsAdmin((byte) 1);
+        requestUser.setCreated(requestUser.getUsername());
+        requestUser.setModified(requestUser.getUsername());
         requestUser.setCreatedTime(new Date());
         requestUser.setModifiedTime(new Date());
         boolean flag = false;
@@ -101,6 +98,13 @@ public class LoginController {
         if(!flag){
             return new Result(ResultCodeEnum.INSERTUSERERROR.getCode(),ResultCodeEnum.INSERTUSERERROR.getMessage());
         }
+        return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
+    }
+
+    @RequestMapping(value = "logout")
+    public Result logout(HttpSession session){
+        log.info("进入logout方法");
+        session.removeAttribute("user");
         return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
     }
 }

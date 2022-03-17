@@ -7,7 +7,7 @@ package com.vcoffeebeta.util;
  */
 public class Validation {
     /**
-     * 电话号码的验证
+     * 验证手机号
      * @author zhangshenming
      * @date 2022/3/11 14:49
      * @param telephoneNumber
@@ -16,6 +16,17 @@ public class Validation {
     public static boolean validateTelephoneNumber(String telephoneNumber){
         String regex = "^1[3-9]\\d{9}$";
         return telephoneNumber != null && telephoneNumber.matches(regex);
+    }
+    /**
+     * 验证座机号
+     * @author zhangshenming
+     * @date 2022/3/16 22:10
+     * @param phoneNumber
+     * @return boolean
+     */
+    public static boolean validatePhoneNumber(String phoneNumber){
+        String regex = "\\d{3,4}\\d{8}";
+        return phoneNumber != null && phoneNumber.matches(regex);
     }
     /**
      * 电子邮箱验证

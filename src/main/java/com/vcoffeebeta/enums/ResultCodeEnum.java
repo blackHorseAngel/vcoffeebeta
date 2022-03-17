@@ -11,11 +11,10 @@ public enum ResultCodeEnum {
      *
      */
     SUCCESS("成功",1000),
-
     /**
      *
      */
-    NONEXIT("用户名不存在或用户名错误",1001),
+    NONEXIST("用户名不存在或用户名错误",1001),
     /**
      *
      */
@@ -23,15 +22,15 @@ public enum ResultCodeEnum {
     /**
      *
      */
-    USERNAMEEXIT("用户名已存在",1003),
+    USERNAMEEXIST("用户名已存在",1003),
     /**
      *
      */
-    PHONENUMBERERROR("用户联系方式不正确",1004),
+    PHONENUMBERERROR("用户联系方式格式不正确",1004),
     /**
      *
      */
-    EMAILERROR("用户邮箱不正确",1005),
+    EMAILERROR("用户邮箱格式不正确",1005),
     /**
      *
      */
@@ -40,6 +39,18 @@ public enum ResultCodeEnum {
      *
      */
     INSERTUSERERROR("新增用户出错",1007),
+    /**
+     *
+     */
+    COMPANYEXIST("公司名称已存在",1008),
+    /**
+     *
+     */
+    COMPANYPHONENUMBERERROR("公司座机号格式错误",1009),
+    /**
+     *
+     */
+    INSERTCOMPANYERROR("新增公司报错",1010),
     /**
      *
      */

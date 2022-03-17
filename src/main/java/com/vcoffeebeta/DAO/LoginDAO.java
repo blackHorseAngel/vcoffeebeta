@@ -13,14 +13,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LoginDAO extends BaseDAO {
     /**
-     * 根据用户名和密码查询用户信息
+     * 根据条件查询用户信息
      * @author zhangshenming
      * @date 2022/1/7 14:44
-     * @param username
-     * @param password
+     * @param user
      * @return com.example.zam.vcoffee.domain.User
      */
-    public User queryByNameAndPassword(String username, String password);
+    public User queryByNameAndPassword(User user);
 
-    public User findByUsername(String username);
 }

@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.vcoffeebeta.DAO.LoginDAO">
-
+    <!--查询使用的结果集-->
     <resultMap id="userMap" type="com.vcoffeebeta.domain.User">
         <id property="id" column="id"/>
         <result property="username" column="username"/>
@@ -19,9 +19,41 @@
         <result property="createdTime" column="created_time"/>
         <result property="modifiedTime" column="modified_time"/>
     </resultMap>
-
-    <!-- 根据名字和密码查询用户信息-->
-    <select id="queryByNameAndPassword" parameterType="string" resultMap="userMap">
+    <!-- 新增一个用户 -->
+    <insert id="insert" parameterType="com.vcoffeebeta.domain.User" useGeneratedKeys="true" keyProperty="id">
+        insert into user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            username,
+            password,
+            telephone_number,
+            email,
+            isAdmin,
+            company_id,
+            account_id,
+            equip_id,
+            created,
+            modified,
+            created_time,
+            modified_time
+        </trim>
+        values
+         <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{username},
+            #{password},
+            #{telephoneNumber},
+            #{email},
+            #{isAdmin},
+            #{companyId},
+            #{accountId},
+            #{equipId},
+            #{created},
+            #{modified},
+            #{createdTime},
+            #{modifiedTime}
+         </trim>
+    </insert>
+    <!-- 根据条件查询用户信息-->
+    <select id="queryByNameAndPassword" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
         select
         u.id,
         u.username,
@@ -37,26 +69,14 @@
         u.modified_time
         from user u
         <where>
-            u.username = #{username} and u.password = #{password}
-        </where>
-    </select>
-    <select id="findByUsername" resultType="com.vcoffeebeta.domain.User">
-        select
-        u.id,
-        u.username,
-        u.telephone_number,
-        u.email,
-        u.isAdmin,
-        u.company_id,
-        u.account_id,
-        u.equip_id,
-        u.created,
-        u.modified,
-        u.created_time,
-        u.modified_time
-        from user u
-        <where>
-            u.username = #{username}
+          1=1
+          <if test="username != null">
+            and u.username = #{username}
+          </if>
+          <if test="password != null">
+              and u.password = #{password}
+          </if>
+            order by modified_time desc
         </where>
     </select>
 

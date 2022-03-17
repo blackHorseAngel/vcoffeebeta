@@ -13,26 +13,18 @@ public interface UserService {
      * 查询用户名是否存在
      * @author zhangshenming
      * @date 2022/3/11 19:04
-     * @param username
+     * @param user
      * @return boolean
      */
-    public boolean isExist(String username);
-    /**
-     * 根据用户名查找用户
-     * @author zhangshenming
-     * @date 2022/3/11 19:04
-     * @param username
-     * @return com.vcoffeebeta.domain.User
-     */
-    public User findByUserName(String username);
+    public boolean isExist(User user);
     /**
      * 使用用户名和用户密码登录
      * @author zhangshenming
      * @date 2022/3/11 19:04
-     * @param username, password
+     * @param user
      * @return com.vcoffeebeta.domain.User
      */
-    public User loginByNameAndPassword(String username, String password);
+    public User loginByNameAndPassword(User user);
     /**
      * 新增用户
      * @author zhangshenming
