@@ -14,7 +14,6 @@ import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.sql.SQLException;
 import java.util.Date;
 
 /**
@@ -25,7 +24,7 @@ import java.util.Date;
  */
 @RestController
 @Slf4j
-@RequestMapping(value = "/api/vcoffee/")
+@RequestMapping(value = "/vcoffee/")
 public class LoginController {
 
     @Autowired
@@ -111,10 +110,10 @@ public class LoginController {
     public Result logout(HttpServletRequest request){
         log.info("进入logout方法");
         HttpSession session = request.getSession();
+        log.info("session:"+JSONObject.toJSONString(session));
         User user = (User) session.getAttribute("user");
         log.info("登录的user对象："+JSONObject.toJSONString(user));
         session.removeAttribute("user");
-        log.info("session:"+JSONObject.toJSONString(session));
         return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
     }
 }
