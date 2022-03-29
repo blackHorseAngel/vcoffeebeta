@@ -116,4 +116,32 @@ public class LoginController {
         session.removeAttribute("user");
         return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
     }
+
+    @GetMapping(value = "logging")
+    public String logging(){
+        log.info("测试vue");
+        StringBuilder builder = new StringBuilder();
+        builder.append("<html>");
+        builder.append("<head>");
+        builder.append("<meta charset=utf-8>");
+        builder.append("<title>vcoffeeui</title>");
+        builder.append("<script src=\"../../js/vue.js\">");
+        builder.append("</script>");
+        builder.append("</head>");
+        builder.append("<body>");
+        builder.append("<div id='app'>");
+        builder.append("<h1>message:{{ message }}</h1>");
+        builder.append("</div>");
+        builder.append("<script type=\"text/javascript\">");
+        builder.append("var vm = new Vue({");
+        builder.append("el:'#app',");
+        builder.append("data:{");
+        builder.append("message:\"hello world!\"");
+        builder.append("}");
+        builder.append("})");
+        builder.append("</script>");
+        builder.append("</body>");
+        builder.append("</html>");
+        return builder.toString();
+    }
 }

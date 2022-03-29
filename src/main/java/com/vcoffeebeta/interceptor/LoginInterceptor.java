@@ -1,6 +1,7 @@
 package com.vcoffeebeta.interceptor;
 
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -13,13 +14,14 @@ import javax.servlet.http.HttpServletResponse;
  * @date 2022/3/23 6:20
  * @version 1.0
  */
+@Component
 public class LoginInterceptor implements HandlerInterceptor {
 
    @Override
    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
             throws Exception {
        response.setCharacterEncoding("UTF-8");
-       response.setContentType("application/json; charset=utf-8");
+       response.setContentType("application/json");
        response.setHeader("Access-Control-Allow-Credentials","true");
        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
        response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
