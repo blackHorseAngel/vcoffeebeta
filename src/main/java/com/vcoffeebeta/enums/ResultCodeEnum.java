@@ -54,7 +54,11 @@ public enum ResultCodeEnum {
     /**
      *
      */
-    INTERNALERROR("服务器报错",500);
+    INTERNALERROR("服务器报错",500),
+    /**
+     *
+     */
+    SESSIONERROR("服务器session数据丢失",1500);
     /**
      * 返回码信息
      */

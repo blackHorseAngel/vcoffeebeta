@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
  * @date 2022/3/23 6:20
  * @version 1.0
  */
-@Component
+@Component("lxj")
 public class LoginInterceptor implements HandlerInterceptor {
 
    @Override
@@ -22,9 +22,11 @@ public class LoginInterceptor implements HandlerInterceptor {
             throws Exception {
        response.setCharacterEncoding("UTF-8");
        response.setContentType("application/json");
+       //是否支持cookie跨域
        response.setHeader("Access-Control-Allow-Credentials","true");
+       //支持跨域请求
        response.setHeader("Access-Control-Allow-Origin", request.getHeader("Origin"));
-       response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+       response.setHeader("Access-Control-Allow-Headers", "Authorization,Access-Token,Origin, X-Requested-With, Content-Type, Accept");
        response.setHeader("Access-Control-Allow-Methods", "GET, HEAD, POST, PUT, DELETE, TRACE, OPTIONS, PATCH");
        return true;
     }

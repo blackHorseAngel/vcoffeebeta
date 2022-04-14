@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录页面</title>
+    <!--cdn引入purecss方式-->
+    <!--<link rel="stylesheet" href="https://unpkg.com/purecss@2.1.0/build/pure-min.css" integrity="sha384-yHIFVG6ClnONEA5yB5DJXfW2/KC173DIQrYoZMEtBvGzmf0PKiGyNEqe9N6BNDBH" crossorigin="anonymous">-->
+    <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
+    <script type="text/javascript">
+        function login(){
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const params = {
+                "username":username,
+                "password":password
+            };
+            const url = "/vcoffee/login1";
+            <!-- xmlHttpRequest写法：1、实例化xmlHttpRequest对象；2、建立连接，就是open；3、设置请求头，响应头参数；4、绑定一系列监听函数；5、整理数据；6、发送请求，就是send -->
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST",url,true);
+            //http错误码415，unsupport media type text/plain
+            xhr.setRequestHeader("content-Type","application/json");
+            xhr.onload = function(e){
+                let res =xhr.responseText;
+                if(xhr.readyState === 4 && xhr.status === 200){
+                    res = JSON.parse(res);
+                    if(res.code === 1000){
+                        alert(res.message);
+                        window.location.href = "/home/home.html";
+                    }else if(res.code === 1001){
+                        alert(res.message);
+                    }else if(res.code === 1002){
+                        alert(res.message);
+                    }else{
+                        alert(res.message);
+                        window.location.href = "/error/error.html";
+                    }
+                }
+            };
+            xhr.onerror = function(e){
+                console.error("登录失败！")
+                window.location.href = "/error/error.html";
+            };
+            /*JavaScript对象到xmlHttpRequest中的data参数使用json.stringify将对象变成json串，
+                xmlHttpRequest.responseText中的返回json串使用json.parse转成javascript对象*/
+            xhr.send(JSON.stringify(params));
+        }
+
+        function registry() {
+            window.location.href = "/registry/registry.html";
+        }
+    </script>
+</head>
+<body background="/picture/coffee.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
+<!--1、使用form提交数据到后台，contentType是application/form-urlEncoded，后台需要使用requiredParam来接受参数数据类型根据实体类来确定-->
+<!--1、<form class="pure-form pure-form-aligned" action="/vcoffee/login" method="post">-->
+<!--2、使用ajax提交数据到后台，contentType是text/plain，后台需要使用requiredParam来接受数据，数据类型只能是string-->
+<!--3、使用ajax提交数据到后太，使用json格式，contentType是application/json，吼他偶需要使用requiredBody来接受数据，数据类型是对象-->
+<form class="pure-form pure-form-aligned" method="post">
+    <fieldset>
+        <div class="pure-controls">
+            <legend align="center">用户登录</legend>
+        </div>
+        <div class="pure-control-group" align="center">
+            <label for="username">用户姓名</label>
+            <input type="text" id="username" name="username" placeholder="用户姓名" min="2" max="50" required=""/>
+        </div>
+        <div class="pure-control-group" align="center">
+            <label for="password">用户密码</label>
+            <input type="password" id="password" name="password" placeholder="用户密码" min="6" max="20" required="" autocomplete="off"/>
+        </div>
+        <div class="pure-controls" align="center">
+            <button type="button" class="pure-button pure-button-primary" onclick="login()">登录</button>
+            <!--1、<button type="submit" class="pure-button pure-button-primary">登录</button>-->
+            <button type="reset" class="pure-button pure-button-primary">取消</button>
+            <button type="button" class="pure-button pure-button-primary" onclick="registry()">注册</button>
+        </div>
+    </fieldset>
+</form>
+</body>
+<!--引入vue.js-->
+<!--<script src="js/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+
+</html>

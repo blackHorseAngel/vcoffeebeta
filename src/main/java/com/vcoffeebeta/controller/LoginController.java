@@ -6,13 +6,17 @@ import com.vcoffeebeta.domain.User;
 import com.vcoffeebeta.enums.ResultCodeEnum;
 import com.vcoffeebeta.service.UserService;
 import com.vcoffeebeta.util.Validation;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.Date;
 
@@ -22,7 +26,7 @@ import java.util.Date;
  * @date 2022/1/11 18:18
  * @version 1.0
  */
-@RestController
+@Controller
 @Slf4j
 @RequestMapping(value = "/vcoffee/")
 public class LoginController {
@@ -30,8 +34,44 @@ public class LoginController {
     @Autowired
     private UserService userService;
 
-    @CrossOrigin
+    @GetMapping(value = "toLogin")
+    public String toLogin(){
+        return "/login/login.html";
+    }
+
     @PostMapping(value = "login")
+    @ResponseBody
+    public Result login(@RequestParam(name = "username" ,required = true) String username,@RequestParam(name = "password",required = true)String password,HttpServletRequest request){
+        log.info("进入login的Controller层");
+        User u = new User();
+        u.setUsername(username);
+        u.setPassword(password);
+        boolean flag = userService.isExist(u);
+        log.info("-------------------------"+flag+"------------------------------------");
+        if(!flag){
+            return new Result(ResultCodeEnum.NONEXIST.getCode(),ResultCodeEnum.NONEXIST.getMessage());
+        }
+        User user = null;
+        try{
+            user = userService.loginByNameAndPassword(u);
+            log.info(user.toString());
+            HttpSession session = request.getSession();
+            session.setAttribute("user",user);
+            log.info("session:"+ JSONObject.toJSONString(session));
+        }catch(Exception e){
+            log.error("登录时根据用户名和密码查找信息报错",e);
+            e.printStackTrace();
+            return new Result(ResultCodeEnum.INTERNALERROR.getCode(),ResultCodeEnum.INTERNALERROR.getMessage());
+        }
+        if (null == user) {
+            return new Result(ResultCodeEnum.PASSWORDERROR.getCode(),ResultCodeEnum.PASSWORDERROR.getMessage());
+        }
+        return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
+    }
+
+
+    @CrossOrigin
+    @PostMapping(value = "login1")
     @ResponseBody
     public Result login(@RequestBody User requestUser, HttpServletRequest request){
         log.info("进入login的Controller层");
@@ -44,6 +84,9 @@ public class LoginController {
         try{
              user = userService.loginByNameAndPassword(requestUser);
             log.info(user.toString());
+            HttpSession session = request.getSession();
+            session.setAttribute("user",user);
+            log.info("session:"+ JSONObject.toJSONString(session));
         }catch(Exception e){
             log.error("登录时根据用户名和密码查找信息报错",e);
             e.printStackTrace();
@@ -54,9 +97,6 @@ public class LoginController {
             return new Result(ResultCodeEnum.PASSWORDERROR.getCode(),ResultCodeEnum.PASSWORDERROR.getMessage());
          }
         log.info("--------------------------------"+user.toString()+"-------------------------------");
-        HttpSession session = request.getSession();
-        session.setAttribute("user",user);
-        log.info("session:"+ JSONObject.toJSONString(session));
         return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
     }
 
@@ -107,14 +147,18 @@ public class LoginController {
     @CrossOrigin
     @PostMapping(value = "logout")
     @ResponseBody
-    public Result logout(HttpServletRequest request){
+    public Result logout(HttpServletRequest request,HttpServletResponse response){
         log.info("进入logout方法");
         HttpSession session = request.getSession();
         log.info("session:"+JSONObject.toJSONString(session));
         User user = (User) session.getAttribute("user");
         log.info("登录的user对象："+JSONObject.toJSONString(user));
-        session.removeAttribute("user");
-        return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
+        if(user != null){
+            session.removeAttribute("user");
+            return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
+        }else{
+            return new Result(ResultCodeEnum.SESSIONERROR.getCode(),ResultCodeEnum.SESSIONERROR.getMessage());
+        }
     }
 
     @GetMapping(value = "logging")
@@ -143,5 +187,11 @@ public class LoginController {
         builder.append("</body>");
         builder.append("</html>");
         return builder.toString();
+    }
+
+  public static void main(String[] args) {
+    //
+      StringBuilder builder = new StringBuilder();
+
     }
 }

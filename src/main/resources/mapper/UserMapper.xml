@@ -57,6 +57,7 @@
         select
         u.id,
         u.username,
+        u.password,
         u.telephone_number,
         u.email,
         u.isAdmin,
@@ -76,7 +77,7 @@
           <if test="password != null">
               and u.password = #{password}
           </if>
-            order by modified_time desc
+            order by u.modified_time desc
         </where>
     </select>
 

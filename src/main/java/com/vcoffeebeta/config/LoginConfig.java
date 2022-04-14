@@ -2,6 +2,9 @@ package com.vcoffeebeta.config;
 
 import com.vcoffeebeta.interceptor.LoginInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -12,12 +15,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @date 2022/3/23 6:22
  * @version 1.0
  */
-@Configuration
+//@Configuration
 @Slf4j
 public class LoginConfig implements WebMvcConfigurer {
+    @Autowired
+    @Qualifier("jh")
+    LoginInterceptor interceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         log.info("使用loginConfig中的登录拦截器");
-        registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/*");
+        registry.addInterceptor(interceptor).addPathPatterns("/**");
     }
+
+    @Bean(name={"zsm", "jh"})
+    public LoginInterceptor newLoginIntercepter() {
+        return new LoginInterceptor();
+    }
+
 }
