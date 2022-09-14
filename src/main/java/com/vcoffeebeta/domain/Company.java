@@ -2,6 +2,7 @@ package com.vcoffeebeta.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -14,6 +15,7 @@ import java.util.Date;
  */
 @Setter
 @Getter
+@ToString
 public class Company implements Serializable {
     /**
      * 公司id
@@ -51,4 +53,8 @@ public class Company implements Serializable {
      * 修改时间
      */
    private Date modifiedTime;
+    /**
+     * 分页参数
+     */
+   private Page page;
 }

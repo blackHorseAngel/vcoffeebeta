@@ -6,15 +6,11 @@ import com.vcoffeebeta.domain.User;
 import com.vcoffeebeta.enums.ResultCodeEnum;
 import com.vcoffeebeta.service.UserService;
 import com.vcoffeebeta.util.Validation;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.util.HtmlUtils;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -189,9 +185,9 @@ public class LoginController {
         return builder.toString();
     }
 
-  public static void main(String[] args) {
+  /*public static void main(String[] args) {
     //
       StringBuilder builder = new StringBuilder();
 
-    }
+    }*/
 }

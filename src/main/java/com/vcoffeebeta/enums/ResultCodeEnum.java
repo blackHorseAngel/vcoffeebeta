@@ -54,6 +54,22 @@ public enum ResultCodeEnum {
     /**
      *
      */
+    QUERYCOMPANYERROR("根据条件查询公司报错",1011),
+    /**
+     *
+     */
+    UPDATECOMPANYERROR("更新公司信息报错",1012),
+    /**
+     *
+     */
+    TOUPDATECOMPANYERROR("跳转到更新公司页面报错",1013),
+    /**
+     *
+     */
+    DELETECOMPANYERROR("删除单个公司信息报错",1014),
+    /**
+     *
+     */
     INTERNALERROR("服务器报错",500),
     /**
      *

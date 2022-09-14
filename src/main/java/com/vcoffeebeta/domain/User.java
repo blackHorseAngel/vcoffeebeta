@@ -3,7 +3,6 @@ package com.vcoffeebeta.domain;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.ibatis.type.Alias;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,6 +15,7 @@ import java.util.Date;
  */
 @Setter
 @Getter
+@ToString
 public class  User implements Serializable {
     /**
      * 用户id
@@ -74,23 +74,4 @@ public class  User implements Serializable {
      */
     private Date modifiedTime;
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", confirmPassword='" + confirmPassword + '\'' +
-                ", telephoneNumber='" + telephoneNumber + '\'' +
-                ", email='" + email + '\'' +
-                ", isAdmin=" + isAdmin +
-                ", companyId=" + companyId +
-                ", accountId=" + accountId +
-                ", equipId=" + equipId +
-                ", created='" + created + '\'' +
-                ", modified='" + modified + '\'' +
-                ", createdTime=" + createdTime +
-                ", modifiedTime=" + modifiedTime +
-                '}';
-    }
 }

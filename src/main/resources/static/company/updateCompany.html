@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>修改公司页面</title>
+    <link rel="stylesheet" type="text/css" href="/css/pure-min.css">
+    <script type="text/javascript">
+        window.onload = function () {
+            let id = location.search.replace(/[^\d]/g,"");
+            alert("id:"+id);
+            const updateParams = {
+                "id":id
+            };
+            const url = "/vcoffee/toUpdateCompany";
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST",url,true);
+            xhr.setRequestHeader("content-Type","application/json");
+            xhr.onload = function(updateSuccessData){
+                let res = JSON.parse(xhr.responseText);
+                if(res.code === 1000){
+                    alert(res.message);
+                    document.getElementById("companyName").value = res.data.companyName;
+                    document.getElementById("companyNickName").value = res.data.companyNickName;
+                    document.getElementById("companyPhoneNumber").value = res.data.companyPhoneNumber;
+                    document.getElementById("companyAddress").value = res.data.companyAddress;
+                }else {
+                    console.error(JSON.parse(xhr.responseText).message);
+                    window.location.href = "/error/error.html";
+                }
+            };
+            xhr.onerror = function (updateErrorData) {
+                console.error(JSON.parse(xhr.responseText).message);
+                window.location.href = "/error/error.html";
+            };
+            alert("格式化后的updateParams："+JSON.stringify(updateParams));
+            xhr.send(JSON.stringify(updateParams));
+        };
+
+
+        function updateCompany(){
+            const companyName = document.getElementById("companyName").value;
+            const companyNickName = document.getElementById("companyNickName").value;
+            const companyPhoneNumber = document.getElementById("companyPhoneNumber").value;
+            const companyAddress = document.getElementById("companyAddress").value;
+            const updateParams = {
+              "companyName":companyName,
+              "companyNickName":companyNickName,
+              "companyPhoneNumber":companyPhoneNumber,
+              "companyAddress":companyAddress
+            };
+            const url = "/vcoffee/updateCompany";
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST",url,true);
+            xhr.setRequestHeader("content-Type","application/json");
+            xhr.onload = function (e1) {
+              let res = JSON.parse(xhr.responseText);
+              if(res.code === 1000){
+                  alert(res.message);
+                  window.location.href = "/company/queryCompany.html";
+              }else{
+                  console.error("修改公司信息失败" + JSON.parse(xhr.responseText));
+                  window.location.href = "/error/error/html";
+              }
+            };
+            xhr.onerror = function (e2) {
+                console.error("修改公司信息失败" + JSON.parse(xhr.responseText));
+                window.location.href = "/error/error/html";
+            };
+            xhr.send(JSON.stringify(updateParams));
+        }
+        function back() {
+            window.location.href = "/company/queryCompany.html";
+        }
+    </script>
+</head>
+<body>
+    <form class="pure-form pure-form-aligned" method="post">
+        <fieldset>
+            <div class="pure-controls">
+                <legend align="center">修改公司</legend>
+            </div>
+            <div class="pure-control-group" align="center">
+                <label for="companyName">公司名称</label>
+                <input type="text" id="companyName" name="companyName" placeholder="公司名称"/>
+            </div>
+            <div class="pure-control-group" align="center">
+                <label for="companyNickName">公司简称</label>
+                <input type="text" id="companyNickName" name="companyNickName" placeholder="公司简称"/>
+            </div>
+            <div class="pure-control-group" align="center">
+                <label for="companyPhoneNumber">公司电话</label>
+                <input type="text" id="companyPhoneNumber" name="companyPhoneNumber" placeholder="公司电话"/>
+            </div>
+            <div class="pure-control-group" align="center">
+                <label for="companyAddress">公司地址</label>
+                <input type="text" id="companyAddress" name="companyAddress" placeholder="公司地址"/>
+            </div>
+            <div class="pure-control-group" align="center">
+                <button type="button" class="pure-button pure-button-primary" onclick="updateCompany()">修改</button>
+                <button type="reset"  class="pure-button pure-button-primary">取消</button>
+                <button type="button" class="pure-button pure-button-primary" onclick="back()">返回</button>
+            </div>
+        </fieldset>
+    </form>
+
+</body>
+</html>

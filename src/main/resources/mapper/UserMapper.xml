@@ -19,22 +19,14 @@
         <result property="createdTime" column="created_time"/>
         <result property="modifiedTime" column="modified_time"/>
     </resultMap>
+    <sql id="userContent">
+       id,username,password,telephone_number,email,isAdmin,company_id,account_id,equip_id,created,modified,created_time,modified_time
+    </sql>
     <!-- 新增一个用户 -->
     <insert id="insert" parameterType="com.vcoffeebeta.domain.User" useGeneratedKeys="true" keyProperty="id">
         insert into user
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            username,
-            password,
-            telephone_number,
-            email,
-            isAdmin,
-            company_id,
-            account_id,
-            equip_id,
-            created,
-            modified,
-            created_time,
-            modified_time
+            <include refid="userContent"/>
         </trim>
         values
          <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -55,29 +47,17 @@
     <!-- 根据条件查询用户信息-->
     <select id="queryByNameAndPassword" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
         select
-        u.id,
-        u.username,
-        u.password,
-        u.telephone_number,
-        u.email,
-        u.isAdmin,
-        u.company_id,
-        u.account_id,
-        u.equip_id,
-        u.created,
-        u.modified,
-        u.created_time,
-        u.modified_time
-        from user u
+        <include refid="userContent"/>
+        from user
         <where>
           1=1
           <if test="username != null">
-            and u.username = #{username}
+            and username = #{username}
           </if>
           <if test="password != null">
-              and u.password = #{password}
+              and password = #{password}
           </if>
-            order by u.modified_time desc
+            order by modified_time desc
         </where>
     </select>
 

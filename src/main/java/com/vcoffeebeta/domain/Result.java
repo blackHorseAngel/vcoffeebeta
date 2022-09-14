@@ -2,6 +2,7 @@ package com.vcoffeebeta.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * controller返回的结果
@@ -11,6 +12,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@ToString
 public class Result<T> {
     /**
      * 返回响应码

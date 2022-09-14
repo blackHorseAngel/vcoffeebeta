@@ -15,22 +15,16 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @date 2022/3/23 6:22
  * @version 1.0
  */
-//@Configuration
 @Slf4j
 public class LoginConfig implements WebMvcConfigurer {
     @Autowired
-    @Qualifier("jh")
     LoginInterceptor interceptor;
+
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         log.info("使用loginConfig中的登录拦截器");
         registry.addInterceptor(interceptor).addPathPatterns("/**");
-    }
-
-    @Bean(name={"zsm", "jh"})
-    public LoginInterceptor newLoginIntercepter() {
-        return new LoginInterceptor();
     }
 
 }
