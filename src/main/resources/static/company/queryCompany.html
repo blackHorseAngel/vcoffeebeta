@@ -7,7 +7,8 @@
     <!-- html嵌入另一个页面目前存在问题 -->
     <!--<link rel="import" href="/home/home.html" id="homePage">-->
    <script type="text/javascript">
-        // document.write(homePage.import.body.innerHTML);
+
+   // document.write(homePage.import.body.innerHTML);
 
     function forwardAddCompany() {
       window.location.href = "/company/addCompany.html";
@@ -23,21 +24,37 @@
                 if(res.code === 1000){
                     for (let i = 0;i < res.data.length;i++){
                         let rowElement = document.createElement("tr");
+
+                        let checkboxCell = document.createElement("td");
+                        let checkBox = document.createElement("input");
+                        checkBox.setAttribute("type","checkbox");
+                        checkBox.setAttribute("name","idCheckBox");
+                        checkBox.setAttribute("id",res.data[i].id);
+                        checkboxCell.appendChild(checkBox);
+                        rowElement.appendChild(checkboxCell);
+
                         let idCell = document.createElement("td");
                         idCell.innerHTML = res.data[i].id;
                         rowElement.appendChild(idCell);
+
                         let nameCell = document.createElement("td");
                         nameCell.innerHTML = res.data[i].companyName;
                         rowElement.appendChild(nameCell);
+
                         let nickCell = document.createElement("td");
                         nickCell.innerHTML = res.data[i].companyNickName;
                         rowElement.appendChild(nickCell);
+
                         let phoneCell = document.createElement("td");
                         phoneCell.innerHTML = res.data[i].companyPhoneNumber;
                         rowElement.appendChild(phoneCell);
+
                         let addressCell = document.createElement("td");
                         addressCell.innerHTML = res.data[i].companyAddress;
+                        rowElement.appendChild(addressCell);
+
                         let operateCell = document.createElement("td");
+
                         let btnUpdate = document.createElement("button");
                         btnUpdate.setAttribute("type","button");
                         btnUpdate.setAttribute("value","修改");
@@ -56,8 +73,6 @@
                         btnDel.innerText = "删除";
                         operateCell.appendChild(btnDel);
 
-                        operateCell.appendChild(btnDel);
-                        rowElement.appendChild(addressCell);
                         rowElement.appendChild(operateCell);
 
                         let tbody = document.getElementById("companyTbody");
@@ -77,8 +92,6 @@
     }
 
            function deleteCompany() {
-
-
               const url = "/vcoffee/deleteCompany";
               const xhr = new XMLHttpRequest();
               const delParam = {
@@ -134,6 +147,39 @@
             };
             xhr.send(JSON.stringify(params));
         }
+
+       function batchDelete() {
+            let ids = [];
+           // let ids = "";
+            let data = document.getElementsByName("idCheckBox");
+            for(let i = 0 ; i < data.length ; i++){
+                if(data[i].checked === true){
+                    ids.push(data[i].id);
+                    // ids += data[i].id + ",";
+               }
+            }
+            const params = {
+                "ids":ids
+            };
+            const url = "/vcoffee/batchDeleteCompany";
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST",url,true);
+            xhr.setRequestHeader("content-Type","application/json");
+            xhr.onload = function(){
+                let res = JSON.parse(xhr.responseText);
+                if(res.code === 1000){
+                    alert(res.message);
+                    window.location.href = "/company/queryCompany.html";
+                }
+            };
+            xhr.onerror = function (e1) {
+                console.error("批量删除公司信息失败：" + JSON.parse(xhr.responseText));
+                window.location.href = "/error/error.html";
+            };
+            // xhr.send(params);
+            xhr.send(JSON.stringify(params));
+       }
+
         function back() {
           window.location.href = "/home/home.html";
         }
@@ -149,11 +195,13 @@
         <button type="reset" class="pure-button pure-button-primary">取消</button>
         <button type="button" class="pure-button pure-button-primary" onclick="forwardAddCompany()">新增</button>
         <button type="button" class="pure-button pure-button-primary" onclick="back()">返回</button>
+        <button type="button" class="pure-button pure-button-primary" onclick="batchDelete()">批量删除</button>
     </fieldset>
 </form>
 <table class="pure-table pure-table-bordered" align="center">
     <thead align="center">
         <tr>
+           <td>&nbsp&nbsp</td>
            <td>序号</td>
            <td>公司名称</td>
            <td>公司简称</td>

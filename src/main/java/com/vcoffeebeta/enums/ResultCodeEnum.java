@@ -70,6 +70,10 @@ public enum ResultCodeEnum {
     /**
      *
      */
+    BATCHDELETECOMPANY("批量删除公司信息报错",1015),
+    /**
+     *
+     */
     INTERNALERROR("服务器报错",500),
     /**
      *
