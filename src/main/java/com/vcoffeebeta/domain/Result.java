@@ -26,6 +26,10 @@ public class Result<T> {
      * 返回数据
      */
     private T data;
+    /**
+     * 分页数据
+     */
+    private Page page;
 
     public Result(int code,String message) {
         this.code = code;
@@ -36,5 +40,12 @@ public class Result<T> {
         this.code = code;
         this.message = message;
         this.data = data;
+    }
+
+    public Result(int code, String message, T data, Page page) {
+        this.code = code;
+        this.message = message;
+        this.data = data;
+        this.page = page;
     }
 }

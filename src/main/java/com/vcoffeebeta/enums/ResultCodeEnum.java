@@ -74,6 +74,14 @@ public enum ResultCodeEnum {
     /**
      *
      */
+    INSERTEQUIPMENT("新增设备报错",2010),
+    /**
+     *
+     */
+    QUERYEQUIPMENT("查询全部设备信息报错",2011),
+    /**
+     *
+     */
     INTERNALERROR("服务器报错",500),
     /**
      *

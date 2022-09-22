@@ -29,6 +29,6 @@ public class Page {
     /**
      * 每页显示的记录
      */
-    private int limit = 10;
+    private int limit;
 
 }

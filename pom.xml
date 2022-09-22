@@ -86,9 +86,12 @@
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>2.2.1</version>
         </dependency>
-        <!--新增mybatis分页插件pageHelper-->
-
-
+        <!-- https://mvnrepository.com/artifact/com.github.pagehelper/pagehelper-spring-boot-starter -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.4.1</version>
+        </dependency>
         <!-- java中各种数据类型转json -->
         <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
         <dependency>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查询设备页面</title>
+    <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
+    <script type="text/javascript">
+        function toUpdateEquipment() {
+            window.location.href = "/equipment/updateEquipment.html?"+this.id;
+        }
+        function queryPage(){
+            //TODO
+        }
+        window.onload = function () {
+            const url = "/vcoffee/findAllEquipment";
+            const xhr = new XMLHttpRequest();
+            const params = {
+                "currentPage":1,
+                "limit":10
+            };
+            xhr.open("POST",url,true);
+            xhr.setRequestHeader("content-Type","application/json");
+            xhr.onload = function (e1) {
+                let res = JSON.parse(xhr.responseText);
+                if(res.code === 1000){
+                   for(let i = 0 ; i < res.data.length ; i++){
+                       let rowElement = document.createElement("tr");
+
+                       let checkboxCell = document.createElement("td");
+                       let checkBox = document.createElement("input");
+                       checkBox.setAttribute("type","checkbok");
+                       checkBox.setAttribute("name","idCheckBox");
+                       checkBox.setAttribute("id",res.data[i].id);
+                       checkboxCell.appendChild(checkBox);
+                       rowElement.appendChild(checkboxCell);
+
+                       let idCell = document.createElement("td");
+                       idCell.innerHTML = res.data[i].id;
+                       rowElement.appendChild(idCell);
+
+                       let serialNumberCell = document.createElement("td");
+                       serialNumberCell.innerHTML = res.data[i].serialNumber;
+                       rowElement.appendChild(serialNumberCell);
+
+                       let equipmentNameCell = document.createElement("td");
+                       equipmentNameCell.innerHTML = res.data[i].equipmentName;
+                       rowElement.appendChild(equipmentNameCell);
+
+                       let isUsedCell = document.createElement("td");
+                       isUsedCell.innerHTML = res.data[i].isUsed;
+                       rowElement.appendChild(isUsed);
+
+                       let companyNameCell = document.createElement("td");
+                       companyNameCell.innerHTML = res.data[i].companyName;
+                       rowElement.appendChild(companyNameCell);
+
+                       let attendantNameCell = document.createElement("td");
+                       attendantNameCell.innerHTML = res.data[i].attendantName;
+                       rowElement.appendChild(attendantNameCell);
+
+                       let attendantTelephoneNumberCell = document.createElement("td");
+                       attendantTelephoneNumberCell.innerHTML = res.data[i].attendantTelephoneNumber;
+                       rowElement.appendChild(attendantTelephoneNumberCell);
+
+                       let operateCell = document.createElement("td");
+
+                       let btnUpdate = document.createElement("button");
+                       btnUpdate.setAttribute("type","button");
+                       btnUpdate.setAttribute("value","修改");
+                       btnUpdate.setAttribute("id",res.data[i].id);
+                       btnUpdate.addEventListener("click",toUpdateEquipment);
+                       btnUpdate.innerHTML = "修改";
+                       operateCell.appendChild(btnUpdate);
+
+                       let btnDel = document.createElement("button");
+                       btnDel.setAttribute("type","button");
+                       btnDel.setAttribute("value","删除");
+                       btnDel.setAttribute("id",res.data[i].id);
+                       btnDel.innerHTML = "删除";
+                       operateCell.appendChild(btnDel);
+
+                       rowElement.appendChild(operateCell);
+
+                       let tbody = document.getElementById("equipmentTbody");
+                       tbody.appendChild(rowElement);
+
+                   }
+                   let pageDiv = document.getElementById("pageDiv");
+                   alert("返回的结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
+                   let totalPage = res.page.totalPage;
+                   alert("返回结果中的页码对象中的limit的属性值：" + res.page.limit);
+                   let limit = res.page.limit;
+                   alert("返回结果中的页码对象中的totalCount的属性值：" + res.page.totalCount);
+                   let totalCount = res.page.totalCount;
+                   let firstPageA = document.createElement("a");
+                   firstPageA.setAttribute("id","first");
+                   firstPageA.setAttribute("href","javascript:void(0)");
+                   firstPageA.innerHTML = "首页&nbsp&nbsp";
+                   firstPageA.addEventListener("click",queryPage);
+                   pageDiv.appendChild(firstPageA);
+                   for(let i = 1 ; i <= totalPage ; i++){
+                       let pageA = document.createElement("a");
+                       pageA.setAttribute("id",""+i);
+                       pageA.setAttribute("href","javascript:void(0)");
+                       pageA.innerHTML = ""+i+"&nbsp&nbsp";
+                       pageA.addEventListener("click",queryPage);
+                       pageDiv.appendChild(pageA);
+                   }
+                   let lastPageA = document.createElement("a");
+                   lastPageA.setAttribute("id","last");
+                   lastPageA.setAttribute("href","javascript:void(0)");
+                   lastPageA.innerHTML = "&nbsp&nbsp最后一页";
+                   lastPageA.addEventListener("click",queryPage);
+                   pageDiv.appendChild(lastPageA);
+                }
+            };
+            xhr.onerror = function (e2) {
+                console.error(JSON.parse(xhr.responseText));
+                window.location.href = "/error/error.html";
+            };
+            xhr.send(JSON.stringify(params));
+        };
+
+        function batchDelete() {
+
+        }
+
+        function back() {
+            window.location.href = "/home/home.html";
+        }
+    </script>
+</head>
+<body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
+<form class="pure-form" method="post">
+    <fieldset>
+        <input type="text" id="serialNumber" name="serialNumber" placeholder="设备序列号"/>
+        <input type="text" id="equipmentName" name="equipmentName" placeholder="设备名称"/>
+        <button type="button" class="pure-button pure-button-primary" onclick="queryEquipment()">查询</button>
+        <button type="reset" class="pure-button pure-button-primary">取消</button>
+        <button type="button" class="pure-button pure-button-primary" onclick="back()">返回</button>
+        <button type="button" class="pure-button pure-button-primary" onclick="batchDelete()">批量删除</button>
+    </fieldset>
+
+</form>
+<table class="pure-table pure-table-bordered" align="center">
+    <thead align="center">
+        <tr>
+            <td>&nbsp&nbsp</td>
+            <td>序号</td>
+            <td>设备序列号</td>
+            <td>设备名称</td>
+            <td>是否投入使用</td>
+            <td>所属公司名称</td>
+            <td>维修人姓名</td>
+            <td>维修人联系方式</td>
+            <td>操作</td>
+        </tr>
+    </thead>
+    <tbody id="equipmentTbody" align="center">
+
+    </tbody>
+</table>
+<div id="pageDiv" align="center">
+
+</div>
+</body>
+</html>

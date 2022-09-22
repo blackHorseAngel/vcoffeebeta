@@ -37,6 +37,10 @@ public class Company implements Serializable {
      * 公司地址
      */
    private String companyAddress;
+   /**
+    * 公司状态,0:在线的公司；1：已删除的公司
+    */
+   private byte state;
     /**
      * 创建人
      */
@@ -53,8 +57,4 @@ public class Company implements Serializable {
      * 修改时间
      */
    private Date modifiedTime;
-    /**
-     * 分页参数
-     */
-   private Page page;
 }
