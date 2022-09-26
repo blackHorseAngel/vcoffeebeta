@@ -5,7 +5,35 @@
     <title>新增设备页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
     <script type="text/javascript">
-        function insertEquipment() {
+    window.onload = function() {
+        const url = "/vcoffee/company/findAllCompanyNames"
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST",url,true);
+        xhr.setRequestHeader("content-Type","application/json");
+        xhr.onload = function () {
+            let res = JSON.parse(xhr.responseText);
+            if(res.code === 1000){
+                alert(res.message);
+                let companyNameSelector = document.getElementById("companyId");
+                for(let i = 0 ; i < res.data.length ; i++){
+                    let companyNameOption = document.createElement("option");
+                    companyNameOption.value = res.data[i].id;
+                    companyNameOption.innerHTML = res.data[i].companyName;
+                    companyNameSelector.appendChild(companyNameOption);
+                }
+            }else{
+                console.error(res.message);
+                window.location.href = "/error/error.html";
+            }
+        };
+        xhr.onerror = function () {
+            console.error("设备新增页面中，查询公司名称报错,",JSON.parse(xhr.responseText).message);
+            window.location.href = "/error/error.html";
+        };
+        xhr.send();
+    }
+
+    function insertEquipment() {
             const serialNumber = document.getElementById("serialNumber").value;
             const equipmentName = document.getElementById("equipmentName").value;
             const isUsed = document.getElementById("isUsed").value;
@@ -20,14 +48,15 @@
               "attendantName":attendantName,
               "attendantTelephoneNumber":attendantTelephoneNumber
             };
-            const url = "/vcoffee/insertEquipment";
+            const url = "/vcoffee/equipment/insertEquipment";
             const xhr = new XMLHttpRequest();
             xhr.open("POST",url,true);
             xhr.setRequestHeader("content-Type","application/json");
-            xhr.onload = function (e1) {
+            xhr.onload = function () {
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
                     alert(res.message);
+                    window.location.href = "/equipment/queryEquipment.html";
                 }else{
                     alert(res.message);
                     window.location.href = "/error/error.html";
@@ -51,35 +80,34 @@
                 <legend align="center">新增设备</legend>
             </div>
             <div class="pure-control-group" align="center">
-                <label for="serialNumber">设备序列号</label>
-                <input type="text" id="serialNumber" name="serialNumber" placeholder="设备序列号"/>
+                <label for="serialNumber">设备序列号&nbsp</label>
+                <input type="text" id="serialNumber" name="serialNumber" size="32" placeholder="设备序列号"/>
             </div>
             <div class="pure-control-group" align="center">
-                <label for="equipmentName">设备名称</label>
-                <input type="text" id="equipmentName" name="equipment" placeholder="设备名称"/>
+                <label for="equipmentName">设备的名称</label>
+                <input type="text" id="equipmentName" name="equipment" size="20" placeholder="设备名称"/>
             </div>
             <div class="pure-control-group" align="center">
-                <label for="isUsed">是否使用</label>
-                <input type="radio" id="isNotUsed" name="isUsed" value="0" checked/>未使用
+                <label for="isUsed">是否投入使用</label>
+                <input type="radio" id="isNotUsed" name="isUsed" value="0" checked/>未使用&nbsp&nbsp
                 <input type="radio" id="isUsed" name="isUsed" value="1" >投入使用
             </div>
             <div class="pure-control-group" align="center">
-                <label for="companyId">所属公司</label>
-                <select id="companyId"  name="companyId" size="10" autofocus>
-                    <option value="1">aaa</option>
-                    <option value="2">bbb</option>
+                <label for="companyId">设备所属公司&nbsp&nbsp</label>
+                <select id="companyId"  name="companyId" size="10"autofocus="autofocus">
+
                 </select>
             </div>
             <div class="pure-control-group" align="center">
-                <label for="attendantName">维护人姓名</label>
-                <input type="text" id="attendantName" name="attendantName" placeholder="维护人姓名"/>
+                <label for="attendantName">维护人姓名&nbsp&nbsp</label>
+                <input type="text" id="attendantName" name="attendantName" size="12" placeholder="维护人姓名"/>
             </div>
             <div class="pure-control-group" align="center">
-                <label for="attendantTelephoneNumber">维护人联系方式</label>
-                <input type="text" id="attendantTelephoneNumber" name="attendantTelephoneNumber" placeholder="维护人联系方式"/>
+                <label for="attendantTelephoneNumber">维护人电话</label>
+                <input type="number" id="attendantTelephoneNumber" name="attendantTelephoneNumber" size="11" placeholder="维护人联系方式"/>
             </div>
             <div class="pure-control-group" align="center">
-                <button type="button" class="pure-button pure-button-primary" onclick="insertEquipment()"/>
+                <button type="button" class="pure-button pure-button-primary" onclick="insertEquipment()">新增</button>
                 <button type="reset" class="pure-button pure-button-primary">取消</button>
                 <button type="button" class="pure-button pure-button-primary" onclick="back()">返回</button>
             </div>

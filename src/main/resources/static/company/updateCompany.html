@@ -6,12 +6,12 @@
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css">
     <script type="text/javascript">
         window.onload = function () {
+            //获取链接传过来的要进行修改的公司id
             let id = location.search.replace(/[^\d]/g,"");
-            alert("id:"+id);
             const updateParams = {
                 "id":id
             };
-            const url = "/vcoffee/toUpdateCompany";
+            const url = "/vcoffee/company/toUpdateCompany";
             const xhr = new XMLHttpRequest();
             xhr.open("POST",url,true);
             xhr.setRequestHeader("content-Type","application/json");
@@ -48,7 +48,7 @@
               "companyPhoneNumber":companyPhoneNumber,
               "companyAddress":companyAddress
             };
-            const url = "/vcoffee/updateCompany";
+            const url = "/vcoffee/company/updateCompany";
             const xhr = new XMLHttpRequest();
             xhr.open("POST",url,true);
             xhr.setRequestHeader("content-Type","application/json");
@@ -81,15 +81,15 @@
             </div>
             <div class="pure-control-group" align="center">
                 <label for="companyName">公司名称</label>
-                <input type="text" id="companyName" name="companyName" placeholder="公司名称"/>
+                <input type="text" id="companyName" name="companyName" size="32" placeholder="公司名称"/>
             </div>
             <div class="pure-control-group" align="center">
                 <label for="companyNickName">公司简称</label>
-                <input type="text" id="companyNickName" name="companyNickName" placeholder="公司简称"/>
+                <input type="text" id="companyNickName" name="companyNickName" size="20" placeholder="公司简称"/>
             </div>
             <div class="pure-control-group" align="center">
                 <label for="companyPhoneNumber">公司电话</label>
-                <input type="text" id="companyPhoneNumber" name="companyPhoneNumber" placeholder="公司电话"/>
+                <input type="number" id="companyPhoneNumber" name="companyPhoneNumber" size="11" placeholder="公司电话"/>
             </div>
             <div class="pure-control-group" align="center">
                 <label for="companyAddress">公司地址</label>

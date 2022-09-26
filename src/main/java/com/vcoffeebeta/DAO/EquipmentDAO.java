@@ -4,6 +4,8 @@ import com.vcoffeebeta.domain.Equipment;
 import com.vcoffeebeta.util.BaseDAO;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * 设备DAO层
  * @author zhangshenming
@@ -12,20 +14,4 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface EquipmentDAO extends BaseDAO {
-    /**
-     * 新增设备
-     * @author zhangshenming
-     * @date 2022/9/22 9:10
-     * @param equipment
-     * @return int
-     */
-    public int insertEquipment(Equipment equipment);
-    /**
-     * 查询设备数量
-     * @author zhangshenming
-     * @date 2022/9/22 9:53
-     * @param
-     * @return int
-     */
-    public int queryForAmount();
 }

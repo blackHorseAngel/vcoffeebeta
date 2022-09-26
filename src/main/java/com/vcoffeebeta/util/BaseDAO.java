@@ -57,5 +57,12 @@ public interface BaseDAO<E,Q> {
      * @return java.util.List<E>
      */
     public List<E>findAll();
-
+    /**
+     * 查询全部数据条数
+     * @author zhangshenming
+     * @date 2022/9/25 21:54
+     * @param
+     * @return int
+     */
+    public int queryForAmount();
 }

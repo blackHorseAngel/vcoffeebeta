@@ -4,6 +4,7 @@ import com.vcoffeebeta.DAO.EquipmentDAO;
 import com.vcoffeebeta.domain.Equipment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
+@Transactional(rollbackFor = Exception.class)
 public class EquipmentServiceImpl implements EquipmentService {
 
     @Autowired
@@ -21,7 +23,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
     @Override
     public boolean insertEquipment(Equipment equipment) {
-        int num = equipmentDAO.insertEquipment(equipment);
+        int num = equipmentDAO.insert(equipment);
         return num >= 0 ? true : false;
     }
 
@@ -31,7 +33,48 @@ public class EquipmentServiceImpl implements EquipmentService {
     }
 
     @Override
-    public List<Equipment> findAll() {
+    public List<Equipment> findAllEquipment() {
         return equipmentDAO.findAll();
+    }
+
+    @Override
+    public Equipment findById(long id) {
+        return (Equipment) equipmentDAO.findById(id);
+    }
+
+    @Override
+    public boolean updateEquipment(Equipment equipment) {
+        int num = equipmentDAO.update(equipment);
+        return num >= 0 ? true : false;
+    }
+
+    @Override
+    public boolean deleteEquipment(long id) {
+        int num = equipmentDAO.deleteById(id);
+        return num >= 0 ? true : false;
+    }
+
+    @Override
+    public boolean batchDeleteEquipment(List<Long> ids) {
+        int num = 0;
+        try{
+            for(long id : ids){
+                num = equipmentDAO.deleteById(id);
+                if(num >= 0){
+                    continue;
+                }else{
+                    return false;
+                }
+            }
+            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public List<Equipment> queryForList(Equipment equipment) {
+        return equipmentDAO.queryForList(equipment);
     }
 }

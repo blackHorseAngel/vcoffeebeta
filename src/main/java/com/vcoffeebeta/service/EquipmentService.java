@@ -34,5 +34,45 @@ public interface EquipmentService {
      * @param
      * @return java.util.List<com.vcoffeebeta.domain.Equipment>
      */
-    List<Equipment> findAll();
+    List<Equipment> findAllEquipment();
+    /**
+     * 根据id查询设备信息
+     * @author zhangshenming
+     * @date 2022/9/25 16:45
+     * @param id
+     * @return com.vcoffeebeta.domain.Equipment
+     */
+    Equipment findById(long id);
+    /**
+     * 更新设备信息
+     * @author zhangshenming
+     * @date 2022/9/25 17:04
+     * @param equipment
+     * @return boolean
+     */
+    boolean updateEquipment(Equipment equipment);
+    /**
+     * 删除设备信息
+     * @author zhangshenming
+     * @date 2022/9/25 17:19
+     * @param id
+     * @return boolean
+     */
+    boolean deleteEquipment(long id);
+    /**
+     * 批量删除设备信息
+     * @author zhangshenming
+     * @date 2022/9/25 17:34
+     * @param ids
+     * @return boolean
+     */
+    boolean batchDeleteEquipment(List<Long> ids);
+    /**
+     * 条件查询设备信息
+     * @author zhangshenming
+     * @date 2022/9/26 21:07
+     * @param equipment
+     * @return java.util.List<com.vcoffeebeta.domain.Equipment>
+     */
+    List<Equipment> queryForList(Equipment equipment);
 }

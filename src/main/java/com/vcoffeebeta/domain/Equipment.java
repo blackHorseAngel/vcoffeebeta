@@ -37,6 +37,10 @@ public class Equipment {
      */
     private long companyId;
     /**
+     * 公司名称
+     */
+    private String companyName;
+    /**
      * 维修人员名称
      */
     private String attendantName;

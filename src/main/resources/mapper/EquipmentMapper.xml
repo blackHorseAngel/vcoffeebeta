@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vcoffeebeta.DAO.EquipmentDAO">
+    <resultMap id="equipmentMap" type="com.vcoffeebeta.domain.Equipment">
+        <id property="id" column="id"/>
+        <result property="serialNumber" column="serial_number"/>
+        <result property="equipmentName" column="equipment_name"/>
+        <result property="isUsed" column="isUsed"/>
+        <result property="companyId" column="company_id"/>
+        <result property="attendantName" column="attendant_name"/>
+        <result property="attendantTelephoneNumber" column="attendant_telephone_number"/>
+        <result property="created" column="created"/>
+        <result property="modified" column="modified"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="modifiedTime" column="modified_time"/>
+    </resultMap>
+    <sql id="equipmentContent">
+        id,serial_number,equipment_name,isUsed,company_id,attendant_name,attendant_telephone_number,created,created_time,modified,modified_time
+    </sql>
+    <sql id="equipmentContentForInsert">
+        serial_number,equipment_name,isUsed,company_id,attendant_name,attendant_telephone_number,created,created_time,modified,modified_time
+    </sql>
+    <!-- 新增一个设备-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into equipment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <include refid="equipmentContentForInsert"/>
+        </trim>
+        values
+        <trim prefix="(" suffix=")"  suffixOverrides=",">
+            #{serialNumber},
+            #{equipmentName},
+            #{isUsed},
+            #{companyId},
+            #{attendantName},
+            #{attendantTelephoneNumber},
+            #{created},
+            #{createdTime},
+            #{modified},
+            #{modifiedTime}
+        </trim>
+    </insert>
+    <!-- 查询设备数量 -->
+    <select id="queryForAmount" resultType="java.lang.Integer">
+        select count(1) from equipment
+    </select>
+    <!--查询全部设备信息-->
+    <select id="findAll" resultMap="com.vcoffeebeta.DAO.EquipmentDAO.equipmentMap">
+        select <include refid="equipmentContent"/> from equipment
+        <where>
+            isUsed != 2
+        </where>
+        order by modified_time desc
+    </select>
+    <!-- 根据id查询设备信息 -->
+    <select id="findById" parameterType="java.lang.Long" resultMap="com.vcoffeebeta.DAO.EquipmentDAO.equipmentMap">
+        select <include refid="equipmentContent"/> from equipment
+        <where>
+            id = #{id}
+        </where>
+        and isUsed != 2
+        order by modified_time desc
+    </select>
+    <!--  -->
+    <select id="queryForList" parameterType="com.vcoffeebeta.domain.Equipment" resultMap="equipmentMap">
+        select <include refid="equipmentContent"/> from equipment
+        <where>
+            1=1
+            <if test="id != 0">
+                and id = #{id}
+            </if>
+            <if test="serialNumber != null and serialNumber!=''">
+                and serial_number = #{serialNumber}
+            </if>
+            <if test="equipmentName != null and equipmentName != ''">
+                and equipment_name like concat('%',#{equipmentName},"%")
+            </if>
+            and isUsed != 2
+            order by modified_time desc
+        </where>
+    </select>
+    <!-- 更新设备信息 -->
+    <update id="update" parameterType="com.vcoffeebeta.domain.Equipment">
+        update equipment
+        set
+        <if test="serialNumber != null">
+            serial_number = #{serialNumber},
+        </if>
+         <if test="equipmentName != null">
+             equipment_name = #{equipmentName},
+         </if>
+         <if test="isUsed != null">
+             isUsed = #{isUsed},
+         </if>
+         <if test="attendantName != null">
+             attendant_name = #{attendantName},
+         </if>
+         <if test="attendantTelephoneNumber != null">
+             attendant_telephone_number = #{attendantTelephoneNumber}
+         </if>
+         <where>
+             <if test="id != null">
+                 id = #{id}
+             </if>
+         </where>
+    </update>
+    <!-- 根据id删除单个设备信息，实际是修改设备的使用状态，0：未使用，1：已使用，2：已删除（页面上不展示，数据库可查） -->
+    <update id="deleteById" parameterType="int">
+        update equipment
+        set
+        isUsed = 2
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+        </where>
+    </update>
+
+</mapper>
