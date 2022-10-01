@@ -118,11 +118,15 @@ public enum ResultCodeEnum {
     /**
      *
      */
-    UPDATEUSER("更新用户信息报错",3012),
+    UPDATEUSER("更新用户信息报错",3013),
     /**
      *
      */
-    DELETEUSER("删除用户信息报错",3013),
+    DELETEUSER("删除用户信息报错",3014),
+    /**
+     *
+     */
+    BATCHDELETEUSER("批量删除用户报错",3015),
     /**
      *
      */

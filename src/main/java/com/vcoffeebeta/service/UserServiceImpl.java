@@ -5,6 +5,7 @@ import com.vcoffeebeta.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @version 1.0
  */
 @Service
-@Slf4j
+@Transactional(rollbackFor = Exception.class)
 public class UserServiceImpl implements UserService {
 
 
@@ -58,6 +59,25 @@ public class UserServiceImpl implements UserService {
     public boolean deleteUser(long id) {
         int num = userDAO.deleteById(id);
         return num >= 0 ? true : false;
+    }
+
+    @Override
+    public boolean batchDeleteUser(List<Long> ids) {
+        int num = 0;
+        try{
+            for(long id : ids){
+                num = userDAO.deleteById(id);
+                if(num >= 0){
+                    continue;
+                }else{
+                    return false;
+                }
+            }
+            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
 

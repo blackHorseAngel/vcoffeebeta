@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.awt.image.RescaleOp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -58,7 +59,7 @@ public class UserController {
             user.setModifiedTime(new Date());
             long companyId = u.getCompanyId();
             List<Equipment>equipmentList;
-            List<Long>equipmentIdList = new ArrayList<>();
+            StringBuilder equipmentIdBuilder = new StringBuilder();
             if(companyId != 0){
                 equipmentList = equipmentService.findAllEquipmentsByCompanyId(companyId);
                 log.info("当前登录用户u所在公司下的所有的设备信息：" + JSON.toJSONString(equipmentList));
@@ -67,10 +68,15 @@ public class UserController {
                 log.info("新增用户所在公司下的所有的设备信息：" + JSON.toJSONString(equipmentList));
             }
             for(Equipment e : equipmentList){
-                equipmentIdList.add(e.getId());
+                long equipmentId = e.getId();
+                equipmentIdBuilder.append(equipmentId);
+                equipmentIdBuilder.append(";");
             }
-            user.setEquipId(equipmentIdList);
+            String equipmentIdStr = equipmentIdBuilder.toString();
+            equipmentIdStr = equipmentIdStr.substring(0,equipmentIdStr.length()-1);
+            user.setEquipmentId(equipmentIdStr);
             boolean flag = userService.insertUser(user);
+            equipmentIdBuilder.setLength(0);
             if(flag){
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
             }else{
@@ -123,13 +129,20 @@ public class UserController {
             for(User user : userList){
                 Company c = companyService.queryById(u.getCompanyId());
                 user.setCompanyName(c.getCompanyName());
-                List<Long>equipmentIdList = user.getEquipId();
-                List<String>equipmentNameList = new ArrayList<>();
-                for(long id : equipmentIdList){
+                String equipmentIdStr = user.getEquipmentId();
+                String[]equipmentIds = equipmentIdStr.split(";");
+                StringBuilder equipmentNameBuilder = new StringBuilder();
+                String equipmentNameStr = "";
+                for(String idStr : equipmentIds){
+                    long id = Long.parseLong(idStr);
                     Equipment e = equipmentService.findById(id);
-                    equipmentNameList.add(e.getEquipmentName());
+                    equipmentNameBuilder.append(e.getEquipmentName());
+                    equipmentNameBuilder.append(";");
                 }
-                user.setEquipmentName(equipmentNameList);
+                equipmentNameStr = equipmentNameBuilder.toString();
+                equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
+                user.setEquipmentName(equipmentNameStr);
+                equipmentNameBuilder.setLength(0);
             }
             return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
         }catch(Exception e){
@@ -209,7 +222,26 @@ public class UserController {
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "batchDeleteUsers")
-    public Result batchDeleteUser(){
-        return null;
+    public Result batchDeleteUser(@RequestBody Map<String,List<String>>idMap){
+        log.info("进去batchDeleteUser方法" + JSON.toJSONString(idMap));
+        try{
+          List<String>idList = idMap.get("ids");
+          log.info("idList:" + JSON.toJSONString(idList));
+          List<Long>ids = new ArrayList<>();
+          for(String s : idList){
+              long id = Long.parseLong(s);
+              ids.add(id);
+          }
+          boolean flag = userService.batchDeleteUser(ids);
+          if(flag){
+              return new Result(ResultCodeEnum.SUCCESS.getCode(), ResultCodeEnum.SUCCESS.getMessage());
+          }else{
+              return new Result(ResultCodeEnum.BATCHDELETEUSER.getCode(),ResultCodeEnum.BATCHDELETEUSER.getMessage());
+          }
+        }catch(Exception e){
+            log.error("批量删除用户报错",e);
+            e.printStackTrace();
+            return new Result(ResultCodeEnum.BATCHDELETEUSER.getCode(),ResultCodeEnum.BATCHDELETEUSER.getMessage());
+        }
     }
 }

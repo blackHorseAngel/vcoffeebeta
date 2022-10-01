@@ -110,7 +110,6 @@
     }
 
     function queryEquipment() {
-        //TODO
         const serialNumber = document.getElementById("serialNumber").value;
         const equipmentName = document.getElementById("equipmentName").value;
         const url = "/vcoffee/equipment/queryEquipment";
@@ -343,12 +342,12 @@
                 alert(res.message);
                 window.location.href = "/equipment/queryEquipment.html";
             }else{
-                console.error(JSON.parse(res.message));
+                console.error("删除设备信息报错，" + res.message);
                 window.location.href = "/error/error.html";
             }
         };
         xhr.onerror = function () {
-            console.error(JSON.parse(xhr.responseText));
+            console.error("删除设备信息报错，" + JSON.parse(xhr.responseText).message);
             window.location.href = "/error/error.html";
         };
         xhr.send(JSON.stringify(delParam));
@@ -487,10 +486,13 @@
                 if(res.code === 1000){
                     alert(res.message);
                     window.location.href = "/equipment/queryEquipment.html";
+                }else{
+                    console.error("批量删除设备报错" + res.message);
+                    window.location.href = "/error/error.html";
                 }
             };
             xhr.onerror = function () {
-                console.error("批量删除设备报错" + JSON.parse(xhr.responseText));
+                console.error("批量删除设备报错" + JSON.parse(xhr.responseText).message);
                 window.location.href = "/error/error.html";
             };
             xhr.send(JSON.stringify(batchDeleteParams));

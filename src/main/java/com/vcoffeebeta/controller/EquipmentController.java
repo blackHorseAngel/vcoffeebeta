@@ -3,7 +3,6 @@ package com.vcoffeebeta.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.vcoffeebeta.domain.*;
 import com.vcoffeebeta.enums.ResultCodeEnum;
 import com.vcoffeebeta.service.CompanyService;

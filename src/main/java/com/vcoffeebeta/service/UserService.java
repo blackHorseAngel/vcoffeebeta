@@ -75,4 +75,12 @@ public interface UserService {
      * @return boolean
      */
     boolean deleteUser(long id);
+    /**
+     * 批量删除用户
+     * @author zhangshenming
+     * @date 2022/10/1 16:23
+     * @param ids
+     * @return boolean
+     */
+    boolean batchDeleteUser(List<Long> ids);
 }

@@ -10,7 +10,6 @@
         }
 
         function deleteUser() {
-            //TODO
           const url = "/vcoffee/user/deleteUser";
           const delParam = {
             "id":this.id
@@ -36,8 +35,96 @@
         }
 
         function queryUserPage() {
-            //TODO
+            clearUserTbody();
+            const url = "/vcoffee/user/findAllUsers";
+            if(this.id === "first"){
+                this.id = 1;
+            }else if(this.id === "last"){
+                this.id = this.page.totalPage;
+            }
+            const params = {
+              "currentPage":this.id,
+              "limit":10
+            };
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST",url,true);
+            xhr.setRequestHeader("content-Type","application/json");
+            xhr.onload = function () {
+                let res = JSON.parse(xhr.responseText);
+                if(res.code === 1000){
+                    for(let i = 0 ; i < res.data.length ; i++){
+                        let rowElement = document.createElement("tr");
 
+                        let checkboxCell = document.createElement("td");
+                        let checkBox = document.createElement("input");
+                        checkBox.setAttribute("type","checkbox");
+                        checkBox.setAttribute("name","idCheckBox");
+                        checkBox.setAttribute("id","idCheckBox");
+                        checkboxCell.appendChild(checkBox);
+                        rowElement.appendChild(checkboxCell);
+
+                        let idCell = document.createElement("td");
+                        idCell.innerHTML = res.data[i].id;
+                        rowElement.appendChild(idCell);
+
+                        let userNameCell = document.createElement("td");
+                        userNameCell.innerHTML = res.data[i].userName;
+                        rowElement.appendChild(userNameCell);
+
+                        let telephoneNumberCell = document.createElement("td");
+                        telephoneNumberCell.innerHTML = res.data[i].telephoneNumber;
+                        rowElement.appendChild(telephoneNumberCell);
+
+                        let emailCell = document.createElement("td");
+                        emailCell.innerHTML = res.data[i].email;
+                        rowElement.appendChild(emailCell);
+
+                        let isAdminCell = document.createElement("td");
+                        isAdminCell.innerHTML = res.data[i].isAdmin;
+                        rowElement.appendChild(isAdminCell);
+
+                        let companyNameCell = document.createElement("td");
+                        companyNameCell.innerHTML = res.data[i].companyName;
+                        rowElement.appendChild(companyNameCell);
+
+                        let equipmentNameCell = document.createElement("td");
+                        equipmentNameCell.innerHTML = res.data[i].equipmentName;
+                        rowElement.appendChild(equipmentNameCell);
+
+                        let operateCell = document.createElement("td");
+
+                        let btnUpdate = document.createElement("button");
+                        btnUpdate.setAttribute("type","button");
+                        btnUpdate.setAttribute("value","修改");
+                        btnUpdate.setAttribute("id",res.data[i].id);
+                        btnUpdate.addEventListener("click",toUpdateUser);
+                        btnUpdate.innerHTML = "修改";
+                        operateCell.appendChild(btnUpdate);
+
+                        let btnDel = document.createElement("button");
+                        btnDel.setAttribute("type","button");
+                        btnDel.setAttribute("value","删除");
+                        btnDel.setAttribute("id",res.data[i].id);
+                        btnDel.addEventListener("click",deleteUser);
+                        btnDel.innerHTML = "删除";
+                        operateCell.appendChild(btnDel);
+
+                        rowElement.appendChild(operateCell);
+
+                        let tbody = document.getElementById("userTbody");
+                        tbody.appendChild(rowElement);
+
+                    }
+                }else{
+                    console.error("分页查询用户报错" + JSON.parse(xhr.responseText).message);
+                    window.location.href = "/error/error.html";
+                }
+            };
+            xhr.onerror = function () {
+              console.error("分页查询用户报错" + JSON.parse(xhr.responseText).message);
+              window.location.href = "/error/error.html";
+            };
+            xhr.send(JSON.stringify(params));
         }
 
         window.onload = function () {
@@ -152,8 +239,35 @@
             xhr.send(JSON.stringify(param));
         };
     function batchDeleteUser() {
-      //TODO
-
+      let ids = [];
+      let data = document.getElementById("idCheckBox");
+      for(let i = 0 ; i < data.length ; i++){
+          if(data[i].checked === true){
+              ids.push(data[i].id);
+          }
+      }
+      const batchDeleteParams = {
+        "ids":ids
+      };
+      const url = "/vcoffee/user/batchDeleteUsers";
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST",url,true);
+      xhr.setRequestHeader("content-Type","application/json");
+      xhr.onload = function () {
+        let res = JSON.parse(xhr.responseText);
+        if(res.code === 1000){
+            alert(res.message);
+            window.location.href = "/user/queryUser.html";
+        }else{
+           console.error("批量删除用户信息报错" + res.message);
+           window.location.href = "/error/error.html";
+        }
+      };
+      xhr.onerror = function () {
+          console.error("批量删除用户信息报错" + JSON.parse(xhr.responseText).message);
+          window.location.href = "/error/error.html";
+      };
+      xhr.send(JSON.stringify(batchDeleteParams));
     }
 
     function toInsertUser() {
@@ -171,7 +285,6 @@
         }
 
         function queryUserPageWithOption() {
-            //TODO
             clearUserTbody();
             const userName = document.getElementById("userName").value;
             const queryParam = {
@@ -268,8 +381,7 @@
             xhr.send(JSON.stringify(queryParam));
         }
 
-        function queryUser() {
-      //TODO
+    function queryUser() {
       const userName = document.getElementById("userName").value;
       const  url = "/vcoffee/user/queryUser";
       const queryParam = {
