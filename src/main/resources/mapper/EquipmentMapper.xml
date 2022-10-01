@@ -80,6 +80,17 @@
             order by modified_time desc
         </where>
     </select>
+    <!-- 通过公司id，查询该公司下的全部设备信息 -->
+    <select id="findAllEquipmentsByCompanyId" parameterType="long" resultType="com.vcoffeebeta.domain.Equipment">
+        select <include refid="equipmentContent"/> from equipment
+        <where>
+        1 = 1
+        <if test="companyId != 0">
+           and company_id = #{companyId}
+        </if>
+
+        </where>
+    </select>
     <!-- 更新设备信息 -->
     <update id="update" parameterType="com.vcoffeebeta.domain.Equipment">
         update equipment
@@ -100,7 +111,7 @@
              attendant_telephone_number = #{attendantTelephoneNumber}
          </if>
          <where>
-             <if test="id != null">
+             <if test="id != 0">
                  id = #{id}
              </if>
          </where>

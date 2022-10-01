@@ -1,10 +1,12 @@
 package com.vcoffeebeta.service;
 
-import com.vcoffeebeta.DAO.LoginDAO;
+import com.vcoffeebeta.DAO.UserDAO;
 import com.vcoffeebeta.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * loginService实现类
@@ -16,26 +18,52 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
+
     @Autowired
-    private LoginDAO loginDAO;
+    private UserDAO userDAO;
 
     @Override
     public User loginByNameAndPassword(User user) {
-        log.info("进入loginByNameAndPassword的service层");
-        return loginDAO.queryByNameAndPassword(user);
+        return userDAO.queryByNameAndPassword(user);
     }
 
     @Override
     public boolean  insertUser(User user) {
-        log.info("进入insertUser");
-        int num = loginDAO.insert(user);
-        return num == 1 ? true:false;
+        int num = userDAO.insert(user);
+        return num >= 0 ? true:false;
+    }
+
+    @Override
+    public List<User> findAllUsers() {
+        return userDAO.findAll();
+    }
+
+    @Override
+    public int queryForAmountByCompanyId(long companyId) {
+        return userDAO.queryForAmountByCompanyId(companyId);
+    }
+
+    @Override
+    public boolean updateUser(User user) {
+        int num = userDAO.update(user);
+        return num >= 0 ? true : false;
+    }
+
+    @Override
+    public User findById(long id) {
+        return (User) userDAO.findById(id);
+    }
+
+    @Override
+    public boolean deleteUser(long id) {
+        int num = userDAO.deleteById(id);
+        return num >= 0 ? true : false;
     }
 
 
     @Override
     public boolean isExist(User user) {
-        User u = loginDAO.queryByNameAndPassword(user);
+        User u = userDAO.queryByNameAndPassword(user);
         if(u != null){
             return true;
         }

@@ -5,7 +5,7 @@
     <title>查询设备页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
     <script type="text/javascript">
-    function clearPageDiv() {
+    function clearEquipmentPageDiv() {
       let pageDiv = document.getElementById("pageDiv");
       pageDiv.innerHTML = "";
     }
@@ -98,12 +98,12 @@
 
                 }
             }else{
-                alert(res.message);
+                console.error("条件查询设备分页信息报错，" + res.message);
                 window.location.href = "/error/error.html";
             }
         };
         xhr.onerror = function () {
-            console.error("条件查询设备信息报错," + JSON.parse(xhr.responseText).message);
+            console.error("条件查询设备分页信息报错," + JSON.parse(xhr.responseText).message);
             window.location.href = "/error/error.html";
         };
         xhr.send(JSON.stringify(queryParams));
@@ -190,7 +190,7 @@
                     tbody.appendChild(rowElement);
 
                 }
-                clearPageDiv();
+                clearEquipmentPageDiv();
                 let pageDiv = document.getElementById("pageDiv");
                 alert("返回的结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
                 let totalPage = res.page.totalPage;
@@ -240,7 +240,7 @@
     function toUpdateEquipment() {
        window.location.href = "/equipment/updateEquipment.html?"+this.id;
     }
-    function queryPage(){
+    function queryEquipmentPage(){
         clearEquipmentTbody();
         const url = "/vcoffee/equipment/findAllEquipment";
         if(this.id === "first"){
@@ -311,6 +311,7 @@
                     btnDel.setAttribute("type","button");
                     btnDel.setAttribute("value","删除");
                     btnDel.setAttribute("id",res.data[i].id);
+                    btnDel.addEventListener("click",deleteEquipment);
                     btnDel.innerHTML = "删除";
                     operateCell.appendChild(btnDel);
 
@@ -318,9 +319,7 @@
 
                     let tbody = document.getElementById("equipmentTbody");
                     tbody.appendChild(rowElement);
-
                 }
-
             }
         };
         xhr.onerror = function () {
@@ -440,32 +439,35 @@
         firstPageA.setAttribute("id","first");
         firstPageA.setAttribute("href","javascript:void(0)");
         firstPageA.innerHTML = "首页&nbsp&nbsp";
-        firstPageA.addEventListener("click",queryPage);
+        firstPageA.addEventListener("click",queryEquipmentPage);
         pageDiv.appendChild(firstPageA);
         for(let i = 1 ; i <= totalPage ; i++){
           let pageA = document.createElement("a");
           pageA.setAttribute("id",""+i);
           pageA.setAttribute("href","javascript:void(0)");
           pageA.innerHTML = ""+i+"&nbsp&nbsp";
-          pageA.addEventListener("click",queryPage);
+          pageA.addEventListener("click",queryEquipmentPage);
           pageDiv.appendChild(pageA);
         }
         let lastPageA = document.createElement("a");
         lastPageA.setAttribute("id","last");
         lastPageA.setAttribute("href","javascript:void(0)");
         lastPageA.innerHTML = "&nbsp&nbsp最后一页";
-        lastPageA.addEventListener("click",queryPage);
+        lastPageA.addEventListener("click",queryEquipmentPage);
         pageDiv.appendChild(lastPageA);
+      }else{
+          console.error("查询设备信息报错，" + res.message);
+          window.location.href = "/error/error.html";
       }
       };
-        xhr.onerror = function (e2) {
-          console.error(JSON.parse(xhr.responseText));
+        xhr.onerror = function () {
+          console.error("查询设备信息报错，" + JSON.parse(xhr.responseText).message);
           window.location.href = "/error/error.html";
         };
         xhr.send(JSON.stringify(params));
     };
 
-        function batchDelete() {
+        function batchDeleteEquipment() {
             let ids = [];
             let data = document.getElementById("idCheckBox");
             for(let i = 0 ; i < data.length ; i++){
@@ -508,7 +510,7 @@
         <button type="reset" class="pure-button pure-button-primary">取消</button>
         <button type="button" class="pure-button pure-button-primary" onclick="back()">返回</button>
         <button type="button" class="pure-button pure-button-primary" onclick="toAddEquipment()">新增</button>
-        <button type="button" class="pure-button pure-button-primary" onclick="batchDelete()">批量删除</button>
+        <button type="button" class="pure-button pure-button-primary" onclick="batchDeleteEquipment()">批量删除</button>
     </fieldset>
 
 </form>

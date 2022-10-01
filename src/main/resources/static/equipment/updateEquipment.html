@@ -9,6 +9,7 @@
         let isNotUsed = document.getElementById("isNotUsed");
         let isUsed = document.getElementById("isUsed");
         alert("isUsed的checked属性值是： " + isUsed.checked);
+        alert("isNotUsed的checked属性值：" + isNotUsed.checked);
         if(isUsed.checked === true){
             isNotUsed.checked = false;
         }
@@ -18,6 +19,7 @@
         let isNotUsed = document.getElementById("isNotUsed");
         let isUsed = document.getElementById("isUsed");
         alert("isNotUsed的属性值是： " + isNotUsed.checked);
+        alert("isUsed的属性值是：" + isUsed.checked);
         if(isNotUsed.checked === true){
             isUsed.checked = false;
         }
@@ -48,12 +50,12 @@
                     document.getElementById("attendantName").value = res.data.attendantName;
                     document.getElementById("attendantTelephoneNumber").value = res.data.attendantTelephoneNumber;
                 }else{
-                    console.error(JSON.parse(res.responseText).message);
+                    console.error("初始化更新设备页面报错" + res.message);
                     window.location.href = "/error/error.html";
                 }
             };
             xhr.onerror = function () {
-                console.error(JSON.parse(res.responseText).message);
+                console.error("初始化更新设备页面报错， " + JSON.parse(xhr.responseText).message);
                 window.location.href = "/error/error.html";
             };
             xhr.send(JSON.stringify(updateParam));
@@ -81,7 +83,7 @@
                     alert(res.message);
                     window.location.href = "/equipment/queryEquipment.html";
                 }else{
-                    console.error("修改设备信息失败" + JSON.parse(xhr.responseText));
+                    console.error("修改设备信息失败" + res.message);
                     window.location.href = "/error/error.html";
                 }
             };

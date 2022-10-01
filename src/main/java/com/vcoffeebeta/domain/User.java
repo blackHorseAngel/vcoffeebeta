@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用户实体类
@@ -56,7 +57,7 @@ public class  User implements Serializable {
     /**
      * 用户常用设备id
      */
-    private long equipId;
+    private List<Long> equipId;
     /**
      * 创建人
      */
@@ -73,5 +74,12 @@ public class  User implements Serializable {
      * 修改时间
      */
     private Date modifiedTime;
-
+    /**
+     * 公司名称
+     */
+    private String companyName;
+    /**
+     * 设备名称
+     */
+    private List<String> equipmentName;
 }

@@ -77,4 +77,9 @@ public class EquipmentServiceImpl implements EquipmentService {
     public List<Equipment> queryForList(Equipment equipment) {
         return equipmentDAO.queryForList(equipment);
     }
+
+    @Override
+    public List<Equipment> findAllEquipmentsByCompanyId(long companyId) {
+        return equipmentDAO.findAllEquipmentsByCompanyId(companyId);
+    }
 }

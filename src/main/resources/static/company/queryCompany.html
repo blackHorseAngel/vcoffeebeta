@@ -17,7 +17,7 @@
         let tbody = document.getElementById("companyTbody");
         tbody.innerText = "";
     }
-   function queryPage() {
+   function queryCompanyPage() {
        clearCompanyTbody();
        const url = "/vcoffee/company/findAllCompany";
        if(this.id === "first"){
@@ -268,21 +268,21 @@
                     firstPageA.setAttribute("id","first");
                     firstPageA.setAttribute("href","javascript:void(0)");
                     firstPageA.innerHTML = "首页&nbsp&nbsp";
-                    firstPageA.addEventListener("click",queryPage);
+                    firstPageA.addEventListener("click",queryCompanyPage);
                     pageDiv.appendChild(firstPageA);
                     for(let i = 1; i <= totalPage ; i++){
                         let pageA = document.createElement("a");
                         pageA.setAttribute("id",""+i);
                         pageA.setAttribute("href","javascript:void(0)");
                         pageA.innerHTML = ""+i+"&nbsp&nbsp";
-                        pageA.addEventListener("click",queryPage);
+                        pageA.addEventListener("click",queryCompanyPage);
                         pageDiv.appendChild(pageA);
                     }
                     let lastPageA = document.createElement("a");
                     lastPageA.setAttribute("id","last");
                     lastPageA.setAttribute("href","javascript:void(0)");
                     lastPageA.innerHTML = "&nbsp&nbsp最后一页";
-                    lastPageA.addEventListener("click",queryPage);
+                    lastPageA.addEventListener("click",queryCompanyPage);
                     pageDiv.appendChild(lastPageA);
                 }else{
                     console.error(res.message);

@@ -106,6 +106,26 @@ public enum ResultCodeEnum {
     /**
      *
      */
+    QUERYALLUSERS("查询全部用户信息报错",3010),
+    /**
+     *
+     */
+    SESSIONFORCOMPANYID("session信息中缺少companyId",3011),
+    /**
+     *
+     */
+    TOUPDATEUSER("跳转到更新用户页面报错",3012),
+    /**
+     *
+     */
+    UPDATEUSER("更新用户信息报错",3012),
+    /**
+     *
+     */
+    DELETEUSER("删除用户信息报错",3013),
+    /**
+     *
+     */
     INTERNALERROR("服务器报错",500),
     /**
      *

@@ -75,4 +75,12 @@ public interface EquipmentService {
      * @return java.util.List<com.vcoffeebeta.domain.Equipment>
      */
     List<Equipment> queryForList(Equipment equipment);
+    /**
+     * 通过公司id，查询该公司名下的全部设备信息
+     * @author zhangshenming
+     * @date 2022/9/30 17:06
+     * @param
+     * @return java.util.List<com.vcoffeebeta.domain.Equipment>
+     */
+    List<Equipment> findAllEquipmentsByCompanyId(long companyId);
 }

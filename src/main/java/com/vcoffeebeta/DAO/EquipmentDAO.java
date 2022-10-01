@@ -14,4 +14,12 @@ import java.util.List;
  */
 @Repository
 public interface EquipmentDAO extends BaseDAO {
+    /**
+     * @decription TODO
+     * @author zhangshenming
+     * @date 2022/9/30 17:08
+     * @param
+     * @return java.util.List<com.vcoffeebeta.domain.Equipment>
+     */
+    List<Equipment> findAllEquipmentsByCompanyId(long companyId);
 }

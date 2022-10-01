@@ -2,6 +2,8 @@ package com.vcoffeebeta.service;
 
 import com.vcoffeebeta.domain.User;
 
+import java.util.List;
+
 /**
  * 登录业务层接口
  * @author zhangshenming
@@ -33,4 +35,44 @@ public interface UserService {
      * @return int
      */
     public boolean insertUser(User user);
+    /**
+     * 查询全部用户信息
+     * @author zhangshenming
+     * @date 2022/9/27 0:03
+     * @param
+     * @return java.util.List<com.vcoffeebeta.domain.User>
+     */
+    List<User> findAllUsers();
+    /**
+     * 根据companyId查询用户数
+     * @author zhangshenming
+     * @date 2022/9/30 17:23
+     * @param companyId
+     * @return int
+     */
+    int queryForAmountByCompanyId(long companyId);
+    /**
+     * 更新用户信息
+     * @author zhangshenming
+     * @date 2022/9/30 20:56
+     * @param user
+     * @return boolean
+     */
+    boolean updateUser(User user);
+    /**
+     * 通过id查找用户信息
+     * @author zhangshenming
+     * @date 2022/9/30 21:21
+     * @param id
+     * @return com.vcoffeebeta.domain.User
+     */
+    User findById(long id);
+    /**
+     * 删除用户信息
+     * @author zhangshenming
+     * @date 2022/10/1 0:15
+     * @param id
+     * @return boolean
+     */
+    boolean deleteUser(long id);
 }

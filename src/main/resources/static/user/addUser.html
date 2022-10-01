@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新增用户页面</title>
+    <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
+    <script type="text/javascript">
+     window.onload = function () {
+        const url = "/vcoffee/company/findAllCompanyNames";
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST",url,true);
+        xhr.setRequestHeader("content-Type","application/json");
+        xhr.onload = function () {
+            let res = JSON.parse(xhr.responseText);
+            if(res.code === 1000){
+                alert(res.message);
+                let companyNameSelector = document.getElementById("companyId");
+                for(let i = 0 ; i < res.data.length ; i++){
+                    let companyNameOption = document.createElement("option");
+                    companyNameOption.value = res.data[i].id;
+                    companyNameOption.innerHTML = res.data[i].companyName;
+                    companyNameSelector.appendChild(companyNameOption);
+                }
+            }else{
+                console.error(res.message);
+                window.location.href = "/error/error.html";
+            }
+        };
+        xhr.onerror = function () {
+            console.error("查询全部公司名称信息报错： " + JSON.parse(xhr.responseText).message);
+            window.location.href = "/error/error.html";
+        };
+        xhr.send();
+     };
+
+    function insertUser() {
+       const userName = document.getElementById("userName").value;
+       const telephoneNumber = document.getElementById("telephoneNumber").value;
+       const email = document.getElementById("email").value;
+       const companyId = document.getElementById("companyId").value;
+       const isAdmin = document.getElementById("isAdmin").value;
+       const url = "/vcoffee/user/insertUser";
+       const insertParams = {
+         "userName":userName,
+         "telephoneNumber":telephoneNumber,
+         "email":email,
+         "companyId":companyId,
+         "isAdmin":isAdmin
+       };
+       const xhr = new XMLHttpRequest();
+       xhr.open("POST",url,true);
+       xhr.setRequestHeader("content-Type","application-json");
+       xhr.onload = function () {
+           let res = JSON.parse(xhr.responseText);
+           if(res.code === 1000){
+               alert(res.message);
+               window.location.href = "/user/queryUser.html";
+           }else{
+               alert(res.message);
+               window.location.href = "/error/error.html";
+           }
+       };
+       xhr.onerror = function () {
+         console.error("新增用户报错," + JSON.parse(xhr.responseText).message);
+         window.location.href = "/error/error.html";
+       };
+       xhr.send(JSON.stringify(insertParams));
+    }
+
+    function back() {
+      window.location.href = "/home/home.html";
+    }
+    </script>
+</head>
+<body>
+<form class="pure-form pure-form-aligned" method="post">
+    <div class="pure-controls">
+        <legend align="center">新增用户</legend>
+    </div>
+    <div class="pure-control-group" align="center">
+        <label for="userName">用户名称</label>
+        <input type="text" id="userName" name="userName" placeholder="用户名称"/>
+    </div>
+    <div class="pure-control-group" align="center">
+        <label for="telephoneNumber">用户电话</label>
+        <input type="number" id="telephoneNumber" name="telephoneNumber" placeholder="用户电话"/>
+    </div>
+    <div class="pure-control-group" align="center">
+        <label for="email">用户邮箱</label>
+        <input type="email" id="email" name="email" placeholder="用户邮箱"/>
+    </div>
+    <div class="pure-control-group" align="center">
+        <label for="companyId">用户所属公司</label>
+        <select id="companyId" name="companyId" placeholder="用户所属公司" autofocus="autofocus">
+
+        </select>
+    </div>
+    <div class="pure-control-group" align="center">
+        <label for="isAdmin">管理员权限</label>
+        <input type="radio" id="isAdmin" name="isAdmin" value="1"/>一般管理员
+        <input type="radio" id="isNotAdmin" name="isNotAdmin" value="0"/>普通员工
+    </div>
+    <div class="pure-control-group" align="center">
+        <button type="button" class="pure-button pure-button-primary" onclick="insertUser()">新增</button>
+        <button type="reset"class="pure-button pure-button-primary">取消</button>
+        <button type="button" class="pure-button pure-button-primary" onclick="back()">返回</button>
+    </div>
+</form>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.vcoffeebeta.DAO.LoginDAO">
+<mapper namespace="com.vcoffeebeta.DAO.UserDAO">
     <!--查询使用的结果集-->
     <resultMap id="userMap" type="com.vcoffeebeta.domain.User">
         <id property="id" column="id"/>
@@ -22,11 +22,15 @@
     <sql id="userContent">
        id,username,password,telephone_number,email,isAdmin,company_id,account_id,equip_id,created,modified,created_time,modified_time
     </sql>
+
+    <sql id="userContentForInsert">
+       id,username,password,telephone_number,email,isAdmin,company_id,account_id,equip_id,created,modified,created_time,modified_time
+    </sql>
     <!-- 新增一个用户 -->
     <insert id="insert" parameterType="com.vcoffeebeta.domain.User" useGeneratedKeys="true" keyProperty="id">
         insert into user
         <trim prefix="(" suffix=")" suffixOverrides=",">
-            <include refid="userContent"/>
+            <include refid="userContentForInsert"/>
         </trim>
         values
          <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -57,8 +61,68 @@
           <if test="password != null">
               and password = #{password}
           </if>
-            order by modified_time desc
+          and state = 0
         </where>
+        order by modified_time desc
     </select>
-
+    <!-- 查询全部用户信息 -->
+    <select id="findAll" resultMap="userMap">
+       select  <include refid="userContent"/> from user
+       <where>
+         isAdmin != 2 and state = 0
+       </where>
+       order by modified_time desc
+    </select>
+    <!-- 根据id查询单个用户信息 -->
+    <select id="findById" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
+       select <include refid="userContent"/> from user
+       <where>
+       <if test="id != 0">
+           id = #{id}
+       </if>
+         and state = 0
+       </where>
+       order by modified_time desc
+    </select>
+    <!-- 根据公司id查询用户数 -->
+    <select id="queryForAmountByCompanyId" parameterType="long" resultType="integer">
+       select count(1) from user
+       <where>
+          company_id = #{companyId} and state = 0
+       </where>
+    </select>
+    <!-- 更新单个用户信息 -->
+    <update id="update" parameterType="com.vcoffeebeta.domain.User">
+        update user
+        set
+        <if test="userName != null">
+            user_name = #{userName},
+        </if>
+        <if test="telephoneNumber != null">
+            telephone_number = #{telephoneNumber},
+        </if>
+        <if test="email != null">
+            email = #{email},
+        </if>
+        <if test="isAdmin != null">
+            isAdmin = #{isAdmin}
+        </if>
+        <where>
+            <if test="id != 0">
+                id = #{id}
+            </if>
+            and state = 0
+        </where>
+    </update>
+    <!-- 删除用户信息，实际上修改用户状态，0：正常用户；1：删除用户 -->
+    <update id="deleteById" parameterType="long">
+        update user
+        set
+        state = 1
+        <where>
+            <if test="id != 0">
+                id = #{id}
+            </if>
+        </where>
+    </update>
 </mapper>
