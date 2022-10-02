@@ -23,11 +23,6 @@
             }
         };
         const url = "/vcoffee/equipment/queryEquipment";
-        if(this.id === "first"){
-            this.id = 1;
-        }else if(this.id === "last"){
-            this.id = this.page.totalPage;
-        }
         const xhr = new XMLHttpRequest();
         xhr.open("POST",url,true);
         xhr.setRequestHeader("content-Type","application/json");
@@ -117,8 +112,10 @@
         const queryParams = {
           "serialNumber":serialNumber,
           "equipmentName":equipmentName,
-          "currentPage":1,
-          "limit":10
+          "page":{
+              "currentPage":1,
+              "limit":10
+          }
         };
         xhr.open("POST",url,true);
         xhr.setRequestHeader("content-Type","application/json");
@@ -242,14 +239,11 @@
     function queryEquipmentPage(){
         clearEquipmentTbody();
         const url = "/vcoffee/equipment/findAllEquipment";
-        if(this.id === "first"){
-            this.id = 1;
-        }else if(this.id === "last"){
-            this.id = this.page.totalPage;
-        }
         const params = {
-          "currentPage":this.id,
-          "limit":10
+            "page":{
+                "currentPage":this.id,
+                "limit":10
+            }
         };
         const xhr = new XMLHttpRequest();
         xhr.open("POST",url,true);
@@ -357,8 +351,10 @@
       const url = "/vcoffee/equipment/findAllEquipment";
       const xhr = new XMLHttpRequest();
       const params = {
-       "currentPage":1,
-       "limit":10
+          "page":{
+              "currentPage":1,
+              "limit":10
+          }
       };
       xhr.open("POST",url,true);
       xhr.setRequestHeader("content-Type","application/json");
@@ -468,7 +464,7 @@
 
         function batchDeleteEquipment() {
             let ids = [];
-            let data = document.getElementById("idCheckBox");
+            let data = document.getElementsByName("idCheckBox");
             for(let i = 0 ; i < data.length ; i++){
                 if(data[i].checked === true){
                     ids.push(data[i].id);

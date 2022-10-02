@@ -43,9 +43,9 @@
                     let isNotUsedRatio = document.getElementById("isNotUsed");
                     let isUsedRatio = document.getElementById("isUsed");
                     if(res.data.isUsed === 0){
-                        isNotUsedRatio.setAttribute("checked","checked") ;
+                        isNotUsedRatio.checked = true;
                     }else if(res.data.isUsed === 1){
-                        isUsedRatio.setAttribute("checked","checked") ;
+                        isUsedRatio.checked = true;
                     }
                     document.getElementById("attendantName").value = res.data.attendantName;
                     document.getElementById("attendantTelephoneNumber").value = res.data.attendantTelephoneNumber;
@@ -60,10 +60,24 @@
             };
             xhr.send(JSON.stringify(updateParam));
         };
+    function getIsUsedRadioValue(){
+        let isUsed = document.getElementById("isUsed");
+        let isNotUsed = document.getElementById("isNotUsed");
+        let isUsedValue = null;
+        let isNotUsedValue = null;
+        if(isUsed.checked === true){
+            isUsedValue = isUsed.value;
+            return isUsedValue;
+        }
+        if(isNotUsed.checked === true){
+            isNotUsedValue = isNotUsed.value;
+            return isNotUsedValue;
+        }
+    }
         function updateEquipment() {
             const serialNumber = document.getElementById("serialNumber").value;
             const equipmentName = document.getElementById("equipmentName").value;
-            const isUsed = document.getElementById("isUsed").value;
+            const isUsed = getIsUsedRadioValue();
             const attendantName = document.getElementById("attendantName").value;
             const attendantTelephoneNumber = document.getElementById("attendantTelephoneNumber").value;
             const updateParams = {

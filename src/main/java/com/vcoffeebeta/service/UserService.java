@@ -83,4 +83,20 @@ public interface UserService {
      * @return boolean
      */
     boolean batchDeleteUser(List<Long> ids);
+    /**
+     * 条件查询用户信息
+     * @author zhangshenming
+     * @date 2022/10/1 22:41
+     * @param user
+     * @return java.util.List<com.vcoffeebeta.domain.User>
+     */
+    List<User> queryForList(User user);
+    /**
+     * 查询用户总数
+     * @author zhangshenming
+     * @date 2022/10/2 17:45
+     * @param
+     * @return int
+     */
+    int queryForAmount();
 }

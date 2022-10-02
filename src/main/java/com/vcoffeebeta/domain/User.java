@@ -86,4 +86,8 @@ public class  User implements Serializable {
      * 用户状态，0：正常；1：删除
      */
     private int state;
+    /**
+     * 用户页面的分页数据
+     */
+    private Page page;
 }

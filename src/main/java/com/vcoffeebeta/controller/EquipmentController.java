@@ -28,6 +28,14 @@ import java.util.Map;
 @RequestMapping(value = "/vcoffee/equipment/")
 @Slf4j
 public class EquipmentController {
+    /**
+     * 分页首页
+     */
+    public static final String FIRST = "first";
+    /**
+     * 分页最后一页
+     */
+    public static final String LAST = "last";
 
     @Autowired
     private EquipmentService equipmentService;
@@ -63,32 +71,45 @@ public class EquipmentController {
     @CrossOrigin
     @RequestMapping(value = "/findAllEquipment")
     @ResponseBody
-    public Result findAllEquipment(@RequestBody Map<String,String> pageMap){
-        log.info("进度findAllEquipment方法：" + JSON.toJSONString(pageMap));
+    public Result findAllEquipment(@RequestBody Equipment equipment){
+        log.info("进度findAllEquipment方法：");
         try{
             int amount = equipmentService.queryForAmount();
             log.info("设备的数量amount: " + amount);
             Page page = new Page();
             page.setTotalCount(amount);
-            String limitStr = pageMap.get("limit");
-            int limit = Integer.parseInt(limitStr);
-            page.setLimit(limit);
-            int totalPage = amount/limit + 1;
-            page.setTotalPage(totalPage);
-            String currentPageStr = pageMap.get("currentPage");
-            int currentPage = Integer.parseInt(currentPageStr);
-            page.setCurrentPage(currentPage);
-            log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
-            PageHelper.startPage(currentPage,limit);
-            List<Equipment>equipmentList = equipmentService.findAllEquipment();
-            for(Equipment e:equipmentList){
-                Company c = companyService.queryById(e.getCompanyId());
-                e.setCompanyName(c.getCompanyName());
-            }
-            log.info("全部设备的信息是：" + JSON.toJSONString(equipmentList));
+            Page p = equipment.getPage();
+            int limit = p.getLimit();
+            if(limit != 0){
+                page.setLimit(limit);
+                int totalPage = amount/limit + 1;
+                page.setTotalPage(totalPage);
+                String currentPageStr = p.getCurrentPage();
+                if(currentPageStr == null){
+                    return new Result(ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getCode(),ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getMessage());
+                }else{
+                    if(FIRST.equals(currentPageStr)){
+                        currentPageStr = "1";
+                    }else if(LAST.equals(currentPageStr)){
+                        currentPageStr = String.valueOf(totalPage);
+                    }
+                    int currentPage = Integer.parseInt(currentPageStr);
+                    page.setCurrentPage(currentPageStr);
+                    log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
+                    PageHelper.startPage(currentPage,limit);
+                }
+                List<Equipment>equipmentList = equipmentService.findAllEquipment();
+                for(Equipment e:equipmentList){
+                    Company c = companyService.queryById(e.getCompanyId());
+                    e.setCompanyName(c.getCompanyName());
+                }
+                log.info("全部设备的信息是：" + JSON.toJSONString(equipmentList));
 //            PageInfo<Equipment>equipmentPageInfo = new PageInfo<>(equipmentList);
 //            log.info("全部设备的分页信息是：" + JSON.toJSONString(equipmentPageInfo));
-            return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),equipmentList,page);
+                return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),equipmentList,page);
+            }else{
+                return new Result(ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getCode(),ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getMessage());
+            }
         }catch(Exception e){
             log.error("查询全部设备信息报错");
             e.printStackTrace();
@@ -194,7 +215,7 @@ public class EquipmentController {
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "queryEquipment")
-    public Result queryEquipment(@RequestBody Equipment equipment,Map<String,String>pageMap){
+    public Result queryEquipment(@RequestBody Equipment equipment){
         log.info("进入queryEquipment方法");
         log.info("前台传过来的equipment数据是：" + JSON.toJSONString(equipment));
         try{
@@ -205,28 +226,27 @@ public class EquipmentController {
                 e.setCompanyName(c.getCompanyName());
             }
             Page page = new Page();
-            int limit = 10;
-            page.setLimit(limit);
             int totalCount = equipmentList.size();
             page.setTotalCount(totalCount);
+            Page p = equipment.getPage();
+            int limit = p.getLimit();
+            page.setLimit(limit);
             int totalPage = totalCount/limit + 1;
             page.setTotalPage(totalPage);
-            if(pageMap != null){
-                String currentPageStr = pageMap.get("currentPage");
-                if(currentPageStr != null){
-                    int currentPage = Integer.parseInt(currentPageStr);
-                    page.setCurrentPage(currentPage);
-                }else{
-                    page.setCurrentPage(1);
-                }
+            String currentPageStr = p.getCurrentPage();
+            if(FIRST.equals(currentPageStr)){
+                currentPageStr = "1";
+            }else if(LAST.equals(currentPageStr)){
+                currentPageStr = String.valueOf(totalPage);
             }
+            page.setCurrentPage(currentPageStr);
+            int currentPage = Integer.parseInt(currentPageStr);
+            PageHelper.startPage(currentPage,limit);
             return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),equipmentList,page);
         }catch (Exception e){
             log.error("条件查询设备信息报错,",e);
             e.printStackTrace();
             return new Result(ResultCodeEnum.QUERYEQUIPMENTBYOPTION.getCode(),ResultCodeEnum.QUERYEQUIPMENTBYOPTION.getMessage());
         }
-
     }
-
 }

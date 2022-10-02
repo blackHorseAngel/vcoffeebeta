@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean  insertUser(User user) {
         int num = userDAO.insert(user);
-        return num >= 0 ? true:false;
+        return num > 0 ? true:false;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean updateUser(User user) {
         int num = userDAO.update(user);
-        return num >= 0 ? true : false;
+        return num > 0 ? true : false;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean deleteUser(long id) {
         int num = userDAO.deleteById(id);
-        return num >= 0 ? true : false;
+        return num > 0 ? true : false;
     }
 
     @Override
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
         try{
             for(long id : ids){
                 num = userDAO.deleteById(id);
-                if(num >= 0){
+                if(num > 0){
                     continue;
                 }else{
                     return false;
@@ -78,6 +78,16 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public List<User> queryForList(User user) {
+        return userDAO.queryForList(user);
+    }
+
+    @Override
+    public int queryForAmount() {
+        return userDAO.queryForAmount();
     }
 
 

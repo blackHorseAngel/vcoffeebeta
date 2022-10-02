@@ -32,16 +32,29 @@
         };
         xhr.send();
      };
-
+    function getRadioValue(){
+        let isAdmin = document.getElementById("isAdmin");
+        let isNotAdmin = document.getElementById("isNotAdmin");
+        let isAdminValue = null;
+        let isNotAdminValue = null;
+        if(isAdmin.checked === true){
+            isAdminValue = isAdmin.value;
+            return isAdminValue;
+        }
+        if(isNotAdmin.checked === true){
+            isNotAdminValue = isNotAdmin.value;
+            return isNotAdminValue;
+        }
+    }
     function insertUser() {
        const userName = document.getElementById("userName").value;
        const telephoneNumber = document.getElementById("telephoneNumber").value;
        const email = document.getElementById("email").value;
        const companyId = document.getElementById("companyId").value;
-       const isAdmin = document.getElementById("isAdmin").value;
+       const isAdmin = getRadioValue();
        const url = "/vcoffee/user/insertUser";
        const insertParams = {
-         "userName":userName,
+         "username":userName,
          "telephoneNumber":telephoneNumber,
          "email":email,
          "companyId":companyId,
@@ -49,7 +62,7 @@
        };
        const xhr = new XMLHttpRequest();
        xhr.open("POST",url,true);
-       xhr.setRequestHeader("content-Type","application-json");
+       xhr.setRequestHeader("content-Type","application/json");
        xhr.onload = function () {
            let res = JSON.parse(xhr.responseText);
            if(res.code === 1000){

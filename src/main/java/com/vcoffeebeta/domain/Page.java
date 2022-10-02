@@ -18,7 +18,7 @@ public class Page {
     /**
      * 当前页
      */
-    private int currentPage;
+    private String currentPage;
     /**
      * 总页数
      */

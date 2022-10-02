@@ -35,6 +35,14 @@ import java.util.Map;
 @RequestMapping(value = "/vcoffee/user/")
 @Slf4j
 public class UserController {
+    /**
+     * 分页首页
+     */
+    public static final String FIRST = "first";
+    /**
+     * 分页最后一页
+     */
+    public static final String LAST = "last";
 
     @Autowired
     private UserService userService;
@@ -46,18 +54,20 @@ public class UserController {
     private CompanyService companyService;
 
     @CrossOrigin
-    @RequestMapping(value = "insert")
+    @RequestMapping(value = "insertUser")
     @ResponseBody
     public Result insertUser(@RequestBody User user, HttpServletRequest request){
         log.info("进入insertUser方法");
         try{
             HttpSession session = request.getSession();
             User u = (User) session.getAttribute("user");
+            //新增用户默认密码
+            user.setPassword("123456");
             user.setCreated(u.getUsername());
             user.setModified(u.getUsername());
             user.setCreatedTime(new Date());
             user.setModifiedTime(new Date());
-            long companyId = u.getCompanyId();
+            long companyId = user.getCompanyId();
             List<Equipment>equipmentList;
             StringBuilder equipmentIdBuilder = new StringBuilder();
             if(companyId != 0){
@@ -67,14 +77,20 @@ public class UserController {
                 equipmentList = equipmentService.findAllEquipmentsByCompanyId(user.getCompanyId());
                 log.info("新增用户所在公司下的所有的设备信息：" + JSON.toJSONString(equipmentList));
             }
-            for(Equipment e : equipmentList){
-                long equipmentId = e.getId();
-                equipmentIdBuilder.append(equipmentId);
-                equipmentIdBuilder.append(";");
+            //若新增用户所在的公司名下没有暂时没有设备，按0处理进行新增
+            if(equipmentList.size() == 0){
+                user.setEquipmentId("0");
+            }else{
+                for(Equipment e : equipmentList){
+                    long equipmentId = e.getId();
+                    equipmentIdBuilder.append(equipmentId);
+                    equipmentIdBuilder.append("|");
+                }
+                String equipmentIdStr = equipmentIdBuilder.toString();
+                equipmentIdStr = equipmentIdStr.substring(0,equipmentIdStr.length()-1);
+                user.setEquipmentId(equipmentIdStr);
             }
-            String equipmentIdStr = equipmentIdBuilder.toString();
-            equipmentIdStr = equipmentIdStr.substring(0,equipmentIdStr.length()-1);
-            user.setEquipmentId(equipmentIdStr);
+
             boolean flag = userService.insertUser(user);
             equipmentIdBuilder.setLength(0);
             if(flag){
@@ -91,7 +107,7 @@ public class UserController {
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "findAllUsers")
-    public Result queryAllUsers(@RequestBody Map<String,String> pageMap,HttpServletRequest request){
+    public Result queryAllUsers(@RequestBody User user,HttpServletRequest request){
         log.info("进入queryAllUsers方法");
         try{
             HttpSession session = request.getSession();
@@ -102,49 +118,82 @@ public class UserController {
             int amount = 0;
             if(companyId == 0){
                 if(isAdmin == 2){
-                     amount = userService.queryForAmountByCompanyId(companyId);
+                    //超级管理员查询全部的用户数
+                     amount = userService.queryForAmount();
                     log.info("当前用户是超级管理员，查询所有的用户数：" + amount);
                 }else{
+                    //除了超级管理员之外，一般管理员和普通员工都必须有公司id
                     log.error("session用户信息中缺少companyId报错");
                     return new Result(ResultCodeEnum.SESSIONFORCOMPANYID.getCode(),ResultCodeEnum.SESSIONFORCOMPANYID.getMessage());
                 }
             }else{
+                //其他管理员查询的用户总数为其所在公司下的用户总数
                  amount = userService.queryForAmountByCompanyId(companyId);
                 log.info("当前用户是一般管理员。查询自己所在公司的用户数：" + amount);
 
             }
             Page page = new Page();
             page.setTotalCount(amount);
-            String limitStr = pageMap.get("limit");
-            int limit = Integer.parseInt(limitStr);
-            page.setLimit(limit);
-            int totalPage = amount/limit + 1;
-            page.setTotalPage(totalPage);
-            String currentPageStr = pageMap.get("currentPage");
-            int currentPage = Integer.parseInt(currentPageStr);
-            page.setCurrentPage(currentPage);
-            log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
-            PageHelper.startPage(currentPage,limit);
-            List<User>userList = userService.findAllUsers();
-            for(User user : userList){
-                Company c = companyService.queryById(u.getCompanyId());
-                user.setCompanyName(c.getCompanyName());
-                String equipmentIdStr = user.getEquipmentId();
-                String[]equipmentIds = equipmentIdStr.split(";");
-                StringBuilder equipmentNameBuilder = new StringBuilder();
-                String equipmentNameStr = "";
-                for(String idStr : equipmentIds){
-                    long id = Long.parseLong(idStr);
-                    Equipment e = equipmentService.findById(id);
-                    equipmentNameBuilder.append(e.getEquipmentName());
-                    equipmentNameBuilder.append(";");
+            Page p = user.getPage();
+            int limit = p.getLimit();
+            if(limit != 0){
+                page.setLimit(limit);
+                int totalPage = amount/limit + 1;
+                page.setTotalPage(totalPage);
+                String currentPageStr = p.getCurrentPage();
+                if(currentPageStr == null){
+                    return new Result(ResultCodeEnum.QUERYUSERPAGEERROR.getCode(),ResultCodeEnum.QUERYUSERPAGEERROR.getMessage());
+                }else{
+                    if(FIRST.equals(currentPageStr)){
+                        currentPageStr = "1";
+                    }else if(LAST.equals(currentPageStr)){
+                        currentPageStr = String.valueOf(totalPage);
+                    }
+                    int currentPage = Integer.parseInt(currentPageStr);
+                    page.setCurrentPage(currentPageStr);
+                    log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
+                    PageHelper.startPage(currentPage,limit);
                 }
-                equipmentNameStr = equipmentNameBuilder.toString();
-                equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
-                user.setEquipmentName(equipmentNameStr);
-                equipmentNameBuilder.setLength(0);
+            }else{
+                return new Result(ResultCodeEnum.QUERYUSERPAGEERROR.getCode(),ResultCodeEnum.QUERYUSERPAGEERROR.getMessage());
             }
-            return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
+            List<User>userList = userService.findAllUsers();
+            for(User user1 : userList){
+                long userCompanyId = user1.getCompanyId();
+                if(userCompanyId == 0){
+                    return new Result(ResultCodeEnum.USERCOMPANYERROR.getCode(),ResultCodeEnum.USERCOMPANYERROR.getMessage());
+                }
+                Company c = companyService.queryById(user1.getCompanyId());
+                if(c == null){
+                    return new Result(ResultCodeEnum.QUERYCOMPANYERROR.getCode(),ResultCodeEnum.QUERYCOMPANYERROR.getMessage());
+                }
+                user1.setCompanyName(c.getCompanyName());
+                String equipmentIdStr = user1.getEquipmentId();
+                if(equipmentIdStr == null || "0".equals(equipmentIdStr)){
+                    user1.setEquipmentName("");
+                }else{
+                    String[]equipmentIds = equipmentIdStr.split("|");
+                    StringBuilder equipmentNameBuilder = new StringBuilder();
+                    String equipmentNameStr = "";
+                    for(String idStr : equipmentIds){
+                        if("|".equals(idStr)){
+                            continue;
+                        }
+                        long id = Long.parseLong(idStr);
+                        Equipment e = equipmentService.findById(id);
+                        if(e == null){
+                            return new Result(ResultCodeEnum.USEREQUIPMENTERROR.getCode(),ResultCodeEnum.USEREQUIPMENTERROR.getMessage());
+                        }
+                        equipmentNameBuilder.append(e.getEquipmentName());
+                        equipmentNameBuilder.append("|");
+                    }
+                    equipmentNameStr = equipmentNameBuilder.toString();
+                    equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
+                    user1.setEquipmentName(equipmentNameStr);
+                    equipmentNameBuilder.setLength(0);
+                }
+            }
+            return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),userList,page);
         }catch(Exception e){
             log.error("查询全部用户信息报错,",e);
             e.printStackTrace();
@@ -155,7 +204,6 @@ public class UserController {
     @RequestMapping(value = "toUpdateUser")
     @ResponseBody
     public Result toUpdateUser(@RequestBody String jsonStr,HttpServletRequest request){
-        //TODO
         log.info("进入toUpdateUser方法");
         log.info("前台传过来的参数：" + jsonStr);
         try{
@@ -243,5 +291,59 @@ public class UserController {
             e.printStackTrace();
             return new Result(ResultCodeEnum.BATCHDELETEUSER.getCode(),ResultCodeEnum.BATCHDELETEUSER.getMessage());
         }
+    }
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "queryUser")
+    public Result queryUser(@RequestBody User user){
+       log.info("进入queryUser方法");
+       log.info("前台传过来的user数据是：" + JSON.toJSONString(user));
+       try{
+           List<User>userList = userService.queryForList(user);
+           log.info("条件查询后的userList数据是：" + JSON.toJSONString(userList));
+           for(User u : userList){
+               Company c = companyService.queryById(u.getCompanyId());
+               u.setCompanyName(c.getCompanyName());
+               String equipmentIdStr = u.getEquipmentId();
+               String[] equipmentIds = equipmentIdStr.split("|");
+               StringBuilder builder = new StringBuilder();
+               String equipmentNameStr = "";
+               for(String s : equipmentIds){
+                   if("|".equals(s)){
+                       continue;
+                   }
+                   long equipmentId = Long.parseLong(s);
+                   Equipment e = equipmentService.findById(equipmentId);
+                   builder.append(e.getEquipmentName());
+                   builder.append("|");
+               }
+               equipmentNameStr = builder.toString();
+               equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
+               builder.setLength(0);
+               u.setEquipmentName(equipmentNameStr);
+           }
+           Page page = new Page();
+           int totalCount = userList.size();
+           page.setTotalCount(totalCount);
+           Page p = user.getPage();
+           int limit = p.getLimit();
+           page.setLimit(limit);
+           int totalPage = totalCount/limit + 1;
+           page.setTotalPage(totalPage);
+           String currentPageStr = p.getCurrentPage();
+           if(FIRST.equals(currentPageStr)){
+               currentPageStr = "1";
+           }else if(LAST.equals(currentPageStr)){
+               currentPageStr = String.valueOf(totalPage);
+           }
+           page.setCurrentPage(currentPageStr);
+           int currentPage = Integer.parseInt(currentPageStr);
+           PageHelper.startPage(currentPage,limit);
+          return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),userList,page);
+       }catch (Exception e){
+           log.error("查询用户信息报错，",e);
+           e.printStackTrace();
+           return new Result(ResultCodeEnum.QUERYUSERERROR.getCode(),ResultCodeEnum.QUERYUSERERROR.getMessage());
+       }
     }
 }

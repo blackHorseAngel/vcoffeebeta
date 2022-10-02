@@ -25,7 +25,7 @@
     </sql>
 
     <sql id="userContentForInsert">
-       id,username,password,telephone_number,email,isAdmin,company_id,account_id,equipment_id,state,created,modified,created_time,modified_time
+       username,password,telephone_number,email,isAdmin,company_id,account_id,equipment_id,state,created,modified,created_time,modified_time
     </sql>
     <!-- 新增一个用户 -->
     <insert id="insert" parameterType="com.vcoffeebeta.domain.User" useGeneratedKeys="true" keyProperty="id">
@@ -42,7 +42,7 @@
             #{isAdmin},
             #{companyId},
             #{accountId},
-            #{equipId},
+            #{equipmentId},
             #{state},
             #{created},
             #{modified},
@@ -93,12 +93,29 @@
           company_id = #{companyId} and state = 0
        </where>
     </select>
+    <!-- 根据用户姓名条件查询用户 -->
+    <select id="queryForList" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
+        select <include refid="userContent"/> from user
+        <where>
+            <if test="username != null">
+                username like concat('%',#{username},'%')
+            </if>
+        </where>
+    </select>
+    <!-- 查询总数 -->
+    <select id="queryForAmount" resultType="int">
+        select count(1) from user
+        <where>
+            isAdmin != 2
+        </where>
+        order by modified_time desc
+    </select>
     <!-- 更新单个用户信息 -->
     <update id="update" parameterType="com.vcoffeebeta.domain.User">
         update user
         set
-        <if test="userName != null">
-            user_name = #{userName},
+        <if test="username != null">
+            username = #{username},
         </if>
         <if test="telephoneNumber != null">
             telephone_number = #{telephoneNumber},

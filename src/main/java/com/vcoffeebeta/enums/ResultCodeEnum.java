@@ -74,7 +74,11 @@ public enum ResultCodeEnum {
     /**
      *
      */
-    QUERYCOMPANYNAME("查询全部公司名称",1016),
+    QUERYCOMPANYNAME("查询全部公司名称报错",1016),
+    /**
+     *
+     */
+    QUERYCOMPANYPAGEERROR("查询公司分页信息报错",1017),
     /**
      *
      */
@@ -106,6 +110,10 @@ public enum ResultCodeEnum {
     /**
      *
      */
+    QUERYEQUIPMENTPAGEERROR("查询设备分页报错",2017),
+    /**
+     *
+     */
     QUERYALLUSERS("查询全部用户信息报错",3010),
     /**
      *
@@ -127,6 +135,22 @@ public enum ResultCodeEnum {
      *
      */
     BATCHDELETEUSER("批量删除用户报错",3015),
+    /**
+     *
+     */
+    USERCOMPANYERROR("根据用户得到的公司id为空",3016),
+    /**
+     *
+     */
+    USEREQUIPMENTERROR("根据用户得到的设备信息为空",3017),
+    /**
+     *
+     */
+    QUERYUSERERROR("查询用户信息",3018),
+    /**
+     *
+     */
+    QUERYUSERPAGEERROR("查询用户分页数据报错",3019),
     /**
      *
      */

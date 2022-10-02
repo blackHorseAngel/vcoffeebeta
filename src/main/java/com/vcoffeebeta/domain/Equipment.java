@@ -64,4 +64,8 @@ public class Equipment {
      * 修改时间
      */
     private Date modifiedTime;
+    /**
+     * 分页对象
+     */
+    private Page page;
 }

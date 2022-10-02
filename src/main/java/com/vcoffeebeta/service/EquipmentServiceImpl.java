@@ -45,13 +45,13 @@ public class EquipmentServiceImpl implements EquipmentService {
     @Override
     public boolean updateEquipment(Equipment equipment) {
         int num = equipmentDAO.update(equipment);
-        return num >= 0 ? true : false;
+        return num > 0 ? true : false;
     }
 
     @Override
     public boolean deleteEquipment(long id) {
         int num = equipmentDAO.deleteById(id);
-        return num >= 0 ? true : false;
+        return num > 0 ? true : false;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         try{
             for(long id : ids){
                 num = equipmentDAO.deleteById(id);
-                if(num >= 0){
+                if(num > 0){
                     continue;
                 }else{
                     return false;
