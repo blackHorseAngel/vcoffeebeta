@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查询账户页面</title>
+    <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
+    <script type="text/javascript">
+        /**
+         * 初始化页面，获取当前用户信息和账户信息并展示在页面上
+         */
+        window.onload = function () {
+
+        };
+
+        /**
+         * 返回主页面
+         */
+        function back() {
+            window.location.href = "/home/home.html";
+        }
+    </script>
+</head>
+<body>
+<div align="center">
+    <button type="button" class="pure-button pure-button-primary" onclick="back()">返回</button>
+</div>
+<div align="center">
+    <div id="userDiv">
+        <label for="userName">用户名称</label>
+        <input type="text" id="userName" name="userName" placeholder="用户名称"/>
+    </div>
+    <div id="accountDiv">
+        <label for="remaining">账户余额</label>
+        <input type="text" id="remaining" name="remaining" placeholder="账户余额"/>
+    </div>
+</div>
+</body>
+</html>

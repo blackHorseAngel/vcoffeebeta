@@ -9,14 +9,22 @@
    <script type="text/javascript">
 
    // document.write(homePage.import.body.innerHTML);
-
+    /**
+     * 跳转新增公司页面
+     */
     function forwardAddCompany() {
       window.location.href = "/company/addCompany.html";
     }
+    /**
+     * 清理公司页面表格中内容
+     */
     function clearCompanyTbody(){
         let tbody = document.getElementById("companyTbody");
         tbody.innerText = "";
     }
+    /**
+     * 查询公司分页数据
+     */
    function queryCompanyPage() {
        clearCompanyTbody();
        const url = "/vcoffee/company/findAllCompany";
@@ -32,70 +40,22 @@
        xhr.onload = function(){
          let res = JSON.parse(xhr.responseText);
          if(res.code === 1000) {
-             for (let i = 0; i < res.data.length; i++) {
-                 let rowElement = document.createElement("tr");
-
-                 let checkboxCell = document.createElement("td");
-                 let checkBox = document.createElement("input");
-                 checkBox.setAttribute("type", "checkbox");
-                 checkBox.setAttribute("name", "idCheckBox");
-                 checkBox.setAttribute("id", res.data[i].id);
-                 checkboxCell.appendChild(checkBox);
-                 rowElement.appendChild(checkboxCell);
-
-                 let idCell = document.createElement("td");
-                 idCell.innerHTML = res.data[i].id;
-                 rowElement.appendChild(idCell);
-
-                 let companyNameCell = document.createElement("td");
-                 companyNameCell.innerHTML = res.data[i].companyName;
-                 rowElement.appendChild(companyNameCell);
-
-                 let comapnyNickNameCell = document.createElement("td");
-                 comapnyNickNameCell.innerHTML = res.data[i].companyNickName;
-                 rowElement.appendChild(comapnyNickNameCell);
-
-                 let phoneCell = document.createElement("td");
-                 phoneCell.innerHTML = res.data[i].companyPhoneNumber;
-                 rowElement.appendChild(phoneCell);
-
-                 let addressCell = document.createElement("td");
-                 addressCell.innerHTML = res.data[i].companyAddress;
-                 rowElement.appendChild(addressCell);
-
-                 let operateCell = document.createElement("td");
-
-                 let btnUpdate = document.createElement("button");
-                 btnUpdate.setAttribute("type", "button");
-                 btnUpdate.setAttribute("value", "修改");
-                 btnUpdate.setAttribute("id", res.data[i].id);
-                 btnUpdate.addEventListener("click", toUpdateCompany);
-                 btnUpdate.innerText = "修改";
-                 operateCell.appendChild(btnUpdate);
-
-                 let btnDel = document.createElement("button");
-                 btnDel.setAttribute("type", "button");
-                 btnDel.setAttribute("value", "删除");
-                 btnDel.setAttribute("id", res.data[i].id);
-                 btnDel.addEventListener("click", deleteCompany);
-                 btnDel.innerText = "删除";
-                 operateCell.appendChild(btnDel);
-
-                 rowElement.appendChild(operateCell);
-
-                 let tbody = document.getElementById("companyTbody");
-                 tbody.appendChild(rowElement);
-
-             }
-          }
+             alert(res.message);
+            drawCompanyTbody(res);
+          }else{
+             console.error("查询公司页面分页数据报错，" + res.message);
+             window.location.href = "/error/error.html";
+         }
        };
        xhr.onerror = function(){
-           console.error(JSON.parse(xhr.responseText).message);
+           console.error("查询公司页面分页数据报错，" + JSON.parse(xhr.responseText).message);
            window.location.href = "/error/error.html";
        };
        xhr.send(JSON.stringify(params));
    }
-
+        /**
+         * 条件查询公司页面分页数据
+         */
        function queryCompanyPageWithOption() {
            clearCompanyTbody();
            const companyName = document.getElementById("companyName").value;
@@ -111,77 +71,28 @@
              }
            };
            const url = "/vcoffee/company/queryCompany";
-
            const xhr = new XMLHttpRequest();
            xhr.open("POST",url,true);
            xhr.setRequestHeader("content-type","application/json");
            xhr.onload = function(){
                let res = JSON.parse(xhr.responseText);
                if(res.code === 1000) {
-                   for (let i = 0; i < res.data.length; i++) {
-                       let rowElement = document.createElement("tr");
-
-                       let checkboxCell = document.createElement("td");
-                       let checkBox = document.createElement("input");
-                       checkBox.setAttribute("type", "checkbox");
-                       checkBox.setAttribute("name", "idCheckBox");
-                       checkBox.setAttribute("id", res.data[i].id);
-                       checkboxCell.appendChild(checkBox);
-                       rowElement.appendChild(checkboxCell);
-
-                       let idCell = document.createElement("td");
-                       idCell.innerHTML = res.data[i].id;
-                       rowElement.appendChild(idCell);
-
-                       let companyNameCell = document.createElement("td");
-                       companyNameCell.innerHTML = res.data[i].companyName;
-                       rowElement.appendChild(companyNameCell);
-
-                       let comapnyNickNameCell = document.createElement("td");
-                       comapnyNickNameCell.innerHTML = res.data[i].companyNickName;
-                       rowElement.appendChild(comapnyNickNameCell);
-
-                       let phoneCell = document.createElement("td");
-                       phoneCell.innerHTML = res.data[i].companyPhoneNumber;
-                       rowElement.appendChild(phoneCell);
-
-                       let addressCell = document.createElement("td");
-                       addressCell.innerHTML = res.data[i].companyAddress;
-                       rowElement.appendChild(addressCell);
-
-                       let operateCell = document.createElement("td");
-
-                       let btnUpdate = document.createElement("button");
-                       btnUpdate.setAttribute("type", "button");
-                       btnUpdate.setAttribute("value", "修改");
-                       btnUpdate.setAttribute("id", res.data[i].id);
-                       btnUpdate.addEventListener("click", toUpdateCompany);
-                       btnUpdate.innerText = "修改";
-                       operateCell.appendChild(btnUpdate);
-
-                       let btnDel = document.createElement("button");
-                       btnDel.setAttribute("type", "button");
-                       btnDel.setAttribute("value", "删除");
-                       btnDel.setAttribute("id", res.data[i].id);
-                       btnDel.addEventListener("click", deleteCompany);
-                       btnDel.innerText = "删除";
-                       operateCell.appendChild(btnDel);
-
-                       rowElement.appendChild(operateCell);
-
-                       let tbody = document.getElementById("companyTbody");
-                       tbody.appendChild(rowElement);
-
-                   }
+                   alert(res.message);
+                  drawCompanyTbody(res);
+               }else{
+                   console.error("条件查询公司页面分页数据报错，" + res.message);
+                   window.location.href = "/error/error.html";
                }
            };
            xhr.onerror = function(){
-               console.error(JSON.parse(xhr.responseText).message);
+               console.error("条件查询公司页面分页数据报错," + JSON.parse(xhr.responseText).message);
                window.location.href = "/error/error.html";
            };
            xhr.send(JSON.stringify(queryParams));
        }
-
+    /**
+     * 初始化页面，加载公司全部数据
+     */
    window.onload = function () {
             const  xhr = new XMLHttpRequest();
             const  url = "/vcoffee/company/findAllCompany";
@@ -196,87 +107,11 @@
             xhr.onload = function () {
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
-                    for (let i = 0;i < res.data.length;i++){
-                        let rowElement = document.createElement("tr");
-
-                        let checkboxCell = document.createElement("td");
-                        let checkBox = document.createElement("input");
-                        checkBox.setAttribute("type","checkbox");
-                        checkBox.setAttribute("name","idCheckBox");
-                        checkBox.setAttribute("id",res.data[i].id);
-                        checkboxCell.appendChild(checkBox);
-                        rowElement.appendChild(checkboxCell);
-
-                        let idCell = document.createElement("td");
-                        idCell.innerHTML = res.data[i].id;
-                        rowElement.appendChild(idCell);
-
-                        let companyNameCell = document.createElement("td");
-                        companyNameCell.innerHTML = res.data[i].companyName;
-                        rowElement.appendChild(companyNameCell);
-
-                        let comapnyNickNameCell = document.createElement("td");
-                        comapnyNickNameCell.innerHTML = res.data[i].companyNickName;
-                        rowElement.appendChild(comapnyNickNameCell);
-
-                        let phoneCell = document.createElement("td");
-                        phoneCell.innerHTML = res.data[i].companyPhoneNumber;
-                        rowElement.appendChild(phoneCell);
-
-                        let addressCell = document.createElement("td");
-                        addressCell.innerHTML = res.data[i].companyAddress;
-                        rowElement.appendChild(addressCell);
-
-                        let operateCell = document.createElement("td");
-
-                        let btnUpdate = document.createElement("button");
-                        btnUpdate.setAttribute("type","button");
-                        btnUpdate.setAttribute("value","修改");
-                        btnUpdate.setAttribute("id",res.data[i].id);
-                        btnUpdate.addEventListener("click",toUpdateCompany);
-                        btnUpdate.innerText = "修改";
-                        operateCell.appendChild(btnUpdate);
-
-                        let btnDel = document.createElement("button");
-                        btnDel.setAttribute("type","button");
-                        btnDel.setAttribute("value","删除");
-                        btnDel.setAttribute("id",res.data[i].id);
-                        btnDel.addEventListener("click",deleteCompany);
-                        btnDel.innerText = "删除";
-                        operateCell.appendChild(btnDel);
-
-                        rowElement.appendChild(operateCell);
-
-                        let companyTbody = document.getElementById("companyTbody");
-                        companyTbody.appendChild(rowElement);
-
-                    }
-                    let pageDiv = document.getElementById("pageDiv");
-                    let totalPage = res.page.totalPage;
-                    let limit = res.page.limit;
-                    let totalCount = res.page.totalCount;
-                    let firstPageA = document.createElement("a");
-                    firstPageA.setAttribute("id","first");
-                    firstPageA.setAttribute("href","javascript:void(0)");
-                    firstPageA.innerHTML = "首页&nbsp&nbsp";
-                    firstPageA.addEventListener("click",queryCompanyPage);
-                    pageDiv.appendChild(firstPageA);
-                    for(let i = 1; i <= totalPage ; i++){
-                        let pageA = document.createElement("a");
-                        pageA.setAttribute("id",""+i);
-                        pageA.setAttribute("href","javascript:void(0)");
-                        pageA.innerHTML = ""+i+"&nbsp&nbsp";
-                        pageA.addEventListener("click",queryCompanyPage);
-                        pageDiv.appendChild(pageA);
-                    }
-                    let lastPageA = document.createElement("a");
-                    lastPageA.setAttribute("id","last");
-                    lastPageA.setAttribute("href","javascript:void(0)");
-                    lastPageA.innerHTML = "&nbsp&nbsp最后一页";
-                    lastPageA.addEventListener("click",queryCompanyPage);
-                    pageDiv.appendChild(lastPageA);
+                    alert(res.message);
+                    drawCompanyTbody(res);
+                    drawCompanyPageDiv(res);
                 }else{
-                    console.error(res.message);
+                    console.error("查询全部公司信息报错，" + res.message);
                     window.location.href = "/error/error.html";
                 }
             };
@@ -287,11 +122,17 @@
             xhr.send(JSON.stringify(params));
         };
 
-        function toUpdateCompany(){
-            window.location.href = "/company/updateCompany.html?id="+this.id;
-    }
+       /**
+        * 跳转到更新页面
+        */
+       function toUpdateCompany(){
+                window.location.href = "/company/updateCompany.html?id="+this.id;
+        }
 
-           function deleteCompany() {
+       /**
+        * 删除公司，更改公司状态（从0到1）
+        */
+       function deleteCompany() {
               const url = "/vcoffee/company/deleteCompany";
               const xhr = new XMLHttpRequest();
               const delParam = {
@@ -316,11 +157,17 @@
               xhr.send(JSON.stringify(delParam));
            }
 
+   /**
+    * 清除公司pageDiv中的分页信息
+    */
    function clearCompanyPageDiv() {
        let pageDiv = document.getElementById("pageDiv");
        pageDiv.innerHTML = "";
    }
 
+   /**
+    * 条件查询公司
+    */
    function queryCompany() {
             clearCompanyTbody();
             const companyName = document.getElementById("companyName").value;
@@ -343,86 +190,9 @@
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
                     alert(res.message);
-                    for (let i = 0;i < res.data.length;i++){
-                        let rowElement = document.createElement("tr");
-
-                        let checkboxCell = document.createElement("td");
-                        let checkBox = document.createElement("input");
-                        checkBox.setAttribute("type","checkbox");
-                        checkBox.setAttribute("name","idCheckBox");
-                        checkBox.setAttribute("id",res.data[i].id);
-                        checkboxCell.appendChild(checkBox);
-                        rowElement.appendChild(checkboxCell);
-
-                        let idCell = document.createElement("td");
-                        idCell.innerHTML = res.data[i].id;
-                        rowElement.appendChild(idCell);
-
-                        let companyNameCell = document.createElement("td");
-                        companyNameCell.innerHTML = res.data[i].companyName;
-                        rowElement.appendChild(companyNameCell);
-
-                        let comapnyNickNameCell = document.createElement("td");
-                        comapnyNickNameCell.innerHTML = res.data[i].companyNickName;
-                        rowElement.appendChild(comapnyNickNameCell);
-
-                        let phoneCell = document.createElement("td");
-                        phoneCell.innerHTML = res.data[i].companyPhoneNumber;
-                        rowElement.appendChild(phoneCell);
-
-                        let addressCell = document.createElement("td");
-                        addressCell.innerHTML = res.data[i].companyAddress;
-                        rowElement.appendChild(addressCell);
-
-                        let operateCell = document.createElement("td");
-
-                        let btnUpdate = document.createElement("button");
-                        btnUpdate.setAttribute("type","button");
-                        btnUpdate.setAttribute("value","修改");
-                        btnUpdate.setAttribute("id",res.data[i].id);
-                        btnUpdate.addEventListener("click",toUpdateCompany);
-                        btnUpdate.innerText = "修改";
-                        operateCell.appendChild(btnUpdate);
-
-                        let btnDel = document.createElement("button");
-                        btnDel.setAttribute("type","button");
-                        btnDel.setAttribute("value","删除");
-                        btnDel.setAttribute("id",res.data[i].id);
-                        btnDel.addEventListener("click",deleteCompany);
-                        btnDel.innerText = "删除";
-                        operateCell.appendChild(btnDel);
-
-                        rowElement.appendChild(operateCell);
-
-                        let companyTbody = document.getElementById("companyTbody");
-                        companyTbody.appendChild(rowElement);
-
-                    }
+                   drawCompanyTbody(res);
                     clearCompanyPageDiv();
-                    let pageDiv = document.getElementById("pageDiv");
-                    let totalPage = res.page.totalPage;
-                    let limit = res.page.limit;
-                    let totalCount = res.page.totalCount;
-                    let firstPageA = document.createElement("a");
-                    firstPageA.setAttribute("id","first");
-                    firstPageA.setAttribute("href","javascript:void(0)");
-                    firstPageA.innerHTML = "首页&nbsp&nbsp";
-                    firstPageA.addEventListener("click",queryCompanyPageWithOption);
-                    pageDiv.appendChild(firstPageA);
-                    for(let i = 1; i <= totalPage ; i++){
-                        let pageA = document.createElement("a");
-                        pageA.setAttribute("id",""+i);
-                        pageA.setAttribute("href","javascript:void(0)");
-                        pageA.innerHTML = ""+i+"&nbsp&nbsp";
-                        pageA.addEventListener("click",queryCompanyPageWithOption);
-                        pageDiv.appendChild(pageA);
-                    }
-                    let lastPageA = document.createElement("a");
-                    lastPageA.setAttribute("id","last");
-                    lastPageA.setAttribute("href","javascript:void(0)");
-                    lastPageA.innerHTML = "&nbsp&nbsp最后一页";
-                    lastPageA.addEventListener("click",queryCompanyPageWithOption);
-                    pageDiv.appendChild(lastPageA);
+                    drawCompanyPageDivWithOption(res);
                 }else{
                     console.error(res.message);
                 }
@@ -434,7 +204,9 @@
             };
             xhr.send(JSON.stringify(params));
         }
-
+        /**
+         * 批量删除公司
+         */
        function batchDelete() {
             let ids = [];
             let data = document.getElementsByName("idCheckBox");
@@ -463,11 +235,135 @@
             };
             xhr.send(JSON.stringify(params));
        }
-
+        /**
+         * 回到主页面
+         */
         function back() {
           window.location.href = "/home/home.html";
         }
-    </script>
+
+   /**
+    * 加载公司表格内容
+    * @param res
+    */
+   function drawCompanyTbody(res) {
+       for (let i = 0;i < res.data.length;i++){
+           let rowElement = document.createElement("tr");
+
+           let checkboxCell = document.createElement("td");
+           let checkBox = document.createElement("input");
+           checkBox.setAttribute("type","checkbox");
+           checkBox.setAttribute("name","idCheckBox");
+           checkBox.setAttribute("id",res.data[i].id);
+           checkboxCell.appendChild(checkBox);
+           rowElement.appendChild(checkboxCell);
+
+           let idCell = document.createElement("td");
+           idCell.innerHTML = res.data[i].id;
+           rowElement.appendChild(idCell);
+
+           let companyNameCell = document.createElement("td");
+           companyNameCell.innerHTML = res.data[i].companyName;
+           rowElement.appendChild(companyNameCell);
+
+           let comapnyNickNameCell = document.createElement("td");
+           comapnyNickNameCell.innerHTML = res.data[i].companyNickName;
+           rowElement.appendChild(comapnyNickNameCell);
+
+           let phoneCell = document.createElement("td");
+           phoneCell.innerHTML = res.data[i].companyPhoneNumber;
+           rowElement.appendChild(phoneCell);
+
+           let addressCell = document.createElement("td");
+           addressCell.innerHTML = res.data[i].companyAddress;
+           rowElement.appendChild(addressCell);
+
+           let operateCell = document.createElement("td");
+
+           let btnUpdate = document.createElement("button");
+           btnUpdate.setAttribute("type","button");
+           btnUpdate.setAttribute("value","修改");
+           btnUpdate.setAttribute("id",res.data[i].id);
+           btnUpdate.addEventListener("click",toUpdateCompany);
+           btnUpdate.innerText = "修改";
+           operateCell.appendChild(btnUpdate);
+
+           let btnDel = document.createElement("button");
+           btnDel.setAttribute("type","button");
+           btnDel.setAttribute("value","删除");
+           btnDel.setAttribute("id",res.data[i].id);
+           btnDel.addEventListener("click",deleteCompany);
+           btnDel.innerText = "删除";
+           operateCell.appendChild(btnDel);
+
+           rowElement.appendChild(operateCell);
+
+           let companyTbody = document.getElementById("companyTbody");
+           companyTbody.appendChild(rowElement);
+
+       }
+   }
+   /**
+    * 绘制查询公司pageDiv分页信息
+    */
+     function drawCompanyPageDiv(res) {
+       let pageDiv = document.getElementById("pageDiv");
+       let totalPage = res.page.totalPage;
+       let limit = res.page.limit;
+       let totalCount = res.page.totalCount;
+       let firstPageA = document.createElement("a");
+       firstPageA.setAttribute("id","first");
+       firstPageA.setAttribute("href","javascript:void(0)");
+       firstPageA.innerHTML = "首页&nbsp&nbsp";
+       firstPageA.addEventListener("click",queryCompanyPage);
+       pageDiv.appendChild(firstPageA);
+       for(let i = 1; i <= totalPage ; i++){
+           let pageA = document.createElement("a");
+           pageA.setAttribute("id",""+i);
+           pageA.setAttribute("href","javascript:void(0)");
+           pageA.innerHTML = ""+i+"&nbsp&nbsp";
+           pageA.addEventListener("click",queryCompanyPage);
+           pageDiv.appendChild(pageA);
+       }
+       let lastPageA = document.createElement("a");
+       lastPageA.setAttribute("id","last");
+       lastPageA.setAttribute("href","javascript:void(0)");
+       lastPageA.innerHTML = "&nbsp&nbsp最后一页";
+       lastPageA.addEventListener("click",queryCompanyPage);
+       pageDiv.appendChild(lastPageA);
+     }
+   /**
+    * 绘制条件查询公司PageDiv分页信息
+    * @param res
+    */
+   function drawCompanyPageDivWithOption(res) {
+       let pageDiv = document.getElementById("pageDiv");
+       let totalPage = res.page.totalPage;
+       let limit = res.page.limit;
+       let totalCount = res.page.totalCount;
+       let firstPageA = document.createElement("a");
+       firstPageA.setAttribute("id","first");
+       firstPageA.setAttribute("href","javascript:void(0)");
+       firstPageA.innerHTML = "首页&nbsp&nbsp";
+       firstPageA.addEventListener("click",queryCompanyPageWithOption);
+       pageDiv.appendChild(firstPageA);
+       for(let i = 1; i <= totalPage ; i++){
+           let pageA = document.createElement("a");
+           pageA.setAttribute("id",""+i);
+           pageA.setAttribute("href","javascript:void(0)");
+           pageA.innerHTML = ""+i+"&nbsp&nbsp";
+           pageA.addEventListener("click",queryCompanyPageWithOption);
+           pageDiv.appendChild(pageA);
+       }
+       let lastPageA = document.createElement("a");
+       lastPageA.setAttribute("id","last");
+       lastPageA.setAttribute("href","javascript:void(0)");
+       lastPageA.innerHTML = "&nbsp&nbsp最后一页";
+       lastPageA.addEventListener("click",queryCompanyPageWithOption);
+       pageDiv.appendChild(lastPageA);
+   }
+
+   </script>
 </head>
 <body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
 <form class="pure-form" method="post">

@@ -5,6 +5,9 @@
     <title>新增用户页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
     <script type="text/javascript">
+        /**
+         * 页面初始化，获取公司名称全集
+         */
      window.onload = function () {
         const url = "/vcoffee/company/findAllCompanyNames";
         const xhr = new XMLHttpRequest();
@@ -32,6 +35,11 @@
         };
         xhr.send();
      };
+
+        /**
+         * 拿到是否是管理员的单选框的值
+         * @returns {*}
+         */
     function getRadioValue(){
         let isAdmin = document.getElementById("isAdmin");
         let isNotAdmin = document.getElementById("isNotAdmin");
@@ -46,6 +54,10 @@
             return isNotAdminValue;
         }
     }
+
+        /**
+         * 点击新增按钮，新增用户
+         */
     function insertUser() {
        const userName = document.getElementById("userName").value;
        const telephoneNumber = document.getElementById("telephoneNumber").value;
@@ -80,6 +92,9 @@
        xhr.send(JSON.stringify(insertParams));
     }
 
+        /**
+         * 返回到主页面
+         */
     function back() {
       window.location.href = "/home/home.html";
     }

@@ -110,6 +110,19 @@
         </where>
         order by modified_time desc
     </select>
+    <!-- 根据用户编号和公司id查找用户 -->
+    <select id="findByUserNumberAndCompanyId" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
+        select <include refid="userContent"/> from user
+        <where>
+            <if test="userNumber != 0">
+                user_number = #{userNumber}
+            </if>
+            <if test="companyId != 0">
+                and company_id = #{companyId}
+            </if>
+            and state = 0
+        </where>
+    </select>
     <!-- 更新单个用户信息 -->
     <update id="update" parameterType="com.vcoffeebeta.domain.User">
         update user

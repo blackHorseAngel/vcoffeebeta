@@ -78,35 +78,40 @@ public enum ResultCodeEnum {
     /**
      *
      */
+    QUERYALLCOMPANYERROR("查询全部公司报错",1018),
+    /**
+     *
+     */
     QUERYCOMPANYPAGEERROR("查询公司分页信息报错",1017),
+
     /**
      *
      */
-    INSERTEQUIPMENT("新增设备报错",2010),
+    INSERTEQUIPMENTERROR("新增设备报错",2010),
     /**
      *
      */
-    QUERYEQUIPMENT("查询全部设备信息报错",2011),
+    QUERYEQUIPMENTERROR("查询全部设备信息报错",2011),
     /**
      *
      */
-    TOUPDATEEQUIPMENT("跳转到更新设备页面报错",2012),
+    TOUPDATEEQUIPMENTERROR("跳转到更新设备页面报错",2012),
     /**
      *
      */
-    UPDATEEQUIPMENT("更新设备信息报错",2013),
+    UPDATEEQUIPMENTERROR("更新设备信息报错",2013),
     /**
      *
      */
-    DELETEEQUIPMENT("删除设备信息报错",2014),
+    DELETEEQUIPMENTERROR("删除设备信息报错",2014),
     /**
      *  
      */
-    BATCHDELETEEQUIPMENT("批量删除设备信息报错",2015),
+    BATCHDELETEEQUIPMENTERROR("批量删除设备信息报错",2015),
     /**
      *
      */
-    QUERYEQUIPMENTBYOPTION("条件查询设备信息报错",2016),
+    QUERYEQUIPMENTBYOPTIONERROR("条件查询设备信息报错",2016),
     /**
      *
      */
@@ -146,11 +151,27 @@ public enum ResultCodeEnum {
     /**
      *
      */
-    QUERYUSERERROR("查询用户信息",3018),
+    QUERYUSERERROR("查询用户信息报错",3018),
+    /**
+     *
+     */
+    INSERTUSERCOMPANYDELETION("新增用户时公司已被删除",3019),
     /**
      *
      */
     QUERYUSERPAGEERROR("查询用户分页数据报错",3019),
+    /**
+     *
+     */
+    QUERYACCOUNTDETAILERROR("查询账户信息报错",4010),
+    /**
+     *
+     */
+    INSERTACCOUNTERROR("新增账户报错",4011),
+    /**
+     *
+     */
+    DELETEACCOUNTERROR("删除账户报错",4012),
     /**
      *
      */

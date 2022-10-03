@@ -5,10 +5,16 @@
     <title>查询用户页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css">
     <script type="text/javascript">
+        /**
+         * 跳转到更新用户页面
+         */
         function toUpdateUser() {
             window.location.href = "/user/updateUser.html?"+this.id;
         }
 
+        /**
+         * 删除单个用户，只是改变用户状态（从0变成1）
+         */
         function deleteUser() {
           const url = "/vcoffee/user/deleteUser";
           const delParam = {
@@ -34,6 +40,9 @@
           xhr.send(JSON.stringify(delParam));
         }
 
+        /**
+         * 分页查询用户信息
+         */
         function queryUserPage() {
             clearUserTbody();
             const url = "/vcoffee/user/findAllUsers";
@@ -49,69 +58,8 @@
             xhr.onload = function () {
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
-                    for(let i = 0 ; i < res.data.length ; i++){
-                        let rowElement = document.createElement("tr");
-
-                        let checkboxCell = document.createElement("td");
-                        let checkBox = document.createElement("input");
-                        checkBox.setAttribute("type","checkbox");
-                        checkBox.setAttribute("name","idCheckBox");
-                        checkBox.setAttribute("id",res.data[i].id);
-                        checkboxCell.appendChild(checkBox);
-                        rowElement.appendChild(checkboxCell);
-
-                        let idCell = document.createElement("td");
-                        idCell.innerHTML = res.data[i].id;
-                        rowElement.appendChild(idCell);
-
-                        let userNameCell = document.createElement("td");
-                        userNameCell.innerHTML = res.data[i].username;
-                        rowElement.appendChild(userNameCell);
-
-                        let telephoneNumberCell = document.createElement("td");
-                        telephoneNumberCell.innerHTML = res.data[i].telephoneNumber;
-                        rowElement.appendChild(telephoneNumberCell);
-
-                        let emailCell = document.createElement("td");
-                        emailCell.innerHTML = res.data[i].email;
-                        rowElement.appendChild(emailCell);
-
-                        let isAdminCell = document.createElement("td");
-                        isAdminCell.innerHTML = res.data[i].isAdmin;
-                        rowElement.appendChild(isAdminCell);
-
-                        let companyNameCell = document.createElement("td");
-                        companyNameCell.innerHTML = res.data[i].companyName;
-                        rowElement.appendChild(companyNameCell);
-
-                        let equipmentNameCell = document.createElement("td");
-                        equipmentNameCell.innerHTML = res.data[i].equipmentName;
-                        rowElement.appendChild(equipmentNameCell);
-
-                        let operateCell = document.createElement("td");
-
-                        let btnUpdate = document.createElement("button");
-                        btnUpdate.setAttribute("type","button");
-                        btnUpdate.setAttribute("value","修改");
-                        btnUpdate.setAttribute("id",res.data[i].id);
-                        btnUpdate.addEventListener("click",toUpdateUser);
-                        btnUpdate.innerHTML = "修改";
-                        operateCell.appendChild(btnUpdate);
-
-                        let btnDel = document.createElement("button");
-                        btnDel.setAttribute("type","button");
-                        btnDel.setAttribute("value","删除");
-                        btnDel.setAttribute("id",res.data[i].id);
-                        btnDel.addEventListener("click",deleteUser);
-                        btnDel.innerHTML = "删除";
-                        operateCell.appendChild(btnDel);
-
-                        rowElement.appendChild(operateCell);
-
-                        let tbody = document.getElementById("userTbody");
-                        tbody.appendChild(rowElement);
-
-                    }
+                    alert(res.message);
+                    drawUserTbody(res);
                 }else{
                     console.error("分页查询用户报错" + JSON.parse(xhr.responseText).message);
                     window.location.href = "/error/error.html";
@@ -124,6 +72,9 @@
             xhr.send(JSON.stringify(params));
         }
 
+        /**
+         * 用户页面初始化
+         */
         window.onload = function () {
             const url = "/vcoffee/user/findAllUsers";
             const xhr = new XMLHttpRequest();
@@ -139,93 +90,8 @@
               let res = JSON.parse(xhr.responseText);
               if(res.code === 1000){
                   alert(res.message);
-                  for(let i = 0 ; i < res.data.length ; i++){
-                      let rowElement = document.createElement("tr");
-                      let checkboxCell = document.createElement("td");
-                      let checkBox = document.createElement("input");
-                      checkBox.setAttribute("type","checkbox");
-                      checkBox.setAttribute("name","idCheckBox");
-                      checkBox.setAttribute("id",res.data[i].id);
-                      checkboxCell.appendChild(checkBox);
-                      rowElement.appendChild(checkboxCell);
-
-                      let idCell = document.createElement("td");
-                      idCell.innerHTML = res.data[i].id;
-                      rowElement.appendChild(idCell);
-
-                      let userNameCell = document.createElement("td");
-                      userNameCell.innerHTML = res.data[i].username;
-                      rowElement.appendChild(userNameCell);
-
-                      let telephoneNumberCell = document.createElement("td");
-                      telephoneNumberCell.innerHTML = res.data[i].telephoneNumber;
-                      rowElement.appendChild(telephoneNumberCell);
-
-                      let emailCell = document.createElement("td");
-                      emailCell.innerHTML = res.data[i].email;
-                      rowElement.appendChild(emailCell);
-
-                      let isAdminCell = document.createElement("td");
-                      isAdminCell.innerHTML = res.data[i].isAdmin;
-                      rowElement.appendChild(isAdminCell);
-
-                      let companyNameCell = document.createElement("td");
-                      companyNameCell.innerHTML = res.data[i].companyName;
-                      rowElement.appendChild(companyNameCell);
-
-                      let equipmentNameCell = document.createElement("td");
-                      equipmentNameCell.innerHTML = res.data[i].equipmentName;
-                      rowElement.appendChild(equipmentNameCell);
-
-                      let operateCell = document.createElement("td");
-
-                      let btnUpdate = document.createElement("button");
-                      btnUpdate.setAttribute("type","button");
-                      btnUpdate.setAttribute("value","修改");
-                      btnUpdate.setAttribute("id",res.data[i].id);
-                      btnUpdate.addEventListener("click",toUpdateUser);
-                      btnUpdate.innerHTML = "修改";
-                      operateCell.appendChild(btnUpdate);
-
-                      let btnDel = document.createElement("button");
-                      btnDel.setAttribute("type","button");
-                      btnDel.setAttribute("value","删除");
-                      btnDel.setAttribute("id",res.data[i].id);
-                      btnDel.addEventListener("click",deleteUser);
-                      btnDel.innerHTML = "删除";
-                      operateCell.appendChild(btnDel);
-
-                      rowElement.appendChild(operateCell);
-
-                      let tbody = document.getElementById("userTbody");
-                      tbody.appendChild(rowElement);
-                  }
-                  let pageDiv = document.getElementById("pageDiv");
-                  alert("返回结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
-                  let totalPage = res.page.totalPage;
-                  alert("返回结果中的页码对象中的limit属性值：" + res.page.limit);
-                  let limit = res.page.limit;
-                  alert("返回结果中的页码对象中的totalCount属性值：" + res.page.totalCount);
-                  let firstPageA = document.createElement("a");
-                  firstPageA.setAttribute("id","first");
-                  firstPageA.setAttribute("href","javascript:void(0)");
-                  firstPageA.innerHTML = "首页&nbsp&nbsp";
-                  firstPageA.addEventListener("click",queryUserPage);
-                  pageDiv.appendChild(firstPageA);
-                  for(let i = 1 ; i <= totalPage ; i++){
-                      let pageA = document.createElement("a");
-                      pageA.setAttribute("id",""+i);
-                      pageA.setAttribute("href","javascript:void(0)");
-                      pageA.innerHTML = ""+i+"&nbsp&nbsp";
-                      pageA.addEventListener("click",queryUserPage);
-                      pageDiv.appendChild(pageA);
-                  }
-                  let lastPageA = document.createElement("a");
-                  lastPageA.setAttribute("id","last");
-                  lastPageA.setAttribute("href","javascript:void(0)");
-                  lastPageA.innerHTML = "&nbsp&nbsp最后一页";
-                  lastPageA.addEventListener("click",queryUserPage);
-                  pageDiv.appendChild(lastPageA);
+                  drawUserTbody(res);
+                  drawUserPageDiv(res);
               }else{
                   console.error("查询用户信息错误，" + res.message);
                   window.location.href = "/error/error.html";
@@ -237,6 +103,10 @@
             };
             xhr.send(JSON.stringify(param));
         };
+
+        /**
+         * 批量删除用户
+         */
     function batchDeleteUser() {
       let ids = [];
       let data = document.getElementsByName("idCheckBox");
@@ -269,20 +139,32 @@
       xhr.send(JSON.stringify(batchDeleteParams));
     }
 
+        /**
+         * 点击新增按钮，跳转到新增用户页面
+         */
     function toInsertUser() {
       window.location.href = "/user/addUser.html";
     }
 
+        /**
+         * 清理body中的全部内容
+         */
         function clearUserTbody() {
             let tbody = document.getElementById("userTbody");
             tbody.innerText = "";
         }
 
+        /**
+         * 清理pageDiv中的分页信息
+         */
         function clearUserPageDiv() {
             let pageDiv = document.getElementById("pageDiv");
             pageDiv.innerHTML = "";
         }
 
+        /**
+         * 条件搜索用户信息后分页查找
+         */
         function queryUserPageWithOption() {
             clearUserTbody();
             const userName = document.getElementById("userName").value;
@@ -301,68 +183,7 @@
               let res = JSON.parse(xhr.responseText);
               if(res.code === 1000){
                   alert(res.message);
-                  for(let i = 0 ; i < res.data.length ; i++){
-                      let rowElement = document.createElement("tr");
-
-                      let checkboxCell = document.createElement("td");
-                      let checkBox = document.createElement("input");
-                      checkBox.setAttribute("type","checkbox");
-                      checkBox.setAttribute("name","idCheckBox");
-                      checkBox.setAttribute("id",res.data[i].id);
-                      checkboxCell.appendChild(checkBox);
-                      rowElement.appendChild(checkboxCell);
-
-                      let idCell = document.createElement("td");
-                      idCell.innerHTML = res.data[i].id;
-                      rowElement.appendChild(idCell);
-
-                      let userNameCell = document.createElement("td");
-                      userNameCell.innerHTML = res.data[i].username;
-                      rowElement.appendChild(userNameCell);
-
-                      let telephoneNumberCell = document.createElement("td");
-                      telephoneNumberCell.innerHTML = res.data[i].telephoneNumber;
-                      rowElement.appendChild(telephoneNumberCell);
-
-                      let emailCell = document.createElement("td");
-                      emailCell.innerHTML = res.data[i].email;
-                      rowElement.appendChild(emailCell);
-
-                      let isAdminCell = document.createElement("td");
-                      isAdminCell.innerHTML = res.data[i].isAdmin;
-                      rowElement.appendChild(isAdminCell);
-
-                      let companyNameCell = document.createElement("td");
-                      companyNameCell.innerHTML = res.data[i].companyName;
-                      rowElement.appendChild(companyNameCell);
-
-                      let equipmentNameCell = document.createElement("td");
-                      equipmentNameCell.innerHTML = res.data[i].equipmentName;
-                      rowElement.appendChild(equipmentNameCell);
-
-                      let operateCell = document.createElement("td");
-
-                      let btnUpdate = document.createElement("button");
-                      btnUpdate.setAttribute("type","button");
-                      btnUpdate.setAttribute("value","修改");
-                      btnUpdate.setAttribute("id",res.data[i].id);
-                      btnUpdate.addEventListener("click",toUpdateUser);
-                      btnUpdate.innerHTML = "修改";
-                      operateCell.appendChild(btnUpdate);
-
-                      let btnDel = document.createElement("button");
-                      btnDel.setAttribute("type","button");
-                      btnDel.setAttribute("value","删除");
-                      btnDel.setAttribute("id",res.data[i].id);
-                      btnDel.addEventListener("click",deleteUser);
-                      btnDel.innerHTML = "删除";
-                      operateCell.appendChild(btnDel);
-
-                      rowElement.appendChild(operateCell);
-
-                      let tbody = document.getElementById("userTbody");
-                      tbody.appendChild(rowElement);
-                  }
+                  drawUserTbody(res);
               }else{
                   console.error("条件查询用户分页信息报错，" + res.message);
                   window.location.href = "/error/error.html";
@@ -375,6 +196,9 @@
             xhr.send(JSON.stringify(queryParam));
         }
 
+        /**
+         * 分页查找用户
+         */
     function queryUser() {
       const userName = document.getElementById("userName").value;
       const  url = "/vcoffee/user/queryUser";
@@ -393,96 +217,9 @@
         if(res.code === 1000){
             alert(res.message);
             clearUserTbody();
-            for(let i = 0 ; i < res.data.length ; i++){
-                let rowElement = document.createElement("tr");
-
-                let checkboxCell = document.createElement("td");
-                let checkBox = document.createElement("input");
-                checkBox.setAttribute("type","checkbox");
-                checkBox.setAttribute("name","idCheckBox");
-                checkBox.setAttribute("id",res.data[i].id);
-                checkboxCell.appendChild(checkBox);
-                rowElement.appendChild(checkboxCell);
-
-                let idCell = document.createElement("td");
-                idCell.innerHTML = res.data[i].id;
-                rowElement.appendChild(idCell);
-
-                let userNameCell = document.createElement("td");
-                userNameCell.innerHTML = res.data[i].username;
-                rowElement.appendChild(userNameCell);
-
-                let telephoneNumberCell = document.createElement("td");
-                telephoneNumberCell.innerHTML = res.data[i].telephoneNumber;
-                rowElement.appendChild(telephoneNumberCell);
-
-                let emailCell = document.createElement("td");
-                emailCell.innerHTML = res.data[i].email;
-                rowElement.appendChild(emailCell);
-
-                let isAdminCell = document.createElement("td");
-                isAdminCell.innerHTML = res.data[i].isAdmin;
-                rowElement.appendChild(isAdminCell);
-
-                let companyNameCell = document.createElement("td");
-                companyNameCell.innerHTML = res.data[i].companyName;
-                rowElement.appendChild(companyNameCell);
-
-                let equipmentNameCell = document.createElement("td");
-                equipmentNameCell.innerHTML = res.data[i].equipmentName;
-                rowElement.appendChild(equipmentNameCell);
-
-                let operateCell = document.createElement("td");
-
-                let btnUpdate = document.createElement("button");
-                btnUpdate.setAttribute("type","button");
-                btnUpdate.setAttribute("value","修改");
-                btnUpdate.setAttribute("id",res.data[i].id);
-                btnUpdate.addEventListener("click",toUpdateUser);
-                btnUpdate.innerHTML = "修改";
-                operateCell.appendChild(btnUpdate);
-
-                let btnDel = document.createElement("button");
-                btnDel.setAttribute("type","button");
-                btnDel.setAttribute("value","删除");
-                btnDel.setAttribute("id",res.data[i].id);
-                btnDel.addEventListener("click",deleteUser);
-                btnDel.innerHTML = "删除";
-                operateCell.appendChild(btnDel);
-
-                rowElement.appendChild(operateCell);
-
-                let tbody = document.getElementById("userTbody");
-                tbody.appendChild(rowElement);
-            }
+            drawUserTbody(res);
             clearUserPageDiv();
-            let pageDiv = document.getElementById("pageDiv");
-            alert("返回结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
-            let totalPage = res.page.totalPage;
-            alert("返回结果中的页码对象中的limit属性值：" + res.page.limit);
-            let limit = res.page.limit;
-            alert("返回结果中的页码对象中的totalCount属性值：" + res.page.totalCount);
-            let firstPageA = document.createElement("a");
-            firstPageA.setAttribute("id","first");
-            firstPageA.setAttribute("href","javascript:void(0)");
-            firstPageA.innerHTML = "首页&nbsp&nbsp";
-            firstPageA.addEventListener("click",queryUserPageWithOption);
-            pageDiv.appendChild(firstPageA);
-            for(let i = 1 ; i <= totalPage ; i++){
-                let pageA = document.createElement("a");
-                pageA.setAttribute("id",""+i);
-                pageA.setAttribute("href","javascript:void(0)");
-                pageA.innerHTML = ""+i+"&nbsp&nbsp";
-                pageA.addEventListener("click",queryUserPageWithOption);
-                pageDiv.appendChild(pageA);
-            }
-            let lastPageA = document.createElement("a");
-            lastPageA.setAttribute("id","last");
-            lastPageA.setAttribute("href","javascript:void(0)");
-            lastPageA.innerHTML = "&nbsp&nbsp最后一页";
-            lastPageA.addEventListener("click",queryUserPageWithOption);
-            pageDiv.appendChild(lastPageA);
-
+            drawUserPageDivWithOption(res);
         }else{
           console.error("条件查询用户信息报错，"  + res.message);
           window.location.href = "/error/error.html";
@@ -494,10 +231,148 @@
       };
       xhr.send(JSON.stringify(queryParam));
     }
+
+        /**
+         * 返回到主页面
+         */
     function back() {
        window.location.href = "/home/home.html";
     }
 
+        /**
+         * 重新加载body中的用户信息内容
+         * @param res
+         */
+    function drawUserTbody(res) {
+        for(let i = 0 ; i < res.data.length ; i++){
+            let rowElement = document.createElement("tr");
+
+            let checkboxCell = document.createElement("td");
+            let checkBox = document.createElement("input");
+            checkBox.setAttribute("type","checkbox");
+            checkBox.setAttribute("name","idCheckBox");
+            checkBox.setAttribute("id",res.data[i].id);
+            checkboxCell.appendChild(checkBox);
+            rowElement.appendChild(checkboxCell);
+
+            let idCell = document.createElement("td");
+            idCell.innerHTML = res.data[i].id;
+            rowElement.appendChild(idCell);
+
+            let userNameCell = document.createElement("td");
+            userNameCell.innerHTML = res.data[i].username;
+            rowElement.appendChild(userNameCell);
+
+            let telephoneNumberCell = document.createElement("td");
+            telephoneNumberCell.innerHTML = res.data[i].telephoneNumber;
+            rowElement.appendChild(telephoneNumberCell);
+
+            let emailCell = document.createElement("td");
+            emailCell.innerHTML = res.data[i].email;
+            rowElement.appendChild(emailCell);
+
+            let isAdminCell = document.createElement("td");
+            isAdminCell.innerHTML = res.data[i].isAdmin;
+            rowElement.appendChild(isAdminCell);
+
+            let companyNameCell = document.createElement("td");
+            companyNameCell.innerHTML = res.data[i].companyName;
+            rowElement.appendChild(companyNameCell);
+
+            let equipmentNameCell = document.createElement("td");
+            equipmentNameCell.innerHTML = res.data[i].equipmentName;
+            rowElement.appendChild(equipmentNameCell);
+
+            let operateCell = document.createElement("td");
+
+            let btnUpdate = document.createElement("button");
+            btnUpdate.setAttribute("type","button");
+            btnUpdate.setAttribute("value","修改");
+            btnUpdate.setAttribute("id",res.data[i].id);
+            btnUpdate.addEventListener("click",toUpdateUser);
+            btnUpdate.innerHTML = "修改";
+            operateCell.appendChild(btnUpdate);
+
+            let btnDel = document.createElement("button");
+            btnDel.setAttribute("type","button");
+            btnDel.setAttribute("value","删除");
+            btnDel.setAttribute("id",res.data[i].id);
+            btnDel.addEventListener("click",deleteUser);
+            btnDel.innerHTML = "删除";
+            operateCell.appendChild(btnDel);
+
+            rowElement.appendChild(operateCell);
+
+            let tbody = document.getElementById("userTbody");
+            tbody.appendChild(rowElement);
+        }
+    }
+
+        /**
+         * 重新加载pageDiv中的分页信息
+         * @param res
+         */
+    function drawUserPageDiv(res) {
+        let pageDiv = document.getElementById("pageDiv");
+        alert("返回结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
+        let totalPage = res.page.totalPage;
+        alert("返回结果中的页码对象中的limit属性值：" + res.page.limit);
+        let limit = res.page.limit;
+        alert("返回结果中的页码对象中的totalCount属性值：" + res.page.totalCount);
+        let firstPageA = document.createElement("a");
+        firstPageA.setAttribute("id","first");
+        firstPageA.setAttribute("href","javascript:void(0)");
+        firstPageA.innerHTML = "首页&nbsp&nbsp";
+        firstPageA.addEventListener("click",queryUserPage);
+        pageDiv.appendChild(firstPageA);
+        for(let i = 1 ; i <= totalPage ; i++){
+            let pageA = document.createElement("a");
+            pageA.setAttribute("id",""+i);
+            pageA.setAttribute("href","javascript:void(0)");
+            pageA.innerHTML = ""+i+"&nbsp&nbsp";
+            pageA.addEventListener("click",queryUserPage);
+            pageDiv.appendChild(pageA);
+        }
+        let lastPageA = document.createElement("a");
+        lastPageA.setAttribute("id","last");
+        lastPageA.setAttribute("href","javascript:void(0)");
+        lastPageA.innerHTML = "&nbsp&nbsp最后一页";
+        lastPageA.addEventListener("click",queryUserPage);
+        pageDiv.appendChild(lastPageA);
+    }
+
+        /**
+         * 条件查询后，重新加载pageDiv中的分页信息
+         * @param res
+         */
+    function drawUserPageDivWithOption(res) {
+        let pageDiv = document.getElementById("pageDiv");
+        alert("返回结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
+        let totalPage = res.page.totalPage;
+        alert("返回结果中的页码对象中的limit属性值：" + res.page.limit);
+        let limit = res.page.limit;
+        alert("返回结果中的页码对象中的totalCount属性值：" + res.page.totalCount);
+        let firstPageA = document.createElement("a");
+        firstPageA.setAttribute("id","first");
+        firstPageA.setAttribute("href","javascript:void(0)");
+        firstPageA.innerHTML = "首页&nbsp&nbsp";
+        firstPageA.addEventListener("click",queryUserPageWithOption);
+        pageDiv.appendChild(firstPageA);
+        for(let i = 1 ; i <= totalPage ; i++){
+            let pageA = document.createElement("a");
+            pageA.setAttribute("id",""+i);
+            pageA.setAttribute("href","javascript:void(0)");
+            pageA.innerHTML = ""+i+"&nbsp&nbsp";
+            pageA.addEventListener("click",queryUserPageWithOption);
+            pageDiv.appendChild(pageA);
+        }
+        let lastPageA = document.createElement("a");
+        lastPageA.setAttribute("id","last");
+        lastPageA.setAttribute("href","javascript:void(0)");
+        lastPageA.innerHTML = "&nbsp&nbsp最后一页";
+        lastPageA.addEventListener("click",queryUserPageWithOption);
+        pageDiv.appendChild(lastPageA);
+    }
     </script>
 </head>
 <body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">

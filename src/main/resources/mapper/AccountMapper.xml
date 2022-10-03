@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.vcoffeebeta.DAO.AccountDAO">
+    <!--查询使用的结果集-->
+    <resultMap id="accountMap" type="com.vcoffeebeta.domain.Account">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="remaining" column="remaining"/>
+        <result property="state" column="state"/>
+        <result property="created" column="created"/>
+        <result property="modified" column="modified"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="modifiedTime" column="modified_time"/>
+    </resultMap>
+    <sql id="accountContent">
+        id,user_id,remaining,state,created,modified,created_time,modified_time
+    </sql>
+    <sql id="accountContentForInsert">
+        user_id,remaining,state,created,modified,created_time,modified_time
+    </sql>
+    <!-- 新增一个账户 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" >
+        insert into account
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <include refid="accountContentForInsert"/>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{userId},
+            #{remaining},
+            #{state},
+            #{created},
+            #{modified},
+            #{createdTime},
+            #{modifiedTime}
+        </trim>
+    </insert>
+    <!-- 根据用户id查询账户信息 -->
+    <select id="findByUserId" parameterType="long" resultMap="accountMap">
+        select <include refid="accountContent"/> from company
+        <where>
+            1=1
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            and state = 0
+        </where>
+    </select>
+    <!-- 根据用户id删除其账户信息,实际上是修改账户的状态state，0：账户状态正常；1：已删除的账户（页面上不展示，数据库可查） -->
+    <update id="deleteByUserId" parameterType="int">
+        update  account
+        set
+        state = 1
+        <where>
+           <if test="userId != null">
+               user_id = #{userId}
+           </if>
+        </where>
+    </update>
+</mapper>

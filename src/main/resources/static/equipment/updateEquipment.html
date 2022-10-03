@@ -5,6 +5,9 @@
     <title>修改设备页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css">
     <script type="text/javascript">
+        /**
+         * 单选框选中一个自动取消选定另一个
+         */
     function chooseUsed() {
         let isNotUsed = document.getElementById("isNotUsed");
         let isUsed = document.getElementById("isUsed");
@@ -14,7 +17,9 @@
             isNotUsed.checked = false;
         }
     }
-
+        /**
+         * 单选框选中一个自动取消选定另一个
+         */
     function chooseNotUsed() {
         let isNotUsed = document.getElementById("isNotUsed");
         let isUsed = document.getElementById("isUsed");
@@ -25,6 +30,9 @@
         }
     }
 
+        /**
+         * 页面初始化，获取当前设备信息并展示在页面上
+         */
     window.onload = function () {
             let id = location.search.replace(/[^\d]/g,"");
             const updateParam = {
@@ -60,6 +68,11 @@
             };
             xhr.send(JSON.stringify(updateParam));
         };
+
+        /**
+         * 获取单选框的值
+         * @returns {*}
+         */
     function getIsUsedRadioValue(){
         let isUsed = document.getElementById("isUsed");
         let isNotUsed = document.getElementById("isNotUsed");
@@ -74,6 +87,10 @@
             return isNotUsedValue;
         }
     }
+
+        /**
+         * 点击更新按钮，更新设备信息
+         */
         function updateEquipment() {
             const serialNumber = document.getElementById("serialNumber").value;
             const equipmentName = document.getElementById("equipmentName").value;
@@ -102,12 +119,15 @@
                 }
             };
             xhr.onerror = function (e2) {
-                console.error("修改设备信息失败" + JSON.parse(xhr.responseText));
+                console.error("修改设备信息失败" + JSON.parse(xhr.responseText).message);
                 window.location.href = "/error/error.html";
             };
             xhr.send(JSON.stringify(updateParams));
         }
 
+        /**
+         * 返回主页面
+         */
         function back() {
             window.location.href = "/home/home/html";
         }

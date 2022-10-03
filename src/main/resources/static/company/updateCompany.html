@@ -5,6 +5,9 @@
     <title>修改公司页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css">
     <script type="text/javascript">
+        /**
+         * 页面初始化，获取当前公司信息并展示在页面上
+         */
         window.onload = function () {
             //获取链接传过来的要进行修改的公司id
             let id = location.search.replace(/[^\d]/g,"");
@@ -36,7 +39,9 @@
             xhr.send(JSON.stringify(updateParams));
         };
 
-
+        /**
+         * 更新公司信息
+         */
         function updateCompany(){
             const companyName = document.getElementById("companyName").value;
             const companyNickName = document.getElementById("companyNickName").value;
@@ -68,8 +73,12 @@
             };
             xhr.send(JSON.stringify(updateParams));
         }
+
+        /**
+         * 返回主页面
+         */
         function back() {
-            window.location.href = "/company/queryCompany.html";
+            window.location.href = "/home/home.html";
         }
     </script>
 </head>

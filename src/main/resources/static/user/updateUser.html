@@ -5,6 +5,9 @@
     <title>更新用户页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
     <script type="text/javascript">
+        /**
+         * 单选框选中一个自动取消另一个
+         */
     function chooseAdmin() {
         let isNotAdmin = document.getElementById("isNotAdmin");
         let isAdmin = document.getElementById("isAdmin");
@@ -15,6 +18,9 @@
         }
     }
 
+        /**
+         * 单选框选中一个自动取消另一个
+         */
     function chooseNotAdmin() {
         let isNotAdmin = document.getElementById("isNotAdmin");
         let isAdmin = document.getElementById("isAdmin");
@@ -25,6 +31,9 @@
         }
     }
 
+        /**
+         * 页面初始化，获取当前用户的全部信息并展示在页面上
+         */
     window.onload = function () {
       let id = location.search.replace(/[^\d]/g,"");
       const updateParam = {
@@ -50,15 +59,20 @@
             }
         }else{
             console.error("初始化更新用户页面报错，" + res.message);
-            // window.location.href = "/error/error.html";
+            window.location.href = "/error/error.html";
         }
       };
       xhr.onerror = function () {
           console.error("初始化更新用户页面报错，" + JSON.parse(xhr.responseText).message);
-          // window.location.href = "/error/error.html";
+          window.location.href = "/error/error.html";
       };
       xhr.send(JSON.stringify(updateParam));
     };
+
+        /**
+         * 更新用户前，获取更改后的单选框的值
+         * @returns {*}
+         */
     function getIsAdminRadioValue(){
         let isAdmin = document.getElementById("isAdmin");
         let isNotAdmin = document.getElementById("isNotAdmin");
@@ -73,6 +87,10 @@
             return isNotAdminValue;
         }
     }
+
+        /**
+         * 点击更新按钮，更新用户信息
+         */
     function updateUser() {
       const userName = document.getElementById("userName").value;
       const telephoneNumber = document.getElementById("telephoneNumber").value;
@@ -105,6 +123,9 @@
       xhr.send(JSON.stringify(updateParams));
     }
 
+        /**
+         * 返回主页面
+         */
     function back() {
       window.location.href = "/home/home.html";
     }
@@ -127,12 +148,6 @@
           <label for="email">用户邮箱</label>
           <input type="email" id="email" name="email" placeholder="用户邮箱"/>
       </div>
-      <!--<div class="pure-control-group" align="center">
-          <label for="companyId">用户所属公司</label>
-          <select  id="companyId" name="companyId" placeholder="用户所属公司" autofocus="autofocus">
-
-          </select>
-      </div>-->
       <div class="pure-control-group" align="center">
           <label for="isAdmin">管理员权限</label>
           <input type="radio" id="isAdmin" name="isAdmin" value="1" onclick="chooseAdmin()"/>一般管理员

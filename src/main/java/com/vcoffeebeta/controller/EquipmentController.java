@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 设备controller
@@ -57,66 +54,79 @@ public class EquipmentController {
             equipment.setModified(user.getUsername());
             equipment.setCreatedTime(new Date());
             equipment.setModifiedTime(new Date());
-            boolean isSuccess = equipmentService.insertEquipment(equipment);
-            if(isSuccess){
+            boolean flag = equipmentService.insertEquipment(equipment);
+            if(flag){
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
+            }else{
+                return new Result(ResultCodeEnum.INSERTEQUIPMENTERROR.getCode(),ResultCodeEnum.INSERTEQUIPMENTERROR.getMessage());
             }
         }catch(Exception e){
-            log.error("新增设备报错",e);
+            log.error("equipmentController的insertEquipment内，新增设备报错",e);
             e.printStackTrace();
-            return new Result(ResultCodeEnum.INSERTEQUIPMENT.getCode(),ResultCodeEnum.INSERTEQUIPMENT.getMessage());
+            return new Result(ResultCodeEnum.INSERTEQUIPMENTERROR.getCode(),ResultCodeEnum.INSERTEQUIPMENTERROR.getMessage());
         }
-        return null;
     }
     @CrossOrigin
     @RequestMapping(value = "/findAllEquipment")
     @ResponseBody
     public Result findAllEquipment(@RequestBody Equipment equipment){
-        log.info("进度findAllEquipment方法：");
+        log.info("进入findAllEquipment方法：");
         try{
             int amount = equipmentService.queryForAmount();
             log.info("设备的数量amount: " + amount);
-            Page page = new Page();
-            page.setTotalCount(amount);
-            Page p = equipment.getPage();
-            int limit = p.getLimit();
-            if(limit != 0){
-                page.setLimit(limit);
-                int totalPage = amount/limit + 1;
-                page.setTotalPage(totalPage);
-                String currentPageStr = p.getCurrentPage();
-                if(currentPageStr == null){
-                    return new Result(ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getCode(),ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getMessage());
-                }else{
-                    if(FIRST.equals(currentPageStr)){
-                        currentPageStr = "1";
-                    }else if(LAST.equals(currentPageStr)){
-                        currentPageStr = String.valueOf(totalPage);
-                    }
-                    int currentPage = Integer.parseInt(currentPageStr);
-                    page.setCurrentPage(currentPageStr);
-                    log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
-                    PageHelper.startPage(currentPage,limit);
-                }
-                List<Equipment>equipmentList = equipmentService.findAllEquipment();
-                for(Equipment e:equipmentList){
-                    Company c = companyService.queryById(e.getCompanyId());
-                    e.setCompanyName(c.getCompanyName());
-                }
-                log.info("全部设备的信息是：" + JSON.toJSONString(equipmentList));
-//            PageInfo<Equipment>equipmentPageInfo = new PageInfo<>(equipmentList);
-//            log.info("全部设备的分页信息是：" + JSON.toJSONString(equipmentPageInfo));
-                return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),equipmentList,page);
-            }else{
-                return new Result(ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getCode(),ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getMessage());
+            Page page = handlePage(amount,equipment);
+            if(page == null){
+                return null;
             }
+            PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
+            List<Equipment>equipmentList = equipmentService.findAllEquipment();
+            for(Equipment e:equipmentList){
+               Company c = companyService.queryById(e.getCompanyId());
+               e.setCompanyName(c.getCompanyName());
+            }
+            log.info("全部设备的信息是：" + JSON.toJSONString(equipmentList));
+            return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),equipmentList,page);
         }catch(Exception e){
             log.error("查询全部设备信息报错");
             e.printStackTrace();
-            return new Result(ResultCodeEnum.QUERYEQUIPMENT.getCode(),ResultCodeEnum.QUERYEQUIPMENT.getMessage());
+            return new Result(ResultCodeEnum.QUERYEQUIPMENTERROR.getCode(),ResultCodeEnum.QUERYEQUIPMENTERROR.getMessage());
         }
     }
+    /**
+     *
+     * @author zhangshenming
+     * @date 2022/10/3 16:02
+     * @param amount, equipment
+     * @return com.vcoffeebeta.domain.Page
+     */
+    private Page handlePage(int amount,Equipment equipment){
+        Page page = new Page();
+        page.setTotalCount(amount);
+        Page p = equipment.getPage();
+        int limit = p.getLimit();
+        if(limit != 0){
+            page.setLimit(limit);
+            int totalPage = amount/limit + 1;
+            page.setTotalPage(totalPage);
+            String currentPageStr = p.getCurrentPage();
+            if(currentPageStr == null){
+                return null;
+            }else{
+                if(FIRST.equals(currentPageStr)){
+                    currentPageStr = "1";
+                }else if(LAST.equals(currentPageStr)){
+                    currentPageStr = String.valueOf(totalPage);
+                }
+                int currentPage = Integer.parseInt(currentPageStr);
+                page.setCurrentPage(currentPageStr);
+                log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
 
+            }
+        }else{
+            return null;
+        }
+        return page;
+    }
   @CrossOrigin
   @ResponseBody
   @RequestMapping(value = "toUpdateEquipment")
@@ -135,9 +145,7 @@ public class EquipmentController {
     } catch (Exception e) {
       log.error("跳转到更新设备页面有问题,", e);
       e.printStackTrace();
-      return new Result(
-          ResultCodeEnum.TOUPDATECOMPANYERROR.getCode(),
-          ResultCodeEnum.TOUPDATECOMPANYERROR.getMessage());
+      return new Result(ResultCodeEnum.TOUPDATECOMPANYERROR.getCode(),ResultCodeEnum.TOUPDATECOMPANYERROR.getMessage());
     }
     }
     @CrossOrigin
@@ -157,12 +165,12 @@ public class EquipmentController {
             if(flag){
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),equipment);
             }else{
-                return new Result(ResultCodeEnum.UPDATEEQUIPMENT.getCode(),ResultCodeEnum.UPDATEEQUIPMENT.getMessage());
+                return new Result(ResultCodeEnum.UPDATEEQUIPMENTERROR.getCode(),ResultCodeEnum.UPDATEEQUIPMENTERROR.getMessage());
             }
         }catch(Exception e){
             log.error("更新设备信息报错,",e);
             e.printStackTrace();
-            return new Result(ResultCodeEnum.UPDATEEQUIPMENT.getCode(),ResultCodeEnum.UPDATEEQUIPMENT.getMessage());
+            return new Result(ResultCodeEnum.UPDATEEQUIPMENTERROR.getCode(),ResultCodeEnum.UPDATEEQUIPMENTERROR.getMessage());
         }
 
     }
@@ -179,12 +187,12 @@ public class EquipmentController {
             if(flag){
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
             }else{
-                return new Result(ResultCodeEnum.DELETEEQUIPMENT.getCode(),ResultCodeEnum.DELETEEQUIPMENT.getMessage());
+                return new Result(ResultCodeEnum.DELETEEQUIPMENTERROR.getCode(),ResultCodeEnum.DELETEEQUIPMENTERROR.getMessage());
             }
         }catch(Exception e){
             log.error("删除单个设备信息报错,",e);
             e.printStackTrace();
-            return new Result(ResultCodeEnum.DELETEEQUIPMENT.getCode(),ResultCodeEnum.DELETEEQUIPMENT.getMessage());
+            return new Result(ResultCodeEnum.DELETEEQUIPMENTERROR.getCode(),ResultCodeEnum.DELETEEQUIPMENTERROR.getMessage());
         }
     }
     @CrossOrigin
@@ -204,12 +212,12 @@ public class EquipmentController {
             if(flag){
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
             }else{
-                return new Result(ResultCodeEnum.BATCHDELETEEQUIPMENT.getCode(),ResultCodeEnum.BATCHDELETEEQUIPMENT.getMessage());
+                return new Result(ResultCodeEnum.BATCHDELETEEQUIPMENTERROR.getCode(),ResultCodeEnum.BATCHDELETEEQUIPMENTERROR.getMessage());
             }
         }catch(Exception e){
             log.error("批量删除设备信息报错,",e);
             e.printStackTrace();
-            return new Result(ResultCodeEnum.BATCHDELETEEQUIPMENT.getCode(),ResultCodeEnum.BATCHDELETEEQUIPMENT.getMessage());
+            return new Result(ResultCodeEnum.BATCHDELETEEQUIPMENTERROR.getCode(),ResultCodeEnum.BATCHDELETEEQUIPMENTERROR.getMessage());
         }
     }
     @CrossOrigin
@@ -225,28 +233,17 @@ public class EquipmentController {
                 Company c = companyService.queryById(e.getCompanyId());
                 e.setCompanyName(c.getCompanyName());
             }
-            Page page = new Page();
-            int totalCount = equipmentList.size();
-            page.setTotalCount(totalCount);
-            Page p = equipment.getPage();
-            int limit = p.getLimit();
-            page.setLimit(limit);
-            int totalPage = totalCount/limit + 1;
-            page.setTotalPage(totalPage);
-            String currentPageStr = p.getCurrentPage();
-            if(FIRST.equals(currentPageStr)){
-                currentPageStr = "1";
-            }else if(LAST.equals(currentPageStr)){
-                currentPageStr = String.valueOf(totalPage);
+            int size = equipmentList.size();
+            Page page = handlePage(size,equipment);
+            if(page == null){
+                return new Result(ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getCode(),ResultCodeEnum.QUERYEQUIPMENTPAGEERROR.getMessage());
             }
-            page.setCurrentPage(currentPageStr);
-            int currentPage = Integer.parseInt(currentPageStr);
-            PageHelper.startPage(currentPage,limit);
+            PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
             return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),equipmentList,page);
         }catch (Exception e){
             log.error("条件查询设备信息报错,",e);
             e.printStackTrace();
-            return new Result(ResultCodeEnum.QUERYEQUIPMENTBYOPTION.getCode(),ResultCodeEnum.QUERYEQUIPMENTBYOPTION.getMessage());
+            return new Result(ResultCodeEnum.QUERYEQUIPMENTBYOPTIONERROR.getCode(),ResultCodeEnum.QUERYEQUIPMENTBYOPTIONERROR.getMessage());
         }
     }
 }

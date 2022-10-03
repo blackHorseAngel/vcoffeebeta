@@ -28,4 +28,12 @@ public interface UserDAO extends BaseDAO {
      * @return com.example.zam.vcoffee.domain.User
      */
     public User queryByNameAndPassword(User user);
+    /**
+     * 根据用户编号和公司id查找用户
+     * @author zhangshenming
+     * @date 2022/10/3 10:52
+     * @param user
+     * @return com.vcoffeebeta.domain.User
+     */
+//    User findByUserNumberAndCompanyId(User user);
 }

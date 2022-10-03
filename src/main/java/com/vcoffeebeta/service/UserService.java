@@ -99,4 +99,12 @@ public interface UserService {
      * @return int
      */
     int queryForAmount();
+    /**
+     * 根据用户编号和公司id查询用户
+     * @author zhangshenming
+     * @date 2022/10/3 10:01
+     * @param user
+     * @return com.vcoffeebeta.domain.User
+     */
+//    User findByUserNumberAndCompanyId(User user);
 }

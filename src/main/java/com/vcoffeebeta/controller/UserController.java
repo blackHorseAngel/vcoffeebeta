@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.vcoffeebeta.domain.*;
 import com.vcoffeebeta.enums.ResultCodeEnum;
+import com.vcoffeebeta.service.AccountService;
 import com.vcoffeebeta.service.CompanyService;
 import com.vcoffeebeta.service.EquipmentService;
 import com.vcoffeebeta.service.UserService;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.awt.image.RescaleOp;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,10 +49,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private EquipmentService equipmentService;
-
-    @Autowired
-    private CompanyService companyService;
+    private AccountService accountService;
 
     @CrossOrigin
     @RequestMapping(value = "insertUser")
@@ -59,41 +57,22 @@ public class UserController {
     public Result insertUser(@RequestBody User user, HttpServletRequest request){
         log.info("进入insertUser方法");
         try{
-            HttpSession session = request.getSession();
-            User u = (User) session.getAttribute("user");
-            //新增用户默认密码
-            user.setPassword("123456");
-            user.setCreated(u.getUsername());
-            user.setModified(u.getUsername());
-            user.setCreatedTime(new Date());
-            user.setModifiedTime(new Date());
-            long companyId = user.getCompanyId();
-            List<Equipment>equipmentList;
-            StringBuilder equipmentIdBuilder = new StringBuilder();
-            if(companyId != 0){
-                equipmentList = equipmentService.findAllEquipmentsByCompanyId(companyId);
-                log.info("当前登录用户u所在公司下的所有的设备信息：" + JSON.toJSONString(equipmentList));
-            }else{
-                equipmentList = equipmentService.findAllEquipmentsByCompanyId(user.getCompanyId());
-                log.info("新增用户所在公司下的所有的设备信息：" + JSON.toJSONString(equipmentList));
-            }
-            //若新增用户所在的公司名下没有暂时没有设备，按0处理进行新增
-            if(equipmentList.size() == 0){
-                user.setEquipmentId("0");
-            }else{
-                for(Equipment e : equipmentList){
-                    long equipmentId = e.getId();
-                    equipmentIdBuilder.append(equipmentId);
-                    equipmentIdBuilder.append("|");
-                }
-                String equipmentIdStr = equipmentIdBuilder.toString();
-                equipmentIdStr = equipmentIdStr.substring(0,equipmentIdStr.length()-1);
-                user.setEquipmentId(equipmentIdStr);
-            }
-
+            user = handleUser(user,request);
             boolean flag = userService.insertUser(user);
-            equipmentIdBuilder.setLength(0);
             if(flag){
+                User newUser = userService.findByUserNumberAndCompanyId(user);
+                long newUserId = newUser.getId();
+                try{
+                    Account account = handleAccount(newUserId,request);
+                    boolean accountFlag = accountService.insertAccount(account);
+                    if(!accountFlag){
+                        return new Result(ResultCodeEnum.INSERTACCOUNTERROR.getCode(),ResultCodeEnum.INSERTACCOUNTERROR.getMessage());
+                    }
+                }catch(Exception e){
+                    log.error("新增账户报错",e);
+                    e.printStackTrace();
+                    return new Result(ResultCodeEnum.INSERTACCOUNTERROR.getCode(),ResultCodeEnum.INSERTACCOUNTERROR.getMessage());
+                }
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
             }else{
                 return new Result(ResultCodeEnum.INSERTUSERERROR.getCode(),ResultCodeEnum.INSERTUSERERROR.getMessage());
@@ -103,6 +82,45 @@ public class UserController {
             e.printStackTrace();
             return new Result(ResultCodeEnum.INSERTUSERERROR.getCode(),ResultCodeEnum.INSERTUSERERROR.getMessage());
         }
+    }
+    /**
+     * 新增前，对新的user对象进行赋值
+     * @author zhangshenming
+     * @date 2022/10/3 11:04
+     * @param user, request
+     * @return com.vcoffeebeta.domain.User
+     */
+    private User handleUser(User user,HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User u = (User) session.getAttribute("user");
+        //新增用户默认密码
+        user.setPassword("123456");
+        user.setCreated(u.getUsername());
+        user.setModified(u.getUsername());
+        user.setCreatedTime(new Date());
+        user.setModifiedTime(new Date());
+        return user;
+    }
+
+    /**
+     * 新增前，对新的account对象进行赋值
+     * @author zhangshenming
+     * @date 2022/10/3 11:01
+     * @param userId, user
+     * @return com.vcoffeebeta.domain.Account
+     */
+    private Account handleAccount(long userId,HttpServletRequest request){
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        Account account = new Account();
+        account.setUserId(userId);
+        //初始时每个账户充值100元
+        account.setRemaining(new BigDecimal(100));
+        account.setCreated(user.getUsername());
+        account.setModified(user.getUsername());
+        account.setCreatedTime(new Date());
+        account.setModifiedTime(new Date());
+        return account;
     }
     @CrossOrigin
     @ResponseBody
@@ -130,75 +148,53 @@ public class UserController {
                 //其他管理员查询的用户总数为其所在公司下的用户总数
                  amount = userService.queryForAmountByCompanyId(companyId);
                 log.info("当前用户是一般管理员。查询自己所在公司的用户数：" + amount);
-
             }
-            Page page = new Page();
-            page.setTotalCount(amount);
-            Page p = user.getPage();
-            int limit = p.getLimit();
-            if(limit != 0){
-                page.setLimit(limit);
-                int totalPage = amount/limit + 1;
-                page.setTotalPage(totalPage);
-                String currentPageStr = p.getCurrentPage();
-                if(currentPageStr == null){
-                    return new Result(ResultCodeEnum.QUERYUSERPAGEERROR.getCode(),ResultCodeEnum.QUERYUSERPAGEERROR.getMessage());
-                }else{
-                    if(FIRST.equals(currentPageStr)){
-                        currentPageStr = "1";
-                    }else if(LAST.equals(currentPageStr)){
-                        currentPageStr = String.valueOf(totalPage);
-                    }
-                    int currentPage = Integer.parseInt(currentPageStr);
-                    page.setCurrentPage(currentPageStr);
-                    log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
-                    PageHelper.startPage(currentPage,limit);
-                }
-            }else{
+            Page page = handlePage(amount,user);
+            if(page == null){
                 return new Result(ResultCodeEnum.QUERYUSERPAGEERROR.getCode(),ResultCodeEnum.QUERYUSERPAGEERROR.getMessage());
             }
+            PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
             List<User>userList = userService.findAllUsers();
-            for(User user1 : userList){
-                long userCompanyId = user1.getCompanyId();
-                if(userCompanyId == 0){
-                    return new Result(ResultCodeEnum.USERCOMPANYERROR.getCode(),ResultCodeEnum.USERCOMPANYERROR.getMessage());
-                }
-                Company c = companyService.queryById(user1.getCompanyId());
-                if(c == null){
-                    return new Result(ResultCodeEnum.QUERYCOMPANYERROR.getCode(),ResultCodeEnum.QUERYCOMPANYERROR.getMessage());
-                }
-                user1.setCompanyName(c.getCompanyName());
-                String equipmentIdStr = user1.getEquipmentId();
-                if(equipmentIdStr == null || "0".equals(equipmentIdStr)){
-                    user1.setEquipmentName("");
-                }else{
-                    String[]equipmentIds = equipmentIdStr.split("|");
-                    StringBuilder equipmentNameBuilder = new StringBuilder();
-                    String equipmentNameStr = "";
-                    for(String idStr : equipmentIds){
-                        if("|".equals(idStr)){
-                            continue;
-                        }
-                        long id = Long.parseLong(idStr);
-                        Equipment e = equipmentService.findById(id);
-                        if(e == null){
-                            return new Result(ResultCodeEnum.USEREQUIPMENTERROR.getCode(),ResultCodeEnum.USEREQUIPMENTERROR.getMessage());
-                        }
-                        equipmentNameBuilder.append(e.getEquipmentName());
-                        equipmentNameBuilder.append("|");
-                    }
-                    equipmentNameStr = equipmentNameBuilder.toString();
-                    equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
-                    user1.setEquipmentName(equipmentNameStr);
-                    equipmentNameBuilder.setLength(0);
-                }
-            }
             return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),userList,page);
         }catch(Exception e){
             log.error("查询全部用户信息报错,",e);
             e.printStackTrace();
             return new Result(ResultCodeEnum.QUERYALLUSERS.getCode(),ResultCodeEnum.QUERYALLUSERS.getMessage());
         }
+    }
+    /**
+     * 查询全部用户时候，处理分页page对象
+     * @author zhangshenming
+     * @date 2022/10/3 12:38
+     * @param amount, user
+     * @return com.vcoffeebeta.domain.Page
+     */
+    private Page handlePage(int amount,User user){
+        Page page = new Page();
+        page.setTotalCount(amount);
+        Page p = user.getPage();
+        int limit = p.getLimit();
+        if(limit != 0){
+            page.setLimit(limit);
+            int totalPage = amount/limit + 1;
+            page.setTotalPage(totalPage);
+            String currentPageStr = p.getCurrentPage();
+            if(currentPageStr == null){
+                return null;
+            }else{
+                if(FIRST.equals(currentPageStr)){
+                    currentPageStr = "1";
+                }else if(LAST.equals(currentPageStr)){
+                    currentPageStr = String.valueOf(totalPage);
+                }
+                int currentPage = Integer.parseInt(currentPageStr);
+                page.setCurrentPage(currentPageStr);
+                log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
+            }
+        }else{
+            return null;
+        }
+        return page;
     }
     @CrossOrigin
     @RequestMapping(value = "toUpdateUser")
@@ -221,7 +217,6 @@ public class UserController {
         }
 
     }
-
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "updateUser")
@@ -257,6 +252,16 @@ public class UserController {
             long id =user.getId();
             boolean flag = userService.deleteUser(id);
             if(flag){
+                try{
+                    boolean accountFlag = accountService.deleteByUserId(id);
+                    if(!accountFlag){
+                        return new Result(ResultCodeEnum.DELETEACCOUNTERROR.getCode(),ResultCodeEnum.DELETEACCOUNTERROR.getMessage());
+                    }
+                }catch (Exception e){
+                    log.error("userController中deleteUser方法内，删除当前用户的账户报错，",e);
+                    e.printStackTrace();
+                    return new Result(ResultCodeEnum.DELETEACCOUNTERROR.getCode(),ResultCodeEnum.DELETEACCOUNTERROR.getMessage());
+                }
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
             }else{
                 return new Result(ResultCodeEnum.DELETEUSER.getCode(),ResultCodeEnum.DELETEUSER.getMessage());
@@ -271,7 +276,7 @@ public class UserController {
     @ResponseBody
     @RequestMapping(value = "batchDeleteUsers")
     public Result batchDeleteUser(@RequestBody Map<String,List<String>>idMap){
-        log.info("进去batchDeleteUser方法" + JSON.toJSONString(idMap));
+        log.info("进入batchDeleteUser方法" + JSON.toJSONString(idMap));
         try{
           List<String>idList = idMap.get("ids");
           log.info("idList:" + JSON.toJSONString(idList));
@@ -300,45 +305,12 @@ public class UserController {
        log.info("前台传过来的user数据是：" + JSON.toJSONString(user));
        try{
            List<User>userList = userService.queryForList(user);
-           log.info("条件查询后的userList数据是：" + JSON.toJSONString(userList));
-           for(User u : userList){
-               Company c = companyService.queryById(u.getCompanyId());
-               u.setCompanyName(c.getCompanyName());
-               String equipmentIdStr = u.getEquipmentId();
-               String[] equipmentIds = equipmentIdStr.split("|");
-               StringBuilder builder = new StringBuilder();
-               String equipmentNameStr = "";
-               for(String s : equipmentIds){
-                   if("|".equals(s)){
-                       continue;
-                   }
-                   long equipmentId = Long.parseLong(s);
-                   Equipment e = equipmentService.findById(equipmentId);
-                   builder.append(e.getEquipmentName());
-                   builder.append("|");
-               }
-               equipmentNameStr = builder.toString();
-               equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
-               builder.setLength(0);
-               u.setEquipmentName(equipmentNameStr);
+           int size = userList.size();
+           Page page = handlePage(size,user);
+           if(page == null){
+               return new Result(ResultCodeEnum.QUERYUSERPAGEERROR.getCode(),ResultCodeEnum.QUERYUSERPAGEERROR.getMessage());
            }
-           Page page = new Page();
-           int totalCount = userList.size();
-           page.setTotalCount(totalCount);
-           Page p = user.getPage();
-           int limit = p.getLimit();
-           page.setLimit(limit);
-           int totalPage = totalCount/limit + 1;
-           page.setTotalPage(totalPage);
-           String currentPageStr = p.getCurrentPage();
-           if(FIRST.equals(currentPageStr)){
-               currentPageStr = "1";
-           }else if(LAST.equals(currentPageStr)){
-               currentPageStr = String.valueOf(totalPage);
-           }
-           page.setCurrentPage(currentPageStr);
-           int currentPage = Integer.parseInt(currentPageStr);
-           PageHelper.startPage(currentPage,limit);
+           PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
           return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),userList,page);
        }catch (Exception e){
            log.error("查询用户信息报错，",e);

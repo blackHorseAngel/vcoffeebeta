@@ -5,6 +5,9 @@
     <title>新增设备页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
     <script type="text/javascript">
+        /**
+         * 页面初始化，获取全部公司名称下拉列表
+         */
     window.onload = function() {
         const url = "/vcoffee/company/findAllCompanyNames"
         const xhr = new XMLHttpRequest();
@@ -22,7 +25,7 @@
                     companyNameSelector.appendChild(companyNameOption);
                 }
             }else{
-                console.error(res.message);
+                console.error("设备新增页面中，查询公司名称报错," + res.message);
                 window.location.href = "/error/error.html";
             }
         };
@@ -33,6 +36,9 @@
         xhr.send();
     }
 
+        /**
+         * 点击新增按钮，新增设备信息
+         */
     function insertEquipment() {
             const serialNumber = document.getElementById("serialNumber").value;
             const equipmentName = document.getElementById("equipmentName").value;
@@ -58,7 +64,7 @@
                     alert(res.message);
                     window.location.href = "/equipment/queryEquipment.html";
                 }else{
-                    alert(res.message);
+                    console.error("新增设备失败：" + res.message);
                     window.location.href = "/error/error.html";
                 }
             };
@@ -68,6 +74,10 @@
             };
             xhr.send(JSON.stringify(params));
         }
+
+        /**
+         * 返回主页面
+         */
         function  back() {
             window.location.href = "/home/home.html";
         }

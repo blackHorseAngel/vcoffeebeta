@@ -5,6 +5,9 @@
     <title>新增公司页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
     <script type="text/javascript">
+        /**
+         * 点击新增按钮，新增公司信息
+         */
         function insertCompany() {
             const companyName = document.getElementById("companyName").value;
             const companyNickName = document.getElementById("companyNickName").value;
@@ -41,6 +44,9 @@
             xhr.send(JSON.stringify(params));
         }
 
+        /**
+         * 返回主页面
+         */
         function back() {
             window.location.href = "/home/home.html";
         }

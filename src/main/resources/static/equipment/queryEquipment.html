@@ -5,11 +5,16 @@
     <title>查询设备页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css"/>
     <script type="text/javascript">
+        /**
+         * 清除设备pageDiv中内容
+         */
     function clearEquipmentPageDiv() {
       let pageDiv = document.getElementById("pageDiv");
       pageDiv.innerHTML = "";
     }
-
+        /**
+         * 条件查询设备内容信息
+         */
     function queryEquipmentPageWithOption() {
         clearEquipmentTbody();
         const serialNumber = document.getElementById("serialNumber").value;
@@ -30,68 +35,7 @@
             let res = JSON.parse(xhr.responseText);
             if(res.code === 1000){
                 alert(res.message);
-                for(let i = 0 ; i < res.data.length ; i++){
-                    let rowElement = document.createElement("tr");
-
-                    let checkboxCell = document.createElement("td");
-                    let checkBox = document.createElement("input");
-                    checkBox.setAttribute("type","checkbox");
-                    checkBox.setAttribute("name","idCheckBox");
-                    checkBox.setAttribute("id",res.data[i].id);
-                    checkboxCell.appendChild(checkBox);
-                    rowElement.appendChild(checkboxCell);
-
-                    let idCell = document.createElement("td");
-                    idCell.innerHTML = res.data[i].id;
-                    rowElement.appendChild(idCell);
-
-                    let serialNumberCell = document.createElement("td");
-                    serialNumberCell.innerHTML = res.data[i].serialNumber;
-                    rowElement.appendChild(serialNumberCell);
-
-                    let equipmentNameCell = document.createElement("td");
-                    equipmentNameCell.innerHTML = res.data[i].equipmentName;
-                    rowElement.appendChild(equipmentNameCell);
-
-                    let isUsedCell = document.createElement("td");
-                    isUsedCell.innerHTML = res.data[i].isUsed;
-                    rowElement.appendChild(isUsedCell);
-
-                    let companyNameCell = document.createElement("td");
-                    companyNameCell.innerHTML = res.data[i].companyName;
-                    rowElement.appendChild(companyNameCell);
-
-                    let attendantNameCell = document.createElement("td");
-                    attendantNameCell.innerHTML = res.data[i].attendantName;
-                    rowElement.appendChild(attendantNameCell);
-
-                    let attendantTelephoneNumberCell = document.createElement("td");
-                    attendantTelephoneNumberCell.innerHTML = res.data[i].attendantTelephoneNumber;
-                    rowElement.appendChild(attendantTelephoneNumberCell);
-
-                    let operateCell = document.createElement("td");
-
-                    let btnUpdate = document.createElement("button");
-                    btnUpdate.setAttribute("type","button");
-                    btnUpdate.setAttribute("value","修改");
-                    btnUpdate.setAttribute("id",res.data[i].id);
-                    btnUpdate.addEventListener("click",toUpdateEquipment);
-                    btnUpdate.innerHTML = "修改";
-                    operateCell.appendChild(btnUpdate);
-
-                    let btnDel = document.createElement("button");
-                    btnDel.setAttribute("type","button");
-                    btnDel.setAttribute("value","删除");
-                    btnDel.setAttribute("id",res.data[i].id);
-                    btnDel.innerHTML = "删除";
-                    operateCell.appendChild(btnDel);
-
-                    rowElement.appendChild(operateCell);
-
-                    let tbody = document.getElementById("equipmentTbody");
-                    tbody.appendChild(rowElement);
-
-                }
+                drawEquipmentTbody(res);
             }else{
                 console.error("条件查询设备分页信息报错，" + res.message);
                 window.location.href = "/error/error.html";
@@ -103,7 +47,9 @@
         };
         xhr.send(JSON.stringify(queryParams));
     }
-
+    /**
+     * 条件查询设备信息
+     */
     function queryEquipment() {
         const serialNumber = document.getElementById("serialNumber").value;
         const equipmentName = document.getElementById("equipmentName").value;
@@ -124,96 +70,9 @@
             if(res.code === 1000){
                 alert(res.message);
                 clearEquipmentTbody();
-                for(let i = 0 ; i < res.data.length ; i++){
-                    let rowElement = document.createElement("tr");
-
-                    let checkboxCell = document.createElement("td");
-                    let checkBox = document.createElement("input");
-                    checkBox.setAttribute("type","checkbox");
-                    checkBox.setAttribute("name","idCheckBox");
-                    checkBox.setAttribute("id",res.data[i].id);
-                    checkboxCell.appendChild(checkBox);
-                    rowElement.appendChild(checkboxCell);
-
-                    let idCell = document.createElement("td");
-                    idCell.innerHTML = res.data[i].id;
-                    rowElement.appendChild(idCell);
-
-                    let serialNumberCell = document.createElement("td");
-                    serialNumberCell.innerHTML = res.data[i].serialNumber;
-                    rowElement.appendChild(serialNumberCell);
-
-                    let equipmentNameCell = document.createElement("td");
-                    equipmentNameCell.innerHTML = res.data[i].equipmentName;
-                    rowElement.appendChild(equipmentNameCell);
-
-                    let isUsedCell = document.createElement("td");
-                    isUsedCell.innerHTML = res.data[i].isUsed;
-                    rowElement.appendChild(isUsedCell);
-
-                    let companyNameCell = document.createElement("td");
-                    companyNameCell.innerHTML = res.data[i].companyName;
-                    rowElement.appendChild(companyNameCell);
-
-                    let attendantNameCell = document.createElement("td");
-                    attendantNameCell.innerHTML = res.data[i].attendantName;
-                    rowElement.appendChild(attendantNameCell);
-
-                    let attendantTelephoneNumberCell = document.createElement("td");
-                    attendantTelephoneNumberCell.innerHTML = res.data[i].attendantTelephoneNumber;
-                    rowElement.appendChild(attendantTelephoneNumberCell);
-
-                    let operateCell = document.createElement("td");
-
-                    let btnUpdate = document.createElement("button");
-                    btnUpdate.setAttribute("type","button");
-                    btnUpdate.setAttribute("value","修改");
-                    btnUpdate.setAttribute("id",res.data[i].id);
-                    btnUpdate.addEventListener("click",toUpdateEquipment);
-                    btnUpdate.innerHTML = "修改";
-                    operateCell.appendChild(btnUpdate);
-
-                    let btnDel = document.createElement("button");
-                    btnDel.setAttribute("type","button");
-                    btnDel.setAttribute("value","删除");
-                    btnDel.setAttribute("id",res.data[i].id);
-                    btnDel.innerHTML = "删除";
-                    operateCell.appendChild(btnDel);
-
-                    rowElement.appendChild(operateCell);
-
-                    let tbody = document.getElementById("equipmentTbody");
-                    tbody.appendChild(rowElement);
-
-                }
+                drawEquipmentTbody(res);
                 clearEquipmentPageDiv();
-                let pageDiv = document.getElementById("pageDiv");
-                alert("返回的结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
-                let totalPage = res.page.totalPage;
-                alert("返回结果中的页码对象中的limit的属性值：" + res.page.limit);
-                let limit = res.page.limit;
-                alert("返回结果中的页码对象中的totalCount的属性值：" + res.page.totalCount);
-                let totalCount = res.page.totalCount;
-                let firstPageA = document.createElement("a");
-                firstPageA.setAttribute("id","first");
-                firstPageA.setAttribute("href","javascript:void(0)");
-                firstPageA.innerHTML = "首页&nbsp&nbsp";
-                firstPageA.addEventListener("click",queryEquipmentPageWithOption);
-                pageDiv.appendChild(firstPageA);
-                for(let i = 1 ; i <= totalPage ; i++){
-                    let pageA = document.createElement("a");
-                    pageA.setAttribute("id",""+i);
-                    pageA.setAttribute("href","javascript:void(0)");
-                    pageA.innerHTML = ""+i+"&nbsp&nbsp";
-                    pageA.addEventListener("click",queryEquipmentPageWithOption);
-                    pageDiv.appendChild(pageA);
-                }
-                let lastPageA = document.createElement("a");
-                lastPageA.setAttribute("id","last");
-                lastPageA.setAttribute("href","javascript:void(0)");
-                lastPageA.innerHTML = "&nbsp&nbsp最后一页";
-                lastPageA.addEventListener("click",queryEquipmentPageWithOption);
-                pageDiv.appendChild(lastPageA);
+                drawEquipmentPageDivWithOption(res);
             }else{
                 console.error("条件查询设备信息报错，" + res.message);
                 window.location.href = "/error/error.html";
@@ -225,17 +84,28 @@
         };
         xhr.send(JSON.stringify(queryParams));
     }
+    /**
+     * 清除设备表格中内容
+     */
     function clearEquipmentTbody() {
         let tbody = document.getElementById("equipmentTbody");
         tbody.innerText = "";
     }
+    /**
+     * 跳转到新增设备页面
+     */
     function toAddEquipment() {
         window.location.href = "/equipment/addEquipment.html";
     }
-
+    /**
+     * 跳转到更新设备页面
+     */
     function toUpdateEquipment() {
        window.location.href = "/equipment/updateEquipment.html?"+this.id;
     }
+    /**
+     * 分页查询设备信息
+     */
     function queryEquipmentPage(){
         clearEquipmentTbody();
         const url = "/vcoffee/equipment/findAllEquipment";
@@ -251,77 +121,22 @@
         xhr.onload = function () {
             let res = JSON.parse(xhr.responseText);
             if(res.code === 1000){
-                for(let i = 0 ; i < res.data.length ; i++){
-                    let rowElement = document.createElement("tr");
-
-                    let checkboxCell = document.createElement("td");
-                    let checkBox = document.createElement("input");
-                    checkBox.setAttribute("type","checkbox");
-                    checkBox.setAttribute("name","idCheckBox");
-                    checkBox.setAttribute("id",res.data[i].id);
-                    checkboxCell.appendChild(checkBox);
-                    rowElement.appendChild(checkboxCell);
-
-                    let idCell = document.createElement("td");
-                    idCell.innerHTML = res.data[i].id;
-                    rowElement.appendChild(idCell);
-
-                    let serialNumberCell = document.createElement("td");
-                    serialNumberCell.innerHTML = res.data[i].serialNumber;
-                    rowElement.appendChild(serialNumberCell);
-
-                    let equipmentNameCell = document.createElement("td");
-                    equipmentNameCell.innerHTML = res.data[i].equipmentName;
-                    rowElement.appendChild(equipmentNameCell);
-
-                    let isUsedCell = document.createElement("td");
-                    isUsedCell.innerHTML = res.data[i].isUsed;
-                    rowElement.appendChild(isUsedCell);
-
-                    let companyNameCell = document.createElement("td");
-                    companyNameCell.innerHTML = res.data[i].companyName;
-                    rowElement.appendChild(companyNameCell);
-
-                    let attendantNameCell = document.createElement("td");
-                    attendantNameCell.innerHTML = res.data[i].attendantName;
-                    rowElement.appendChild(attendantNameCell);
-
-                    let attendantTelephoneNumberCell = document.createElement("td");
-                    attendantTelephoneNumberCell.innerHTML = res.data[i].attendantTelephoneNumber;
-                    rowElement.appendChild(attendantTelephoneNumberCell);
-
-                    let operateCell = document.createElement("td");
-
-                    let btnUpdate = document.createElement("button");
-                    btnUpdate.setAttribute("type","button");
-                    btnUpdate.setAttribute("value","修改");
-                    btnUpdate.setAttribute("id",res.data[i].id);
-                    btnUpdate.addEventListener("click",toUpdateEquipment);
-                    btnUpdate.innerHTML = "修改";
-                    operateCell.appendChild(btnUpdate);
-
-                    let btnDel = document.createElement("button");
-                    btnDel.setAttribute("type","button");
-                    btnDel.setAttribute("value","删除");
-                    btnDel.setAttribute("id",res.data[i].id);
-                    btnDel.addEventListener("click",deleteEquipment);
-                    btnDel.innerHTML = "删除";
-                    operateCell.appendChild(btnDel);
-
-                    rowElement.appendChild(operateCell);
-
-                    let tbody = document.getElementById("equipmentTbody");
-                    tbody.appendChild(rowElement);
-                }
+                alert(res.message);
+                drawEquipmentTbody(res);
+            }else{
+                console.error("查询设备分页信息报错，" + JSON.parse(xhr.responseText).message);
+                window.location.href = "/error/error.html";
             }
         };
         xhr.onerror = function () {
-          console.error(JSON.parse(xhr.responseText).message);
+          console.error("查询设备分页信息报错，" + JSON.parse(xhr.responseText).message);
           window.location.href = "/error/error.html";
         };
         xhr.send(JSON.stringify(params));
     }
-
+    /**
+     * 删除设备信息，只是修改状态（从0未启用、1使用中到2）
+     */
     function deleteEquipment() {
         const url = "/vcoffee/equipment/deleteEquipment";
         const xhr = new XMLHttpRequest();
@@ -347,6 +162,9 @@
         xhr.send(JSON.stringify(delParam));
     }
 
+    /**
+     * 初始化页面，绘制设备信息表格
+     */
     window.onload = function () {
       const url = "/vcoffee/equipment/findAllEquipment";
       const xhr = new XMLHttpRequest();
@@ -361,95 +179,9 @@
       xhr.onload = function (e1) {
       let res = JSON.parse(xhr.responseText);
       if(res.code === 1000){
-        for(let i = 0 ; i < res.data.length ; i++){
-          let rowElement = document.createElement("tr");
-          let checkboxCell = document.createElement("td");
-          let checkBox = document.createElement("input");
-          checkBox.setAttribute("type","checkbox");
-          checkBox.setAttribute("name","idCheckBox");
-          checkBox.setAttribute("id",res.data[i].id);
-          checkboxCell.appendChild(checkBox);
-          rowElement.appendChild(checkboxCell);
-
-          let idCell = document.createElement("td");
-          idCell.innerHTML = res.data[i].id;
-          rowElement.appendChild(idCell);
-
-          let serialNumberCell = document.createElement("td");
-          serialNumberCell.innerHTML = res.data[i].serialNumber;
-          rowElement.appendChild(serialNumberCell);
-
-          let equipmentNameCell = document.createElement("td");
-          equipmentNameCell.innerHTML = res.data[i].equipmentName;
-          rowElement.appendChild(equipmentNameCell);
-
-          let isUsedCell = document.createElement("td");
-          isUsedCell.innerHTML = res.data[i].isUsed;
-          rowElement.appendChild(isUsedCell);
-
-          let companyNameCell = document.createElement("td");
-          companyNameCell.innerHTML = res.data[i].companyName;
-          rowElement.appendChild(companyNameCell);
-
-          let attendantNameCell = document.createElement("td");
-          attendantNameCell.innerHTML = res.data[i].attendantName;
-          rowElement.appendChild(attendantNameCell);
-
-          let attendantTelephoneNumberCell = document.createElement("td");
-          attendantTelephoneNumberCell.innerHTML = res.data[i].attendantTelephoneNumber;
-          rowElement.appendChild(attendantTelephoneNumberCell);
-
-          let operateCell = document.createElement("td");
-
-          let btnUpdate = document.createElement("button");
-          btnUpdate.setAttribute("type","button");
-          btnUpdate.setAttribute("value","修改");
-          btnUpdate.setAttribute("id",res.data[i].id);
-          btnUpdate.addEventListener("click",toUpdateEquipment);
-          btnUpdate.innerHTML = "修改";
-          operateCell.appendChild(btnUpdate);
-
-          let btnDel = document.createElement("button");
-          btnDel.setAttribute("type","button");
-          btnDel.setAttribute("value","删除");
-          btnDel.setAttribute("id",res.data[i].id);
-          btnDel.addEventListener("click",deleteEquipment);
-          btnDel.innerHTML = "删除";
-          operateCell.appendChild(btnDel);
-
-          rowElement.appendChild(operateCell);
-
-          let tbody = document.getElementById("equipmentTbody");
-          tbody.appendChild(rowElement);
-
-        }
-        let pageDiv = document.getElementById("pageDiv");
-        alert("返回的结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
-        let totalPage = res.page.totalPage;
-        alert("返回结果中的页码对象中的limit的属性值：" + res.page.limit);
-        let limit = res.page.limit;
-        alert("返回结果中的页码对象中的totalCount的属性值：" + res.page.totalCount);
-        let totalCount = res.page.totalCount;
-        let firstPageA = document.createElement("a");
-        firstPageA.setAttribute("id","first");
-        firstPageA.setAttribute("href","javascript:void(0)");
-        firstPageA.innerHTML = "首页&nbsp&nbsp";
-        firstPageA.addEventListener("click",queryEquipmentPage);
-        pageDiv.appendChild(firstPageA);
-        for(let i = 1 ; i <= totalPage ; i++){
-          let pageA = document.createElement("a");
-          pageA.setAttribute("id",""+i);
-          pageA.setAttribute("href","javascript:void(0)");
-          pageA.innerHTML = ""+i+"&nbsp&nbsp";
-          pageA.addEventListener("click",queryEquipmentPage);
-          pageDiv.appendChild(pageA);
-        }
-        let lastPageA = document.createElement("a");
-        lastPageA.setAttribute("id","last");
-        lastPageA.setAttribute("href","javascript:void(0)");
-        lastPageA.innerHTML = "&nbsp&nbsp最后一页";
-        lastPageA.addEventListener("click",queryEquipmentPage);
-        pageDiv.appendChild(lastPageA);
+        alert(res.message);
+        drawEquipmentTbody(res);
+        drawEquipmentPageDiv(res);
       }else{
           console.error("查询设备信息报错，" + res.message);
           window.location.href = "/error/error.html";
@@ -461,7 +193,9 @@
         };
         xhr.send(JSON.stringify(params));
     };
-
+        /**
+         * 批量删除设备信息
+         */
         function batchDeleteEquipment() {
             let ids = [];
             let data = document.getElementsByName("idCheckBox");
@@ -493,9 +227,148 @@
             };
             xhr.send(JSON.stringify(batchDeleteParams));
         }
-
+        /**
+         * 返回主页面
+         */
         function back() {
             window.location.href = "/home/home.html";
+        }
+
+        /**
+         * 绘制设备表格内容信息
+         * @param res
+         */
+        function drawEquipmentTbody(res) {
+            for(let i = 0 ; i < res.data.length ; i++){
+                let rowElement = document.createElement("tr");
+
+                let checkboxCell = document.createElement("td");
+                let checkBox = document.createElement("input");
+                checkBox.setAttribute("type","checkbox");
+                checkBox.setAttribute("name","idCheckBox");
+                checkBox.setAttribute("id",res.data[i].id);
+                checkboxCell.appendChild(checkBox);
+                rowElement.appendChild(checkboxCell);
+
+                let idCell = document.createElement("td");
+                idCell.innerHTML = res.data[i].id;
+                rowElement.appendChild(idCell);
+
+                let serialNumberCell = document.createElement("td");
+                serialNumberCell.innerHTML = res.data[i].serialNumber;
+                rowElement.appendChild(serialNumberCell);
+
+                let equipmentNameCell = document.createElement("td");
+                equipmentNameCell.innerHTML = res.data[i].equipmentName;
+                rowElement.appendChild(equipmentNameCell);
+
+                let isUsedCell = document.createElement("td");
+                isUsedCell.innerHTML = res.data[i].isUsed;
+                rowElement.appendChild(isUsedCell);
+
+                let companyNameCell = document.createElement("td");
+                companyNameCell.innerHTML = res.data[i].companyName;
+                rowElement.appendChild(companyNameCell);
+
+                let attendantNameCell = document.createElement("td");
+                attendantNameCell.innerHTML = res.data[i].attendantName;
+                rowElement.appendChild(attendantNameCell);
+
+                let attendantTelephoneNumberCell = document.createElement("td");
+                attendantTelephoneNumberCell.innerHTML = res.data[i].attendantTelephoneNumber;
+                rowElement.appendChild(attendantTelephoneNumberCell);
+
+                let operateCell = document.createElement("td");
+
+                let btnUpdate = document.createElement("button");
+                btnUpdate.setAttribute("type","button");
+                btnUpdate.setAttribute("value","修改");
+                btnUpdate.setAttribute("id",res.data[i].id);
+                btnUpdate.addEventListener("click",toUpdateEquipment);
+                btnUpdate.innerHTML = "修改";
+                operateCell.appendChild(btnUpdate);
+
+                let btnDel = document.createElement("button");
+                btnDel.setAttribute("type","button");
+                btnDel.setAttribute("value","删除");
+                btnDel.setAttribute("id",res.data[i].id);
+                btnDel.innerHTML = "删除";
+                operateCell.appendChild(btnDel);
+
+                rowElement.appendChild(operateCell);
+
+                let tbody = document.getElementById("equipmentTbody");
+                tbody.appendChild(rowElement);
+
+            }
+        }
+
+        /**
+         * 绘制设备pageDiv分页信息
+         * @param res
+         */
+        function drawEquipmentPageDiv(res) {
+            let pageDiv = document.getElementById("pageDiv");
+            alert("返回的结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
+            let totalPage = res.page.totalPage;
+            alert("返回结果中的页码对象中的limit的属性值：" + res.page.limit);
+            let limit = res.page.limit;
+            alert("返回结果中的页码对象中的totalCount的属性值：" + res.page.totalCount);
+            let totalCount = res.page.totalCount;
+            let firstPageA = document.createElement("a");
+            firstPageA.setAttribute("id","first");
+            firstPageA.setAttribute("href","javascript:void(0)");
+            firstPageA.innerHTML = "首页&nbsp&nbsp";
+            firstPageA.addEventListener("click",queryEquipmentPage);
+            pageDiv.appendChild(firstPageA);
+            for(let i = 1 ; i <= totalPage ; i++){
+                let pageA = document.createElement("a");
+                pageA.setAttribute("id",""+i);
+                pageA.setAttribute("href","javascript:void(0)");
+                pageA.innerHTML = ""+i+"&nbsp&nbsp";
+                pageA.addEventListener("click",queryEquipmentPage);
+                pageDiv.appendChild(pageA);
+            }
+            let lastPageA = document.createElement("a");
+            lastPageA.setAttribute("id","last");
+            lastPageA.setAttribute("href","javascript:void(0)");
+            lastPageA.innerHTML = "&nbsp&nbsp最后一页";
+            lastPageA.addEventListener("click",queryEquipmentPage);
+            pageDiv.appendChild(lastPageA);
+        }
+
+        /**
+         * 条件查询设备信息分页数据
+         * @param res
+         */
+        function drawEquipmentPageDivWithOption(res) {
+            let pageDiv = document.getElementById("pageDiv");
+            alert("返回的结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
+            let totalPage = res.page.totalPage;
+            alert("返回结果中的页码对象中的limit的属性值：" + res.page.limit);
+            let limit = res.page.limit;
+            alert("返回结果中的页码对象中的totalCount的属性值：" + res.page.totalCount);
+            let totalCount = res.page.totalCount;
+            let firstPageA = document.createElement("a");
+            firstPageA.setAttribute("id","first");
+            firstPageA.setAttribute("href","javascript:void(0)");
+            firstPageA.innerHTML = "首页&nbsp&nbsp";
+            firstPageA.addEventListener("click",queryEquipmentPageWithOption);
+            pageDiv.appendChild(firstPageA);
+            for(let i = 1 ; i <= totalPage ; i++){
+                let pageA = document.createElement("a");
+                pageA.setAttribute("id",""+i);
+                pageA.setAttribute("href","javascript:void(0)");
+                pageA.innerHTML = ""+i+"&nbsp&nbsp";
+                pageA.addEventListener("click",queryEquipmentPageWithOption);
+                pageDiv.appendChild(pageA);
+            }
+            let lastPageA = document.createElement("a");
+            lastPageA.setAttribute("id","last");
+            lastPageA.setAttribute("href","javascript:void(0)");
+            lastPageA.innerHTML = "&nbsp&nbsp最后一页";
+            lastPageA.addEventListener("click",queryEquipmentPageWithOption);
+            pageDiv.appendChild(lastPageA);
         }
     </script>
 </head>
