@@ -244,6 +244,8 @@
          * @param res
          */
     function drawUserTbody(res) {
+        alert(res.data);
+        alert(res.data.length);
         for(let i = 0 ; i < res.data.length ; i++){
             let rowElement = document.createElement("tr");
 
@@ -258,6 +260,10 @@
             let idCell = document.createElement("td");
             idCell.innerHTML = res.data[i].id;
             rowElement.appendChild(idCell);
+
+            let userNumberCell = document.createElement("td");
+            userNumberCell.innerHTML = res.data[i].userNumber;
+            rowElement.appendChild(userNumberCell);
 
             let userNameCell = document.createElement("td");
             userNameCell.innerHTML = res.data[i].username;
@@ -391,6 +397,7 @@
        <tr>
            <td>&nbsp;&nbsp;</td>
            <td>序号</td>
+           <td>用户编号</td>
            <td>用户姓名</td>
            <td>用户联系方式</td>
            <td>用户电子邮箱</td>

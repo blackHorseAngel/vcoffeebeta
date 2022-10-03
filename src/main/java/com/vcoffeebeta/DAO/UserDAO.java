@@ -35,5 +35,5 @@ public interface UserDAO extends BaseDAO {
      * @param user
      * @return com.vcoffeebeta.domain.User
      */
-//    User findByUserNumberAndCompanyId(User user);
+    User findByUserNumberAndCompanyId(User user);
 }

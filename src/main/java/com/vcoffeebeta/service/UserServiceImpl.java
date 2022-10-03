@@ -87,7 +87,24 @@ public class UserServiceImpl implements UserService {
         int userAmountByCompanyId = 0;
         try{
             userAmountByCompanyId = userDAO.queryForAmountByCompanyId(companyId);
-//            user.setUserNumber(userAmountByCompanyId + 1);
+            userAmountByCompanyId += 1;
+            String userAmountByCompanyIdStr = String.valueOf(userAmountByCompanyId);
+            int userAmountByCompanyIdStrLength = userAmountByCompanyIdStr.length();
+            String companyIdStr = String.valueOf(companyId);
+            int companyIdStrLength = companyIdStr.length();
+            // userNumber字段的数据库中的长度是10，依次公司id的字符串长度和当前公司下的员工数的字符串长度，剩下的需要补0
+            int zeroLength = 10 - userAmountByCompanyIdStrLength - companyIdStrLength;
+            StringBuilder builder = new StringBuilder();
+            builder.append(companyId);
+            builder.append(userAmountByCompanyId);
+            if(zeroLength > 0){
+                for(int i = 0 ; i < zeroLength ; i++){
+                    builder.append("0");
+                }
+            }
+            String userNumber = builder.toString();
+            builder.setLength(0);
+            user.setUserNumber(userNumber);
         }catch(Exception e){
             log.error("userService中获取userNumber报错，",e);
             e.printStackTrace();
@@ -259,10 +276,10 @@ public class UserServiceImpl implements UserService {
     public int queryForAmount() {
         return userDAO.queryForAmount();
     }
-    /*@Override
+    @Override
     public User findByUserNumberAndCompanyId(User user) {
         return userDAO.findByUserNumberAndCompanyId(user);
-    }*/
+    }
     @Override
     public boolean isExist(User user) {
         User u = userDAO.queryByNameAndPassword(user);

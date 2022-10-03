@@ -39,7 +39,7 @@
     </insert>
     <!-- 根据用户id查询账户信息 -->
     <select id="findByUserId" parameterType="long" resultMap="accountMap">
-        select <include refid="accountContent"/> from company
+        select <include refid="accountContent"/> from account
         <where>
             1=1
             <if test="userId != null">

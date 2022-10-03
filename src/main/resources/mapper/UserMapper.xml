@@ -6,6 +6,7 @@
     <!--查询使用的结果集-->
     <resultMap id="userMap" type="com.vcoffeebeta.domain.User">
         <id property="id" column="id"/>
+        <result property="userNumber" column="user_number"/>
         <result property="username" column="username"/>
         <result property="password" column="password"/>
         <result property="telephoneNumber" column="telephone_number"/>
@@ -21,11 +22,11 @@
         <result property="modifiedTime" column="modified_time"/>
     </resultMap>
     <sql id="userContent">
-       id,username,password,telephone_number,email,isAdmin,company_id,account_id,equipment_id,state,created,modified,created_time,modified_time
+       id,user_number,username,password,telephone_number,email,isAdmin,company_id,account_id,equipment_id,state,created,modified,created_time,modified_time
     </sql>
 
     <sql id="userContentForInsert">
-       username,password,telephone_number,email,isAdmin,company_id,account_id,equipment_id,state,created,modified,created_time,modified_time
+       user_number,username,password,telephone_number,email,isAdmin,company_id,account_id,equipment_id,state,created,modified,created_time,modified_time
     </sql>
     <!-- 新增一个用户 -->
     <insert id="insert" parameterType="com.vcoffeebeta.domain.User" useGeneratedKeys="true" keyProperty="id">
@@ -35,6 +36,7 @@
         </trim>
         values
          <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{userNumber},
             #{username},
             #{password},
             #{telephoneNumber},
@@ -90,7 +92,7 @@
     <select id="queryForAmountByCompanyId" parameterType="long" resultType="integer">
        select count(1) from user
        <where>
-          company_id = #{companyId} and state = 0
+          company_id = #{companyId}
        </where>
     </select>
     <!-- 根据用户姓名条件查询用户 -->
@@ -137,7 +139,10 @@
             email = #{email},
         </if>
         <if test="isAdmin != null">
-            isAdmin = #{isAdmin}
+            isAdmin = #{isAdmin},
+        </if>
+        <if test="accountId != 0">
+            account_id = #{accountId}
         </if>
         <where>
             <if test="id != 0">

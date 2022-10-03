@@ -58,24 +58,27 @@ public class UserController {
         log.info("进入insertUser方法");
         try{
             user = handleUser(user,request);
-            boolean flag = userService.insertUser(user);
-            if(flag){
+            boolean flagForInsert = userService.insertUser(user);
+            if(flagForInsert){
                 User newUser = userService.findByUserNumberAndCompanyId(user);
                 long newUserId = newUser.getId();
-                try{
-                    Account account = handleAccount(newUserId,request);
-                    boolean accountFlag = accountService.insertAccount(account);
-                    if(!accountFlag){
-                        return new Result(ResultCodeEnum.INSERTACCOUNTERROR.getCode(),ResultCodeEnum.INSERTACCOUNTERROR.getMessage());
-                    }
-                }catch(Exception e){
-                    log.error("新增账户报错",e);
-                    e.printStackTrace();
-                    return new Result(ResultCodeEnum.INSERTACCOUNTERROR.getCode(),ResultCodeEnum.INSERTACCOUNTERROR.getMessage());
+                Account account = handleAccount(newUserId,request);
+                boolean accountFlag = accountService.insertAccount(account);
+                Account oldAccount = null;
+                if(accountFlag){
+                   oldAccount = accountService.findByUserId(newUserId);
+                   long oldAccountId = oldAccount.getId();
+                    newUser.setAccountId(oldAccountId);
+                   boolean flagForUpdate = userService.updateUser(newUser);
+                   if(!flagForUpdate){
+                      return new Result(ResultCodeEnum.UPDATEUSER.getCode(),ResultCodeEnum.UPDATEUSER.getMessage());
+                   }
+                }else{
+                   return new Result(ResultCodeEnum.INSERTACCOUNTERROR.getCode(),ResultCodeEnum.INSERTACCOUNTERROR.getMessage());
                 }
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
             }else{
-                return new Result(ResultCodeEnum.INSERTUSERERROR.getCode(),ResultCodeEnum.INSERTUSERERROR.getMessage());
+              return new Result(ResultCodeEnum.INSERTUSERERROR.getCode(),ResultCodeEnum.INSERTUSERERROR.getMessage());
             }
         }catch(Exception e){
             log.error("新增用户报错,",e);

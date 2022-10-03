@@ -6,6 +6,7 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 账户实体类
@@ -50,8 +51,20 @@ public class Account {
      */
     private Date modifiedTime;
     /**
+     * 用户编号
+     */
+    private String userNumber;
+    /**
      * 用户名称
      */
     private String username;
+    /**
+     * 公司名称
+     */
+    private String companyName;
+    /**
+     * 设备名称
+     */
+    private String equipmentName;
 
 }

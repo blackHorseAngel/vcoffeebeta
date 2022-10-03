@@ -23,6 +23,10 @@ public class  User implements Serializable {
      */
     private long id;
     /**
+     * 用户编号
+     */
+    private String userNumber;
+    /**
      * 用户名
      */
     private String username;
