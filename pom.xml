@@ -14,7 +14,7 @@
     <name>vcoffeebeta</name>
     <description>vcoffee后台管理系统</description>
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>1.14</java.version>
     </properties>
     <dependencies>
         <!--
@@ -46,6 +46,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+           <!-- <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>-->
         </dependency>
         <!-- 启动热部署 -->
         <dependency>

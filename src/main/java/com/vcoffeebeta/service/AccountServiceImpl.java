@@ -30,6 +30,12 @@ public class AccountServiceImpl implements AccountService{
     }
 
     @Override
+    public boolean updateAccount(Account account) {
+        int num = accountDAO.update(account);
+        return num > 0 ? true : false;
+    }
+
+    @Override
     public boolean deleteByUserId(long userId) {
         int num = accountDAO.deleteByUserId(userId);
         return num > 0 ? true : false;

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新增消费页面</title>
+    <link rel="stylesheet" type="text/css" href="/css/pure-min.css">
+    <script type="text/javascript">
+
+
+
+    /**
+         * 初始化新增消费记录页面，用来控制补贴单选框是否隐藏
+         */
+        window.onload = function () {
+          const url = "/vcoffee/user/findUserById";
+          const xhr = new XMLHttpRequest();
+          xhr.open("POST",url,true);
+          xhr.setRequestHeader("content-Type","application/json");
+          xhr.onload = function () {
+             let res = JSON.parse(xhr.responseText);
+             if(res.code === 1000){
+                  if(res.data.isAdmin == 0){
+                      let typeForSubsidy = document.getElementById("typeForSubsidy");
+                      typeForSubsidy.disable = true;
+                  }
+             }else{
+                 console.error("初始化新增消费消息页面报错，",res.message);
+                 window.location.href = "/error/error.html";
+             }
+          };
+          xhr.onerror = function () {
+              console.error("初始化新增消费消息页面报错，",JSON.parse(xhr.responseText).message);
+              window.location.href = "/error/error.html";
+          };
+          xhr.send();
+        };
+
+    /**
+     * 单选框选择消费
+     */
+    function checkOnTypeForConsume() {
+        let type = document.getElementById("type");
+        let typeForConsume = document.getElementById("typeForConsume");
+        let typeForRefund = document.getElementById("typeForRefund");
+        let typeForSubsity = document.getElementById("typeForSubsidy");
+        if(typeForConsume.checked === true){
+            type.checked = false;
+            typeForRefund.checked = false;
+            typeForSubsity.checked = false;
+        }
+    }
+    /**
+     * 单选框选择补助
+     */
+    function checkOnTypeForSubsity() {
+        let type = document.getElementById("type");
+        let typeForConsume = document.getElementById("typeForConsume");
+        let typeForRefund = document.getElementById("typeForRefund");
+        let typeForSubsity = document.getElementById("typeForSubsidy");
+        if(typeForSubsity.checked === true){
+            type.checked = false;
+            typeForConsume.checked = false;
+            typeForRefund.checked = false;
+        }
+    }
+
+    /**
+     * 单选框选择退卡选项处理
+     */
+    function checkOnTypeForRefund() {
+        let type = document.getElementById("type");
+        let typeForConsume = document.getElementById("typeForConsume");
+        let typeForRefund = document.getElementById("typeForRefund");
+        let typeForSubsity = document.getElementById("typeForSubsidy");
+        if(typeForRefund.checked === true){
+            type.checked = false;
+            typeForConsume.checked = false;
+            typeForSubsity.checkeed = false;
+        }
+    }
+    /**
+     * 单选框选择充值选项的处理
+     */
+    function checkOnType() {
+        let type = document.getElementById("type");
+        let typeForConsume = document.getElementById("typeForConsume");
+        let typeForRefund = document.getElementById("typeForRefund");
+        let typeForSubsity = document.getElementById("typeForSubsidy");
+        if(type.checked === true){
+            typeForConsume.checked = false;
+            typeForRefund.checked = false;
+            typeForSubsity.checked = false;
+        }
+    }
+
+    /**
+     * 新增消费记录
+     */
+    function insertConsume() {
+        const type = getTpeRadioValue();
+        const amount = document.getElementById("amount").value;
+        const insertParam = {
+          "type":type,
+          "amount":amount
+        };
+        const url = "/vcoffee/consume/insertConsume";
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST",url,true);
+        xhr.setRequestHeader("content-Type","application/json");
+        xhr.onload = function () {
+            let res = JSON.parse(xhr.responseText);
+            if(res.code === 1000){
+                alert(res.message);
+                window.location.href = "/consume/queryConsume.html";
+            }else{
+                console.error("" + res.message);
+                window.location.href = "/error/error.html";
+            }
+        };
+        xhr.onerror = function () {
+            console.error("" + JSON.parse(xhr.responseText).message);
+            window.location.href = "/error/error.html";
+        };
+        xhr.send(JSON.stringify(insertParam));
+
+     }
+
+     /**
+      * 获取操作类型单选框的值
+      * @returns {*}
+      */
+     function getTpeRadioValue() {
+       let type = document.getElementById("type");
+       let typeForConsume = document.getElementById("typeForConsume");
+       let typeForSubsity = document.getElementById("typeForSubsidy");
+       let typeForRefund = document.getElementById("typeForRefund");
+       let typeValue = null;
+       let typeForConsumeValue = null;
+       let typeForSubsityValue = null;
+       let typeForRefundValue = null;
+       if(type.checked === true){
+           typeValue = type.value;
+           return typeValue;
+       }else if(typeForConsume.checked === true){
+           typeForConsumeValue =typeForConsume.value;
+           return typeForConsumeValue;
+       }else if(typeForRefund.checked === true){
+           typeForRefundValue = typeForRefund.value;
+           return typeForRefundValue;
+       }else if(typeForSubsity.checked === true){
+           typeForSubsityValue = typeForSubsity.value;
+           return typeForSubsityValue;
+       }
+     }
+
+    /**
+     * 返回主页面
+     */
+    function back() {
+        window.location.href = "/home/home.html";
+     }
+    </script>
+</head>
+<body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
+  <form class="pure-form pure-form-aligned" method="post">
+      <fieldset>
+          <div class="pure-controls">
+              <legend align="center">新增消费记录</legend>
+          </div>
+          <div class="pure-control-group" align="center">
+              <label for="type">操作类型</label>
+              <input type="radio" id="type" name="type" value="0" onclick="checkOnType()"/>充值
+              <input type="radio" id="typeForConsume" name="typeForConsume" value="1" onclick="checkOnTypeForConsume()"/> 消费
+              <input type="radio" id="typeForSubsidy" name="typeForSubsity" value="2" onclick="checkOnTypeForSubsity()"/>补助
+              <input type="radio" id="typeForRefund" name="typeForRefund" value="3" onclick="checkOnTypeForRefund()"/>退卡
+          </div>
+          <div class="pure-control-group" align="center">
+              <label for="amount">金额</label>
+              <input type="number" id="amount" name="amount" placeholder="金额"/>
+          </div>
+          <div class="pure-control-group" align="center">
+             <button type="button" class="pure-button pure-button-primary" onclick="insertConsume()">新增</button>
+             <button type="reset" class="pure-button pure-button-primary">取消</button>
+             <button type="button" class="pure-button pure-button-primary" onclick="back()">返回</button>
+          </div>
+      </fieldset>
+
+  </form>
+</body>
+</html>

@@ -144,6 +144,12 @@
         <if test="accountId != 0">
             account_id = #{accountId}
         </if>
+        <if test="modified != null">
+            modified = #{modified}
+        </if>
+        <if test="modifiedTime != null">
+            modified_time = #{modifiedTime}
+        </if>
         <where>
             <if test="id != 0">
                 id = #{id}

@@ -48,6 +48,27 @@
             and state = 0
         </where>
     </select>
+    <!-- 根据id更新账户信息 -->
+    <update id="update" parameterType="com.vcoffeebeta.domain.Account">
+      update account
+      set
+      <if test="remaining >= 0">
+         remaining = #{remaining}
+      </if>
+      <if test="modified != null">
+          modified = #{modified}
+      </if>
+      <if test="modifiedTime != null">
+          modified_time = #{modifiedTime}
+      </if>
+      <where>
+        <if test="id!=null &amp;&amp; id != 0">
+            id = #{id}
+        </if>
+        and state = 0
+      </where>
+
+    </update>
     <!-- 根据用户id删除其账户信息,实际上是修改账户的状态state，0：账户状态正常；1：已删除的账户（页面上不展示，数据库可查） -->
     <update id="deleteByUserId" parameterType="int">
         update  account

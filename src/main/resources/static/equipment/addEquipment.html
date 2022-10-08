@@ -42,7 +42,7 @@
     function insertEquipment() {
             const serialNumber = document.getElementById("serialNumber").value;
             const equipmentName = document.getElementById("equipmentName").value;
-            const isUsed = document.getElementById("isUsed").value;
+            const isUsed = getIsUsedRadioValue();
             const companyId = document.getElementById("companyId").value;
             const attendantName = document.getElementById("attendantName").value;
             const attendantTelephoneNumber = document.getElementById("attendantTelephoneNumber").value;
@@ -74,7 +74,24 @@
             };
             xhr.send(JSON.stringify(params));
         }
-
+        /**
+         * 获取单选框的值
+         * @returns {*}
+         */
+        function getIsUsedRadioValue(){
+            let isUsed = document.getElementById("isUsed");
+            let isNotUsed = document.getElementById("isNotUsed");
+            let isUsedValue = null;
+            let isNotUsedValue = null;
+            if(isUsed.checked === true){
+                isUsedValue = isUsed.value;
+                return isUsedValue;
+            }
+            if(isNotUsed.checked === true){
+                isNotUsedValue = isNotUsed.value;
+                return isNotUsedValue;
+            }
+        }
         /**
          * 返回主页面
          */
@@ -83,7 +100,7 @@
         }
     </script>
 </head>
-<body>
+<body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
     <form class="pure-form pure-form-aligned" method="post">
         <fieldset>
             <div class="pure-controls">

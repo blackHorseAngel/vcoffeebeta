@@ -26,6 +26,14 @@ public interface AccountService {
      */
     Account findByUserId(long userId);
     /**
+     * 更新账户信息
+     * @author zhangshenming
+     * @date 2022/10/7 16:52
+     * @param account
+     * @return boolean
+     */
+    boolean updateAccount(Account account);
+    /**
      * 根据用户id删除账户信息
      * @author zhangshenming
      * @date 2022/10/2 23:45

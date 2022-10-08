@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.vcoffeebeta.DAO.ConsumeDAO">
+    <!--查询使用的结果集-->
+    <resultMap id="consumeMap" type="com.vcoffeebeta.domain.Consume">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="accountId" column="account_id"/>
+        <result property="type" column="type"/>
+        <result property="amount" column="amount"/>
+        <result property="operator" column="operator"/>
+        <result property="operateDate" column="operate_date"/>
+        <result property="consumeNumber" column="consume_number"/>
+    </resultMap>
+    <sql id="consumeContent">
+        id,user_id,account_id,type,amount,operator,operate_date,consume_number
+    </sql>
+    <sql id="consumeContentForInsert">
+        user_id,account_id,type,amount,operator,operate_date,consume_number
+    </sql>
+    <!-- 新增一条消费记录 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" >
+        insert into consume
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <include refid="consumeContentForInsert"/>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{userId},
+            #{accountId},
+            #{type},
+            #{amount},
+            #{operator},
+            #{operateDate},
+            #{consumeNumber}
+        </trim>
+    </insert>
+    <!-- 根据当前用户id的当前账户下的查询消费信息 -->
+    <select id="findAll" parameterType="long" resultMap="consumeMap">
+        select <include refid="consumeContent"/> from consume
+        <where>
+            1=1
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+            <if test="accountId != null">
+                and account_id = #{accountId}
+            </if>
+            <if test="operator != null">
+                and operator = #{operator}
+            </if>
+            <if test="operatorDate != null">
+                and operate_date = #{operateDate}
+            </if>
+            order by operate_date desc
+        </where>
+    </select>
+    <!-- 条件查询消费记录信息 -->
+    <select id="queryForList" parameterType="com.vcoffeebeta.domain.Consume" resultMap="consumeMap">
+       select <include refid="consumeContent"/> from consume
+       <where>
+           1=1
+           <if test="userId != null &amp;&amp; userId != 0">
+               and user_id = #{userId}
+           </if>
+           <if test="startDate != null &amp;&amp; endDate != null">
+               and operate_date between startDate and endDate
+           </if>
+           order by operate_date desc
+       </where>
+    </select>
+    <!-- 查询全部消费条数 -->
+    <select id="queryForAmount" resultType="int">
+        select count(1) from consume
+    </select>
+    <!-- 根据用户id查询当前用户名下的消费记录数 -->
+    <select id="queryForAmountByUserId" resultType="int">
+        select count(1) from consume
+        <where>
+        <if test="userId !=null ">
+            user_id = #{userId}
+        </if>
+         order by operate_date desc
+        </where>
+    </select>
+</mapper>
