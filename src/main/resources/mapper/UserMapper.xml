@@ -173,10 +173,10 @@
         update user
         set
         <if test="password != null &amp;&amp; password != ''">
-            password = #{password}
+            password = #{password},
         </if>
          <if test="modified != null &amp;&amp; modified != ''">
-             modified = #{modified}
+             modified = #{modified},
          </if>
          <if test="modifiedTime != null">
              modified_time = #{modifiedTime}

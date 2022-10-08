@@ -53,10 +53,10 @@
       update account
       set
       <if test="remaining >= 0">
-         remaining = #{remaining}
+         remaining = #{remaining},
       </if>
       <if test="modified != null">
-          modified = #{modified}
+          modified = #{modified},
       </if>
       <if test="modifiedTime != null">
           modified_time = #{modifiedTime}

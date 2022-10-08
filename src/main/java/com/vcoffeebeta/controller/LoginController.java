@@ -165,20 +165,20 @@ public class LoginController {
         try{
             HttpSession session = request.getSession();
             User u = (User) session.getAttribute("user");
-            String password = user.getPassword();
+            String password = u.getPassword();
             String newPassword = user.getNewPassword();
             String confirmPassword = user.getConfirmPassword();
           if (password.equals(newPassword)){
              return new Result(ResultCodeEnum.PASSWORDCONSISTENCEERROR.getCode(),ResultCodeEnum.PASSWORDCONSISTENCEERROR.getMessage());
           }
           boolean flagForPassword = Validation.validatePassword(newPassword,confirmPassword);
-          if(flagForPassword){
+          if(!flagForPassword){
               return new Result(ResultCodeEnum.PASSWORDCONFIRMERROR.getCode(),ResultCodeEnum.PASSWORDCONFIRMERROR.getMessage());
           }
           u.setPassword(newPassword);
           u.setModified(u.getUsername());
           u.setModifiedTime(new Date());
-          boolean flagForChangePassword = userService.changePassword(user);
+          boolean flagForChangePassword = userService.changePassword(u);
           if(flagForChangePassword){
               return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
           }else{
