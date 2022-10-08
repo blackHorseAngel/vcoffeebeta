@@ -280,6 +280,13 @@ public class UserServiceImpl implements UserService {
     public User findByUserNumberAndCompanyId(User user) {
         return userDAO.findByUserNumberAndCompanyId(user);
     }
+
+    @Override
+    public boolean changePassword(User user) {
+        int num = userDAO.changePassword(user);
+        return num > 0 ? true : false;
+    }
+
     @Override
     public boolean isExist(User user) {
         User u = userDAO.queryByNameAndPassword(user);

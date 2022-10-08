@@ -36,4 +36,12 @@ public interface UserDAO extends BaseDAO {
      * @return com.vcoffeebeta.domain.User
      */
     User findByUserNumberAndCompanyId(User user);
+    /**
+     * 更改密码
+     * @author zhangshenming
+     * @date 2022/10/8 20:28
+     * @param user
+     * @return int
+     */
+    int changePassword(User user);
 }

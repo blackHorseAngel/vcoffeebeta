@@ -157,7 +157,41 @@ public class LoginController {
         }
     }
 
-    @GetMapping(value = "logging")
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "updatePassword")
+    public Result changePassword(@RequestBody User user,HttpServletRequest request){
+        log.info("进入loginController的changePassword方法内");
+        try{
+            HttpSession session = request.getSession();
+            User u = (User) session.getAttribute("user");
+            String password = user.getPassword();
+            String newPassword = user.getNewPassword();
+            String confirmPassword = user.getConfirmPassword();
+          if (password.equals(newPassword)){
+             return new Result(ResultCodeEnum.PASSWORDCONSISTENCEERROR.getCode(),ResultCodeEnum.PASSWORDCONSISTENCEERROR.getMessage());
+          }
+          boolean flagForPassword = Validation.validatePassword(newPassword,confirmPassword);
+          if(flagForPassword){
+              return new Result(ResultCodeEnum.PASSWORDCONFIRMERROR.getCode(),ResultCodeEnum.PASSWORDCONFIRMERROR.getMessage());
+          }
+          u.setPassword(newPassword);
+          u.setModified(u.getUsername());
+          u.setModifiedTime(new Date());
+          boolean flagForChangePassword = userService.changePassword(user);
+          if(flagForChangePassword){
+              return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
+          }else{
+              return new Result(ResultCodeEnum.CHANGEPASSWORDERROR.getCode(),ResultCodeEnum.CHANGEPASSWORDERROR.getMessage());
+          }
+
+        }catch (Exception e){
+            log.error("更新用户密码失败",e);
+            e.printStackTrace();
+            return new Result(ResultCodeEnum.CHANGEPASSWORDERROR.getCode(),ResultCodeEnum.CHANGEPASSWORDERROR.getMessage());
+        }
+    }
+   /* @GetMapping(value = "logging")
     public String logging(){
         log.info("测试vue");
         StringBuilder builder = new StringBuilder();
@@ -183,6 +217,6 @@ public class LoginController {
         builder.append("</body>");
         builder.append("</html>");
         return builder.toString();
-    }
+    }*/
 
 }

@@ -179,7 +179,15 @@ public enum ResultCodeEnum {
     /**
      *
      */
-    SESSIONERROR("服务器session数据丢失",1500);
+    SESSIONERROR("服务器session数据丢失",1500),
+    /**
+     *
+     */
+    CHANGEPASSWORDERROR("更新密码失败",1501),
+    /**
+     *
+     */
+    PASSWORDCONSISTENCEERROR("原密码和新密码一致不符合修改密码规则",1502);
     /**
      * 返回码信息
      */

@@ -94,4 +94,8 @@ public class  User implements Serializable {
      * 用户页面的分页数据
      */
     private Page page;
+    /**
+     * 新密码
+     */
+    private String newPassword;
 }

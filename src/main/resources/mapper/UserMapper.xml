@@ -162,4 +162,23 @@
             </if>
         </where>
     </update>
+    <!-- 用户更改密码 -->
+    <update id="changePassword" parameterType="com.vcoffeebeta.domain.User">
+        update user
+        set
+        <if test="password != null &amp;&amp; password != ''">
+            password = #{password}
+        </if>
+         <if test="modified != null &amp;&amp; modified != ''">
+             modified = #{modified}
+         </if>
+         <if test="modifiedTime != null">
+             modified_time = #{modifiedTime}
+         </if>
+         <where>
+             <if test="id != 0">
+                 id = #{id}
+             </if>
+         </where>
+    </update>
 </mapper>
