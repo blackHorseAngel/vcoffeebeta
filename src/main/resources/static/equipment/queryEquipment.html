@@ -124,7 +124,7 @@
                 alert(res.message);
                 drawEquipmentTbody(res);
             }else{
-                console.error("查询设备分页信息报错，" + JSON.parse(xhr.responseText).message);
+                console.error("查询设备分页信息报错，" + res.message);
                 window.location.href = "/error/error.html";
             }
         };
@@ -239,6 +239,7 @@
          * @param res
          */
         function drawEquipmentTbody(res) {
+            alert("后台传送过来的数据总数是： " + res.data.length);
             for(let i = 0 ; i < res.data.length ; i++){
                 let rowElement = document.createElement("tr");
 
@@ -292,6 +293,7 @@
                 btnDel.setAttribute("type","button");
                 btnDel.setAttribute("value","删除");
                 btnDel.setAttribute("id",res.data[i].id);
+                btnUpdate.addEventListener("click",deleteEquipment);
                 btnDel.innerHTML = "删除";
                 operateCell.appendChild(btnDel);
 

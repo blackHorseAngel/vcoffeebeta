@@ -93,7 +93,7 @@ public class EquipmentController {
         }
     }
     /**
-     *
+     * 整理页码信息并返回
      * @author zhangshenming
      * @date 2022/10/3 16:02
      * @param amount, equipment
@@ -117,7 +117,6 @@ public class EquipmentController {
                 }else if(LAST.equals(currentPageStr)){
                     currentPageStr = String.valueOf(totalPage);
                 }
-                int currentPage = Integer.parseInt(currentPageStr);
                 page.setCurrentPage(currentPageStr);
                 log.info("page对象中的全部属性值：" + JSONObject.toJSONString(page));
 

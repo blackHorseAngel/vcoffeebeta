@@ -175,6 +175,18 @@ public enum ResultCodeEnum {
     /**
      *
      */
+    INSERTCONSUMEERROR("新增一条消费记录报错",5010),
+    /**
+     *
+     */
+    QUERYALLCONSUMESERROR("查询当前用户的所有消费记录报错",5011),
+    /**
+     *  
+     */
+    QUERYCONSUMEPAGEERROR("条件查询当前用户的消费记录报错",5012),
+    /**
+     *
+     */
     INTERNALERROR("服务器报错",500),
     /**
      *

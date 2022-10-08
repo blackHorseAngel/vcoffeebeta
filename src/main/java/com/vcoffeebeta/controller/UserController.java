@@ -1,29 +1,18 @@
 package com.vcoffeebeta.controller;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.*;
 import com.github.pagehelper.PageHelper;
 import com.vcoffeebeta.domain.*;
 import com.vcoffeebeta.enums.ResultCodeEnum;
-import com.vcoffeebeta.service.AccountService;
-import com.vcoffeebeta.service.CompanyService;
-import com.vcoffeebeta.service.EquipmentService;
-import com.vcoffeebeta.service.UserService;
+import com.vcoffeebeta.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -60,22 +49,7 @@ public class UserController {
             user = handleUser(user,request);
             boolean flagForInsert = userService.insertUser(user);
             if(flagForInsert){
-                User newUser = userService.findByUserNumberAndCompanyId(user);
-                long newUserId = newUser.getId();
-                Account account = handleAccount(newUserId,request);
-                boolean accountFlag = accountService.insertAccount(account);
-                Account oldAccount = null;
-                if(accountFlag){
-                   oldAccount = accountService.findByUserId(newUserId);
-                   long oldAccountId = oldAccount.getId();
-                    newUser.setAccountId(oldAccountId);
-                   boolean flagForUpdate = userService.updateUser(newUser);
-                   if(!flagForUpdate){
-                      return new Result(ResultCodeEnum.UPDATEUSER.getCode(),ResultCodeEnum.UPDATEUSER.getMessage());
-                   }
-                }else{
-                   return new Result(ResultCodeEnum.INSERTACCOUNTERROR.getCode(),ResultCodeEnum.INSERTACCOUNTERROR.getMessage());
-                }
+
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());
             }else{
               return new Result(ResultCodeEnum.INSERTUSERERROR.getCode(),ResultCodeEnum.INSERTUSERERROR.getMessage());
@@ -105,26 +79,7 @@ public class UserController {
         return user;
     }
 
-    /**
-     * 新增前，对新的account对象进行赋值
-     * @author zhangshenming
-     * @date 2022/10/3 11:01
-     * @param userId, user
-     * @return com.vcoffeebeta.domain.Account
-     */
-    private Account handleAccount(long userId,HttpServletRequest request){
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
-        Account account = new Account();
-        account.setUserId(userId);
-        //初始时每个账户充值100元
-        account.setRemaining(new BigDecimal(100));
-        account.setCreated(user.getUsername());
-        account.setModified(user.getUsername());
-        account.setCreatedTime(new Date());
-        account.setModifiedTime(new Date());
-        return account;
-    }
+
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "findAllUsers")
@@ -320,5 +275,24 @@ public class UserController {
            e.printStackTrace();
            return new Result(ResultCodeEnum.QUERYUSERERROR.getCode(),ResultCodeEnum.QUERYUSERERROR.getMessage());
        }
+    }
+    @CrossOrigin
+    @ResponseBody
+    @RequestMapping(value = "findUserById")
+    public Result findUserById(HttpServletRequest request){
+        log.info("进入findUserById方法内");
+        try{
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
+           user = userService.findById(user.getId());
+           if(user == null){
+              return new Result(ResultCodeEnum.QUERYUSERERROR.getCode(),ResultCodeEnum.QUERYUSERERROR.getMessage());
+           }
+           return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),user);
+        }catch(Exception e){
+            log.error("根据用户id查找用户报错",e);
+            e.printStackTrace();
+            return new Result(ResultCodeEnum.QUERYUSERERROR.getCode(),ResultCodeEnum.QUERYUSERERROR.getMessage());
+        }
     }
 }

@@ -1,19 +1,15 @@
 package com.vcoffeebeta.service;
 
 import com.alibaba.fastjson.JSON;
-import com.vcoffeebeta.DAO.AccountDAO;
-import com.vcoffeebeta.DAO.CompanyDAO;
-import com.vcoffeebeta.DAO.EquipmentDAO;
-import com.vcoffeebeta.DAO.UserDAO;
-import com.vcoffeebeta.domain.Company;
-import com.vcoffeebeta.domain.Equipment;
-import com.vcoffeebeta.domain.User;
+import com.vcoffeebeta.DAO.*;
+import com.vcoffeebeta.domain.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * loginService实现类
@@ -25,7 +21,10 @@ import java.util.List;
 @Slf4j
 @Transactional(rollbackFor = Exception.class)
 public class UserServiceImpl implements UserService {
-
+    /**
+     * 常数
+     */
+    public static final int TWO = 2;
 
     @Autowired
     private UserDAO userDAO;
@@ -112,7 +111,47 @@ public class UserServiceImpl implements UserService {
         }
         log.info("userService中新增前user数据是： " + JSON.toJSONString(user));
         int num = userDAO.insert(user);
-        return num > 0 ? true:false;
+        if(num > 0){
+            User newUser = userDAO.findByUserNumberAndCompanyId(user);
+            long newUserId = newUser.getId();
+            Account account = handleAccount(newUserId,user);
+            int accountNum = accountDAO.insert(account);
+            Account oldAccount = null;
+            if(accountNum > 0){
+                oldAccount = accountDAO.findByUserId(newUserId);
+                long oldAccountId = oldAccount.getId();
+                newUser.setAccountId(oldAccountId);
+                int updateUserNum = userDAO.update(newUser);
+                if(updateUserNum > 0){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * 新增前，对新的account对象进行赋值
+     * @author zhangshenming
+     * @date 2022/10/3 11:01
+     * @param userId, user
+     * @return com.vcoffeebeta.domain.Account
+     */
+    private Account handleAccount(long userId,User user){
+        Account account = new Account();
+        account.setUserId(userId);
+        //初始时每个账户充值100元
+        account.setRemaining(new BigDecimal(100));
+        account.setCreated(user.getCreated());
+        account.setModified(user.getModified());
+        account.setCreatedTime(new Date());
+        account.setModifiedTime(new Date());
+        return account;
     }
     @Override
     public List<User> findAllUsers() {
@@ -188,7 +227,20 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public User findById(long id) {
-        return (User) userDAO.findById(id);
+        log.info("进入userService的findById方法内");
+        User user = null;
+        try{
+           user = (User) userDAO.findById(id);
+           if(user.getIsAdmin() != TWO){
+               Company c = (Company) companyDAO.findById(user.getCompanyId());
+               user.setCompanyName(c.getCompanyName());
+           }
+            return user;
+        }catch(Exception e){
+            log.error("userService的findById方法报错，",e);
+           e.printStackTrace();
+           return null;
+        }
     }
     @Override
     public boolean deleteUser(long id) {

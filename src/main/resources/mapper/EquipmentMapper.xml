@@ -62,7 +62,7 @@
         and isUsed != 2
         order by modified_time desc
     </select>
-    <!--  -->
+    <!-- 条件查询设备信息 -->
     <select id="queryForList" parameterType="com.vcoffeebeta.domain.Equipment" resultMap="equipmentMap">
         select <include refid="equipmentContent"/> from equipment
         <where>
@@ -109,6 +109,12 @@
          </if>
          <if test="attendantTelephoneNumber != null">
              attendant_telephone_number = #{attendantTelephoneNumber}
+         </if>
+         <if test="modified != null">
+            modified = #{modified}
+         </if>
+         <if test="modifiedTime != null">
+            modified_time = #{modifiedTime}
          </if>
          <where>
              <if test="id != 0">
