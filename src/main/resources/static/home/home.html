@@ -5,6 +5,50 @@
     <title>主页页面</title>
     <link rel="stylesheet" type="text/css" href="/css/pure-min.css">
     <script type="text/javascript">
+        /**
+        * 初始化页面获取菜单列表
+        */
+        window.onload = function () {
+           const url = "/vcoffee/user/findUserById";
+           const xhr = new XMLHttpRequest();
+           xhr.open("POST",url,true);
+           xhr.setRequestHeader("content-Type","application/json");
+           xhr.onload = function () {
+             let res = JSON.parse(xhr.responseText);
+             if(res.code === 1000){
+                 alert(res.message);
+                 let company = document.getElementById("companyA");
+                 let user = document.getElementById("userA");
+                 let equipment = document.getElementById("equipmentA");
+                 let account = document.getElementById("accountA");
+                 let consume = document.getElementById("consumeA");
+                 let isAdmin = res.data.isAdmin;
+                 if(isAdmin == 1){
+                    company.hidden = true;
+                 }else if(isAdmin == 0){
+                    company.hidden = true;
+                    user.hidden = true;
+                    equipment.hidden = true;
+                 }else{
+                     account.hidden = true;
+                     consume.hidden = true;
+                     equipment.hidden = true;
+                 }
+             }else{
+                 console.error("初始化主页面没有获取到用户信息，" + res.message);
+                 window.location.href = "/error/error.html";
+             }
+           };
+           xhr.onerror = function () {
+               console.error("初始化主页面没有获取到用户信息，" + JSON.parse(xhr.responseText).message);
+               window.location.href = "/error/error.html";
+           };
+           xhr.send();
+        };
+
+        /**
+         * 确认消息按钮
+         */
         function confirmMessageBox() {
             const confirmMessage = confirm("确认要退出登录吗？");
             if(confirmMessage == true){
@@ -24,7 +68,7 @@
                   }
                 };
                 xhr.onerror = function(e){
-                  console.error("退出登录失败！");
+                  console.error("退出登录失败！" + JSON.parse(xhr.responseText).message);
                   window.close();
                 };
                 xhr.send();
@@ -39,25 +83,25 @@
     <h3 class="pure-menu-heading">首页</h3>
     <ul class="pure-menu-list">
         <li class="pure-menu-item">
-            <a href="/company/queryCompany.html" class="pure-menu-link">公司</a>
+            <a href="/company/queryCompany.html" class="pure-menu-link" id="companyA">公司</a>
         </li>
         <li class="pure-menu-item">
-            <a href="/user/queryUser.html" class="pure-menu-link">用户</a>
+            <a href="/user/queryUser.html" class="pure-menu-link" id="userA">用户</a>
         </li>
         <li class="pure-menu-item">
-            <a href="/equipment/queryEquipment.html" class="pure-menu-link">设备</a>
+            <a href="/equipment/queryEquipment.html" class="pure-menu-link" id="equipmentA">设备</a>
         </li>
         <li class="pure-menu-item">
-            <a href="/account/queryAccount.html" class="pure-menu-link">账户</a>
+            <a href="/account/queryAccount.html" class="pure-menu-link" id="accountA">账户</a>
         </li>
         <li class="pure-menu-item">
-            <a href="/consume/queryConsume.html" class="pure-menu-link">消费</a>
+            <a href="/consume/queryConsume.html" class="pure-menu-link" id="consumeA">消费</a>
         </li>
         <li class="pure-menu-item">
-            <a href="/login/changePassword.html" class="pure-menu-link">改密码</a>
+            <a href="/login/changePassword.html" class="pure-menu-link" >改密码</a>
         </li>
         <li class="pure-menu-item">
-            <a href="javascipt:void(0)" class="pure-menu-link" onclick="confirmMessageBox()">退出</a>
+            <a href="javascipt:void(0)" class="pure-menu-link" onclick="confirmMessageBox()" >退出</a>
         </li>
     </ul>
 </div>

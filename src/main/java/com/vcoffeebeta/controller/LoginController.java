@@ -79,7 +79,7 @@ public class LoginController {
         User user = null;
         try{
              user = userService.loginByNameAndPassword(requestUser);
-            log.info(user.toString());
+            log.info("通过姓名和密码查询用户： " + user.toString());
             HttpSession session = request.getSession();
             session.setAttribute("user",user);
             log.info("session:"+ JSONObject.toJSONString(session));
