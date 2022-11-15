@@ -1,6 +1,7 @@
 package com.vcoffeebeta.service;
 
 import com.vcoffeebeta.domain.User;
+import com.vcoffeebeta.domain.UserQuery;
 
 import java.util.List;
 
@@ -87,10 +88,10 @@ public interface UserService {
      * 条件查询用户信息
      * @author zhangshenming
      * @date 2022/10/1 22:41
-     * @param user
+     * @param userQuery
      * @return java.util.List<com.vcoffeebeta.domain.User>
      */
-    List<User> queryForList(User user);
+    List<User> queryForList(UserQuery userQuery);
     /**
      * 查询用户总数
      * @author zhangshenming
@@ -99,14 +100,6 @@ public interface UserService {
      * @return int
      */
     int queryForAmount();
-    /**
-     * 根据用户编号和公司id查询用户
-     * @author zhangshenming
-     * @date 2022/10/3 10:01
-     * @param user
-     * @return com.vcoffeebeta.domain.User
-     */
-    User findByUserNumberAndCompanyId(User user);
     /**
      * 更改密码
      * @author zhangshenming

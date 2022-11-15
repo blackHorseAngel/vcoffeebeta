@@ -172,10 +172,10 @@
     <update id="changePassword" parameterType="com.vcoffeebeta.domain.User">
         update user
         set
-        <if test="password != null &amp;&amp; password != ''">
+        <if test="password != null and password != ''">
             password = #{password},
         </if>
-         <if test="modified != null &amp;&amp; modified != ''">
+         <if test="modified != null and modified != ''">
              modified = #{modified},
          </if>
          <if test="modifiedTime != null">

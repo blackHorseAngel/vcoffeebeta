@@ -57,8 +57,4 @@ public class Consume {
      * 结束日期
      */
     private Date endDate;
-    /**
-     * 页码
-     */
-    private Page page;
 }

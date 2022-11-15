@@ -16,7 +16,7 @@
         xhr.onload = function () {
             let res = JSON.parse(xhr.responseText);
             if(res.code === 1000){
-                alert(res.message);
+                console.log(res.message);
                 let companyNameSelector = document.getElementById("companyId");
                 for(let i = 0 ; i < res.data.length ; i++){
                     let companyNameOption = document.createElement("option");
@@ -61,7 +61,7 @@
             xhr.onload = function () {
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
-                    alert(res.message);
+                    console.log(res.message);
                     window.location.href = "/equipment/queryEquipment.html";
                 }else{
                     console.error("新增设备失败：" + res.message);

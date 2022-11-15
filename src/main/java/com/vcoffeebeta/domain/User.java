@@ -91,10 +91,6 @@ public class  User implements Serializable {
      */
     private int state;
     /**
-     * 用户页面的分页数据
-     */
-    private Page page;
-    /**
      * 新密码
      */
     private String newPassword;

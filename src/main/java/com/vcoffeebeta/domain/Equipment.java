@@ -1,8 +1,6 @@
 package com.vcoffeebeta.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.Date;
 
@@ -64,8 +62,5 @@ public class Equipment {
      * 修改时间
      */
     private Date modifiedTime;
-    /**
-     * 分页对象
-     */
-    private Page page;
+
 }
