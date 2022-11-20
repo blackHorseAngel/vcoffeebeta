@@ -1,6 +1,7 @@
 package com.vcoffeebeta.service;
 
 import com.vcoffeebeta.domain.Equipment;
+import com.vcoffeebeta.domain.EquipmentQuery;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public interface EquipmentService {
      * @param
      * @return int
      */
-    int queryForAmount();
+    int queryForAmount(EquipmentQuery equipmentQuery);
     /**
      * 查询全部设备信息
      * @author zhangshenming
@@ -34,7 +35,7 @@ public interface EquipmentService {
      * @param
      * @return java.util.List<com.vcoffeebeta.domain.Equipment>
      */
-    List<Equipment> findAllEquipment();
+    List<Equipment> findAllEquipment(EquipmentQuery equipmentQuery);
     /**
      * 根据id查询设备信息
      * @author zhangshenming

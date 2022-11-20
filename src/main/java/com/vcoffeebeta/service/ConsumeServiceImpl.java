@@ -5,6 +5,7 @@ import com.vcoffeebeta.DAO.ConsumeDAO;
 import com.vcoffeebeta.DAO.UserDAO;
 import com.vcoffeebeta.domain.Account;
 import com.vcoffeebeta.domain.Consume;
+import com.vcoffeebeta.domain.ConsumeQuery;
 import com.vcoffeebeta.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,13 +74,13 @@ public class ConsumeServiceImpl implements ConsumeService{
     }
 
     @Override
-    public List<Consume> queryAllConsumes() {
-        return consumeDAO.findAll();
+    public List<Consume> queryAllConsumes(ConsumeQuery consumeQuery) {
+        return consumeDAO.findAll(consumeQuery);
     }
 
     @Override
-    public int queryForAmount() {
-        return consumeDAO.queryForAmount();
+    public int queryForAmount(ConsumeQuery consumeQuery) {
+        return consumeDAO.queryForAmount(consumeQuery);
     }
 
     @Override

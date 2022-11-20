@@ -54,7 +54,6 @@
             <if test="operatorDate != null">
                 and operate_date = #{operateDate}
             </if>
-            order by operate_date desc
         </where>
     </select>
     <!-- 条件查询消费记录信息 -->

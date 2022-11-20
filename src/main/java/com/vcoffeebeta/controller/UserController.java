@@ -95,7 +95,7 @@ public class UserController {
             if(companyId == 0){
                 if(isAdmin == 2){
                     //超级管理员查询全部的用户数
-                     amount = userService.queryForAmount();
+                     amount = userService.queryForAmount(userQuery);
                     log.info("当前用户是超级管理员，查询所有的用户数：" + amount);
                 }else{
                     //除了超级管理员之外，一般管理员和普通员工都必须有公司id
@@ -112,7 +112,7 @@ public class UserController {
                 return new Result(ResultCodeEnum.QUERYUSERPAGEERROR.getCode(),ResultCodeEnum.QUERYUSERPAGEERROR.getMessage());
             }
             PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
-            List<User>userList = userService.findAllUsers();
+            List<User>userList = userService.findAllUsers(userQuery);
             return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),userList,page);
         }catch(Exception e){
             log.error("查询全部用户信息报错,",e);

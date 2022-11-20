@@ -27,7 +27,7 @@
             let res = JSON.parse(xhr.responseText);
             if(res.code === 1000){
                 console.log(res.message);
-                window.location.href = "/user/queryUser.html";
+                window.location.href = "/user/findAllUsers.html";
             }else{
                 console.error("删除用户报错，" + res.message);
                 window.location.href = "/error/error.html";
@@ -175,7 +175,7 @@
                   "limit":10
               }
             };
-            const url = "/vcoffee/user/queryUser";
+            const url = "/vcoffee/user/findAllUsers";
             const xhr = new XMLHttpRequest();
             xhr.open("POST",url,true);
             xhr.setRequestHeader("content-Type","application/json");
@@ -201,7 +201,7 @@
          */
     function queryUser() {
       const userName = document.getElementById("userName").value;
-      const  url = "/vcoffee/user/queryUser";
+      const  url = "/vcoffee/user/findAllUsers";
       const queryParam = {
         "username":userName,
         "page":{
@@ -381,7 +381,7 @@
     }
     </script>
 </head>
-<body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
+<body background="/picture/welcome1.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
 <form class="pure-form" method="post">
     <fieldset>
         <input type="text" id="userName" name="userName" placeholder="用户名称">

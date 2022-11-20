@@ -44,12 +44,28 @@
     <!-- 查询设备数量 -->
     <select id="queryForAmount" resultType="java.lang.Integer">
         select count(1) from equipment
+        <where>
+            <if test="serialNumber != null and serialNumber!=''">
+                and serial_number = #{serialNumber}
+            </if>
+            <if test="equipmentName != null and equipmentName != ''">
+                and equipment_name like concat('%',#{equipmentName},"%")
+            </if>
+            and isUsed != 2
+        </where>
     </select>
     <!--查询全部设备信息-->
     <select id="findAll" resultMap="com.vcoffeebeta.DAO.EquipmentDAO.equipmentMap">
         select <include refid="equipmentContent"/> from equipment
         <where>
-            isUsed != 2
+            1=1
+            <if test="serialNumber != null and serialNumber!=''">
+                and serial_number = #{serialNumber}
+            </if>
+            <if test="equipmentName != null and equipmentName != ''">
+                and equipment_name like concat('%',#{equipmentName},"%")
+            </if>
+            and isUsed != 2
         </where>
         order by modified_time desc
     </select>
@@ -63,7 +79,7 @@
         order by modified_time desc
     </select>
     <!-- 条件查询设备信息 -->
-    <select id="queryForList" parameterType="com.vcoffeebeta.domain.Equipment" resultMap="equipmentMap">
+    <!--<select id="queryForList" parameterType="com.vcoffeebeta.domain.Equipment" resultMap="equipmentMap">
         select <include refid="equipmentContent"/> from equipment
         <where>
             1=1
@@ -79,7 +95,7 @@
             and isUsed != 2
             order by modified_time desc
         </where>
-    </select>
+    </select>-->
     <!-- 通过公司id，查询该公司下的全部设备信息 -->
     <select id="findAllEquipmentsByCompanyId" parameterType="long" resultType="com.vcoffeebeta.domain.Equipment">
         select <include refid="equipmentContent"/> from equipment
@@ -88,7 +104,13 @@
         <if test="companyId != 0">
            and company_id = #{companyId}
         </if>
-
+        <if test="serialNumber != null and serialNumber!=''">
+           and serial_number = #{serialNumber}
+        </if>
+        <if test="equipmentName != null and equipmentName != ''">
+          and equipment_name like concat('%',#{equipmentName},"%")
+        </if>
+        and isUsed != 2  order by modified_time desc
         </where>
     </select>
     <!-- 更新设备信息 -->

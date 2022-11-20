@@ -43,7 +43,7 @@ public interface UserService {
      * @param
      * @return java.util.List<com.vcoffeebeta.domain.User>
      */
-    List<User> findAllUsers();
+    List<User> findAllUsers(UserQuery userQuery);
     /**
      * 根据companyId查询用户数
      * @author zhangshenming
@@ -99,7 +99,7 @@ public interface UserService {
      * @param
      * @return int
      */
-    int queryForAmount();
+    int queryForAmount(UserQuery userQuery);
     /**
      * 更改密码
      * @author zhangshenming

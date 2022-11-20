@@ -119,11 +119,11 @@ public class UserServiceImpl implements UserService {
         return account;
     }
     @Override
-    public List<User> findAllUsers() {
+    public List<User> findAllUsers(UserQuery userQuery) {
         log.info("进入userService的findAllUsers方法");
         List<User>userList;
         try{
-            userList = userDAO.findAll();
+            userList = userDAO.findAll(userQuery);
             for(User user1 : userList){
                 long userCompanyId = user1.getCompanyId();
                 if(userCompanyId == 0){
@@ -259,8 +259,8 @@ public class UserServiceImpl implements UserService {
 
     }
     @Override
-    public int queryForAmount() {
-        return userDAO.queryForAmount();
+    public int queryForAmount(UserQuery userQuery) {
+        return userDAO.queryForAmount(userQuery);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.vcoffeebeta.service;
 
 import com.vcoffeebeta.DAO.EquipmentDAO;
 import com.vcoffeebeta.domain.Equipment;
+import com.vcoffeebeta.domain.EquipmentQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,13 +29,13 @@ public class EquipmentServiceImpl implements EquipmentService {
     }
 
     @Override
-    public int queryForAmount() {
-        return equipmentDAO.queryForAmount();
+    public int queryForAmount(EquipmentQuery equipmentQuery) {
+        return equipmentDAO.queryForAmount(equipmentQuery);
     }
 
     @Override
-    public List<Equipment> findAllEquipment() {
-        return equipmentDAO.findAll();
+    public List<Equipment> findAllEquipment(EquipmentQuery equipmentQuery) {
+        return equipmentDAO.findAll(equipmentQuery);
     }
 
     @Override
