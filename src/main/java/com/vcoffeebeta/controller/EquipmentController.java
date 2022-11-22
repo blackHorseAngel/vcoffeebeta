@@ -69,17 +69,17 @@ public class EquipmentController {
     @CrossOrigin
     @RequestMapping(value = "/findAllEquipment")
     @ResponseBody
-    public Result findAllEquipment(@RequestBody Equipment equipment){
+    public Result findAllEquipment(@RequestBody EquipmentQuery equipmentQuery){
         log.info("进入findAllEquipment方法：");
         try{
-            int amount = equipmentService.queryForAmount();
+            int amount = equipmentService.queryForAmount(equipmentQuery);
             log.info("设备的数量amount: " + amount);
-            Page page = handlePage(amount,equipment);
+            Page page = handlePage(amount,equipmentQuery);
             if(page == null){
                 return null;
             }
             PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
-            List<Equipment>equipmentList = equipmentService.findAllEquipment();
+            List<Equipment>equipmentList = equipmentService.findAllEquipment(equipmentQuery);
             for(Equipment e:equipmentList){
                Company c = companyService.queryById(e.getCompanyId());
                e.setCompanyName(c.getCompanyName());
@@ -99,10 +99,10 @@ public class EquipmentController {
      * @param amount, equipment
      * @return com.vcoffeebeta.domain.Page
      */
-    private Page handlePage(int amount,Equipment equipment){
+    private Page handlePage(int amount,EquipmentQuery equipmentQuery){
         Page page = new Page();
         page.setTotalCount(amount);
-        Page p = equipment.getPage();
+        Page p = equipmentQuery.getPage();
         int limit = p.getLimit();
         if(limit != 0){
             page.setLimit(limit);
@@ -219,7 +219,7 @@ public class EquipmentController {
             return new Result(ResultCodeEnum.BATCHDELETEEQUIPMENTERROR.getCode(),ResultCodeEnum.BATCHDELETEEQUIPMENTERROR.getMessage());
         }
     }
-    @CrossOrigin
+   /* @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "queryEquipment")
     public Result queryEquipment(@RequestBody Equipment equipment){
@@ -244,5 +244,5 @@ public class EquipmentController {
             e.printStackTrace();
             return new Result(ResultCodeEnum.QUERYEQUIPMENTBYOPTIONERROR.getCode(),ResultCodeEnum.QUERYEQUIPMENTBYOPTIONERROR.getMessage());
         }
-    }
+    }*/
 }

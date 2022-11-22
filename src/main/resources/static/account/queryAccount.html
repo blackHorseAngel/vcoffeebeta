@@ -17,7 +17,7 @@
            xhr.onload = function () {
                let res = JSON.parse(xhr.responseText);
                if(res.code === 1000){
-                   alert(res.message);
+                   console.log(res.message);
                    document.getElementById("userNumber").value = res.data.userNumber;
                    document.getElementById("userName").value = res.data.username;
                    document.getElementById("remaining").value = res.data.remaining;
@@ -43,7 +43,7 @@
         }
     </script>
 </head>
-<body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
+<body background="/picture/welcome1.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
 <div align="center">
     <div></div>
     <div></div>

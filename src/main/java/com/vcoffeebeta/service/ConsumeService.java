@@ -1,6 +1,7 @@
 package com.vcoffeebeta.service;
 
 import com.vcoffeebeta.domain.Consume;
+import com.vcoffeebeta.domain.ConsumeQuery;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public interface ConsumeService {
      * @param
      * @return java.util.List<com.vcoffeebeta.domain.Consume>
      */
-    List<Consume>queryAllConsumes();
+    List<Consume>queryAllConsumes(ConsumeQuery consumeQuery);
     /**
      * 查询全部条数
      * @author zhangshenming
@@ -34,7 +35,7 @@ public interface ConsumeService {
      * @param
      * @return int
      */
-    int queryForAmount();
+    int queryForAmount(ConsumeQuery consumeQuery);
     /**
      * 条件查询消费记录信息
      * @author zhangshenming

@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
-public class Account {
+public class Account implements Serializable {
     /**
      * 主键id
      */

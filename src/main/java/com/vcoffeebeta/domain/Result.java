@@ -1,8 +1,8 @@
 package com.vcoffeebeta.domain;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+
+import java.io.Serializable;
 
 /**
  * controller返回的结果
@@ -13,7 +13,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class Result<T> {
+public class Result<T> implements Serializable {
     /**
      * 返回响应码
      */

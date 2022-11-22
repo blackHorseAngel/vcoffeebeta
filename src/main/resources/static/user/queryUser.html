@@ -26,8 +26,8 @@
           xhr.onload = function () {
             let res = JSON.parse(xhr.responseText);
             if(res.code === 1000){
-                alert(res.message);
-                window.location.href = "/user/queryUser.html";
+                console.log(res.message);
+                window.location.href = "/user/findAllUsers.html";
             }else{
                 console.error("删除用户报错，" + res.message);
                 window.location.href = "/error/error.html";
@@ -58,7 +58,7 @@
             xhr.onload = function () {
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
-                    alert(res.message);
+                    console.log(res.message);
                     drawUserTbody(res);
                 }else{
                     console.error("分页查询用户报错" + JSON.parse(xhr.responseText).message);
@@ -89,7 +89,7 @@
             xhr.onload = function () {
               let res = JSON.parse(xhr.responseText);
               if(res.code === 1000){
-                  alert(res.message);
+                  console.log(res.message);
                   drawUserTbody(res);
                   drawUserPageDiv(res);
               }else{
@@ -125,7 +125,7 @@
       xhr.onload = function () {
         let res = JSON.parse(xhr.responseText);
         if(res.code === 1000){
-            alert(res.message);
+            console.log(res.message);
             window.location.href = "/user/queryUser.html";
         }else{
            console.error("批量删除用户信息报错" + res.message);
@@ -175,14 +175,14 @@
                   "limit":10
               }
             };
-            const url = "/vcoffee/user/queryUser";
+            const url = "/vcoffee/user/findAllUsers";
             const xhr = new XMLHttpRequest();
             xhr.open("POST",url,true);
             xhr.setRequestHeader("content-Type","application/json");
             xhr.onload = function () {
               let res = JSON.parse(xhr.responseText);
               if(res.code === 1000){
-                  alert(res.message);
+                  console.log(res.message);
                   drawUserTbody(res);
               }else{
                   console.error("条件查询用户分页信息报错，" + res.message);
@@ -201,7 +201,7 @@
          */
     function queryUser() {
       const userName = document.getElementById("userName").value;
-      const  url = "/vcoffee/user/queryUser";
+      const  url = "/vcoffee/user/findAllUsers";
       const queryParam = {
         "username":userName,
         "page":{
@@ -215,7 +215,7 @@
       xhr.onload = function () {
         let res = JSON.parse(xhr.responseText);
         if(res.code === 1000){
-            alert(res.message);
+            console.log(res.message);
             clearUserTbody();
             drawUserTbody(res);
             clearUserPageDiv();
@@ -244,8 +244,8 @@
          * @param res
          */
     function drawUserTbody(res) {
-        alert(res.data);
-        alert(res.data.length);
+         console.log(res.data);
+         console.log(res.data.length);
         for(let i = 0 ; i < res.data.length ; i++){
             let rowElement = document.createElement("tr");
 
@@ -320,11 +320,11 @@
          */
     function drawUserPageDiv(res) {
         let pageDiv = document.getElementById("pageDiv");
-        alert("返回结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
+        console.log("返回结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
         let totalPage = res.page.totalPage;
-        alert("返回结果中的页码对象中的limit属性值：" + res.page.limit);
+        console.log("返回结果中的页码对象中的limit属性值：" + res.page.limit);
         let limit = res.page.limit;
-        alert("返回结果中的页码对象中的totalCount属性值：" + res.page.totalCount);
+        console.log("返回结果中的页码对象中的totalCount属性值：" + res.page.totalCount);
         let firstPageA = document.createElement("a");
         firstPageA.setAttribute("id","first");
         firstPageA.setAttribute("href","javascript:void(0)");
@@ -353,11 +353,11 @@
          */
     function drawUserPageDivWithOption(res) {
         let pageDiv = document.getElementById("pageDiv");
-        alert("返回结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
+        console.log("返回结果中的页码对象中的totalPage属性值：" + res.page.totalPage);
         let totalPage = res.page.totalPage;
-        alert("返回结果中的页码对象中的limit属性值：" + res.page.limit);
+        console.log("返回结果中的页码对象中的limit属性值：" + res.page.limit);
         let limit = res.page.limit;
-        alert("返回结果中的页码对象中的totalCount属性值：" + res.page.totalCount);
+        console.log("返回结果中的页码对象中的totalCount属性值：" + res.page.totalCount);
         let firstPageA = document.createElement("a");
         firstPageA.setAttribute("id","first");
         firstPageA.setAttribute("href","javascript:void(0)");
@@ -381,7 +381,7 @@
     }
     </script>
 </head>
-<body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
+<body background="/picture/welcome1.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
 <form class="pure-form" method="post">
     <fieldset>
         <input type="text" id="userName" name="userName" placeholder="用户名称">

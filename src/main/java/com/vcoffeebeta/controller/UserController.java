@@ -83,7 +83,7 @@ public class UserController {
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "findAllUsers")
-    public Result queryAllUsers(@RequestBody User user,HttpServletRequest request){
+    public Result queryAllUsers(@RequestBody UserQuery userQuery,HttpServletRequest request){
         log.info("进入queryAllUsers方法");
         try{
             HttpSession session = request.getSession();
@@ -95,7 +95,7 @@ public class UserController {
             if(companyId == 0){
                 if(isAdmin == 2){
                     //超级管理员查询全部的用户数
-                     amount = userService.queryForAmount();
+                     amount = userService.queryForAmount(userQuery);
                     log.info("当前用户是超级管理员，查询所有的用户数：" + amount);
                 }else{
                     //除了超级管理员之外，一般管理员和普通员工都必须有公司id
@@ -107,12 +107,12 @@ public class UserController {
                  amount = userService.queryForAmountByCompanyId(companyId);
                 log.info("当前用户是一般管理员。查询自己所在公司的用户数：" + amount);
             }
-            Page page = handlePage(amount,user);
+            Page page = handlePage(amount,userQuery);
             if(page == null){
                 return new Result(ResultCodeEnum.QUERYUSERPAGEERROR.getCode(),ResultCodeEnum.QUERYUSERPAGEERROR.getMessage());
             }
             PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
-            List<User>userList = userService.findAllUsers();
+            List<User>userList = userService.findAllUsers(userQuery);
             return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),userList,page);
         }catch(Exception e){
             log.error("查询全部用户信息报错,",e);
@@ -127,10 +127,10 @@ public class UserController {
      * @param amount, user
      * @return com.vcoffeebeta.domain.Page
      */
-    private Page handlePage(int amount,User user){
+    private Page handlePage(int amount,UserQuery userQuery){
         Page page = new Page();
         page.setTotalCount(amount);
-        Page p = user.getPage();
+        Page p = userQuery.getPage();
         int limit = p.getLimit();
         if(limit != 0){
             page.setLimit(limit);
@@ -255,7 +255,7 @@ public class UserController {
             return new Result(ResultCodeEnum.BATCHDELETEUSER.getCode(),ResultCodeEnum.BATCHDELETEUSER.getMessage());
         }
     }
-    @CrossOrigin
+    /*@CrossOrigin
     @ResponseBody
     @RequestMapping(value = "queryUser")
     public Result queryUser(@RequestBody User user){
@@ -275,7 +275,7 @@ public class UserController {
            e.printStackTrace();
            return new Result(ResultCodeEnum.QUERYUSERERROR.getCode(),ResultCodeEnum.QUERYUSERERROR.getMessage());
        }
-    }
+    }*/
     @CrossOrigin
     @ResponseBody
     @RequestMapping(value = "findUserById")

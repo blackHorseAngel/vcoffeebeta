@@ -74,6 +74,9 @@
        select  <include refid="userContent"/> from user
        <where>
          isAdmin != 2 and state = 0
+           <if test="username != null">
+            and username like concat('%',#{username},'%')
+           </if>
        </where>
        order by modified_time desc
     </select>
@@ -96,21 +99,24 @@
        </where>
     </select>
     <!-- 根据用户姓名条件查询用户 -->
-    <select id="queryForList" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
+    <!--<select id="queryForList" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
         select <include refid="userContent"/> from user
         <where>
             <if test="username != null">
                 username like concat('%',#{username},'%')
             </if>
         </where>
-    </select>
+    </select>-->
     <!-- 查询总数 -->
     <select id="queryForAmount" resultType="int">
         select count(1) from user
         <where>
-            isAdmin != 2
+            1=1
+            <if test="username != null">
+               and username like concat('%',#{username},'%')
+            </if>
+            and isAdmin != 2
         </where>
-        order by modified_time desc
     </select>
     <!-- 根据用户编号和公司id查找用户 -->
     <select id="findByUserNumberAndCompanyId" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
@@ -172,10 +178,10 @@
     <update id="changePassword" parameterType="com.vcoffeebeta.domain.User">
         update user
         set
-        <if test="password != null &amp;&amp; password != ''">
+        <if test="password != null and password != ''">
             password = #{password},
         </if>
-         <if test="modified != null &amp;&amp; modified != ''">
+         <if test="modified != null and modified != ''">
              modified = #{modified},
          </if>
          <if test="modifiedTime != null">

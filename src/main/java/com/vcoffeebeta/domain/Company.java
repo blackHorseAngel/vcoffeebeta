@@ -57,8 +57,5 @@ public class Company implements Serializable {
      * 修改时间
      */
    private Date modifiedTime;
-   /**
-    * 分页数据
-    */
-   private Page page;
+
 }

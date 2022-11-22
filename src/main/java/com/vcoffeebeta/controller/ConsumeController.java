@@ -74,26 +74,26 @@ public class ConsumeController {
     @CrossOrigin
     @RequestMapping(value = "queryAllConsumes")
     @ResponseBody
-    public Result queryAllConsumes(@RequestBody Consume consume,HttpServletRequest request){
+    public Result queryAllConsumes(@RequestBody ConsumeQuery consumeQuery,HttpServletRequest request){
         log.info("进入consumeController的queryAllConsumes方法");
-        log.info("前台返回的page对象内容是： " + JSON.toJSONString(consume));
+        log.info("前台返回的page对象内容是： " + JSON.toJSONString(consumeQuery));
         try{
             HttpSession session = request.getSession();
             User u = (User) session.getAttribute("user");
             int amount = 0;
             if(u.getIsAdmin() == TWO){
-               amount = consumeService.queryForAmount();
+               amount = consumeService.queryForAmount(consumeQuery);
                 log.info("后台查询的所有消费记录数为：" + amount);
             }else{
                 amount = consumeService.queryForAmountByUserId(u.getId());
                 log.info("后台查询当前用户的所有消费记录数为：" + amount);
             }
-            Page page = handlePage(amount,consume);
+            Page page = handlePage(amount,consumeQuery);
             if(page == null){
                 return new Result(ResultCodeEnum.QUERYALLCONSUMESERROR.getCode(),ResultCodeEnum.QUERYALLCONSUMESERROR.getMessage());
             }
             PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
-            List<Consume>consumeList = consumeService.queryAllConsumes();
+            List<Consume>consumeList = consumeService.queryAllConsumes(consumeQuery);
             log.info("查询数据库之后返回的全部消费记录条数是： " + JSON.toJSONString(consumeList));
             return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),consumeList,page);
         }catch (Exception e){
@@ -102,7 +102,7 @@ public class ConsumeController {
             return new Result(ResultCodeEnum.QUERYALLCONSUMESERROR.getCode(),ResultCodeEnum.QUERYALLCONSUMESERROR.getMessage());
         }
     }
-    @CrossOrigin
+    /*@CrossOrigin
     @ResponseBody
     @RequestMapping(value = "queryConsume")
     public Result queryConsume(@RequestBody Consume consume,HttpServletRequest request){
@@ -123,7 +123,7 @@ public class ConsumeController {
             e.printStackTrace();
             return new Result(ResultCodeEnum.QUERYCONSUMEPAGEERROR.getCode(),ResultCodeEnum.QUERYCONSUMEPAGEERROR.getMessage());
         }
-    }
+    }*/
     /**
      * 整理页码信息并返回
      * @author zhangshenming
@@ -131,10 +131,10 @@ public class ConsumeController {
      * @param amount, consume
      * @return com.vcoffeebeta.domain.Page
      */
-    private Page handlePage(int amount, Consume consume) {
+    private Page handlePage(int amount, ConsumeQuery consumeQuery) {
        Page page = new Page();
        page.setTotalPage(amount);
-       Page p = consume.getPage();
+       Page p = consumeQuery.getPage();
        int limit = p.getLimit();
        if(limit != 0){
            page.setLimit(limit);

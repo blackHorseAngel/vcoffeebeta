@@ -40,7 +40,7 @@
        xhr.onload = function(){
          let res = JSON.parse(xhr.responseText);
          if(res.code === 1000) {
-             alert(res.message);
+             console.log(res.message);
             drawCompanyTbody(res);
           }else{
              console.error("查询公司页面分页数据报错，" + res.message);
@@ -77,7 +77,7 @@
            xhr.onload = function(){
                let res = JSON.parse(xhr.responseText);
                if(res.code === 1000) {
-                   alert(res.message);
+                   console.log(res.message);
                   drawCompanyTbody(res);
                }else{
                    console.error("条件查询公司页面分页数据报错，" + res.message);
@@ -107,7 +107,7 @@
             xhr.onload = function () {
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
-                    alert(res.message);
+                    console.log(res.message);
                     drawCompanyTbody(res);
                     drawCompanyPageDiv(res);
                 }else{
@@ -143,7 +143,7 @@
               xhr.onload = function () {
                   let res = JSON.parse(xhr.responseText);
                   if(res.code === 1000){
-                    alert(res.message);
+                    console.log(res.message);
                     window.location.href = "/company/queryCompany.html";
                   }else{
                       console.error(res.message);
@@ -189,8 +189,8 @@
             xhr.onload = function(){
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
-                    alert(res.message);
-                   drawCompanyTbody(res);
+                    console.log(res.message);
+                    drawCompanyTbody(res);
                     clearCompanyPageDiv();
                     drawCompanyPageDivWithOption(res);
                 }else{
@@ -225,7 +225,7 @@
             xhr.onload = function(){
                 let res = JSON.parse(xhr.responseText);
                 if(res.code === 1000){
-                    alert(res.message);
+                    console.log(res.message);
                     window.location.href = "/company/queryCompany.html";
                 }
             };
@@ -365,7 +365,7 @@
 
    </script>
 </head>
-<body background="/picture/welcome.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
+<body background="/picture/welcome1.jpg" style="background-repeat: no-repeat;background-size: 100% 100%;background-attachment: fixed;">
 <form class="pure-form" method="post">
     <fieldset>
         <input type="text" id="companyName" name="companyName" placeholder="公司名称"/>

@@ -1,6 +1,7 @@
 package com.vcoffeebeta.DAO;
 
 import com.vcoffeebeta.domain.User;
+import com.vcoffeebeta.domain.UserQuery;
 import com.vcoffeebeta.util.BaseDAO;
 import org.springframework.stereotype.Repository;
 
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Repository;
  * @version 1.0
  */
 @Repository
-public interface UserDAO extends BaseDAO {
+public interface UserDAO extends BaseDAO<User, UserQuery> {
     /**
      * 根据公司id查询全部用户数
      * @author zhangshenming 
