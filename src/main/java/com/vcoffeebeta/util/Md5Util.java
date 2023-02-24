@@ -1,6 +1,7 @@
 package com.vcoffeebeta.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.crypto.hash.Md5Hash;
 
 import java.security.MessageDigest;
 /**
@@ -40,18 +41,57 @@ public class Md5Util {
         for(int i = 0 ; i < charArr.length ; i++){
            byteArr[i] = (byte) charArr[i];
         }
+        //默认的md5加密，散列一次
         byte[]md5Bytes = md5.digest(byteArr);
         StringBuffer buffer = new StringBuffer();
         for(int i = 0 ; i < md5Bytes.length ; i++){
+            //当byte要转化为int的时候，高的24位必然会补1，这样，其二进制补码其实已经不一致了，&0xff可以将高的24位置为0，低8位保持原样。
+            // 这样做的目的就是为了保证二进制数据的一致性。
            int val = ((int)md5Bytes[i]) & 0xff;
            if(val < 16){
                buffer.append("0");
            }
+           //hash散列二次
            buffer.append(Integer.toHexString(val));
         }
         return buffer.toString();
     }
 
+    /**
+     * 默认md5加密，hash：1次
+     * @param str
+     * @return
+     */
+    public static String getMd5HashString1(String str){
+        //默认md5加密，hash：1次
+        Md5Hash md5Hash1 = new Md5Hash(str);
+        String md5Str = md5Hash1.toString();
+        return md5Str;
+    }
+
+    /**
+     * md5 + Salt,hash:1次
+     * @param str
+     * @return
+     */
+    public static String getMd5HashSaltStr(String str){
+        //md5 + Salt,hash:1次
+        Md5Hash md5Hash2 = new Md5Hash(str,"qlv*%(");
+        String md5Str2 = md5Hash2.toString();
+        return md5Str2;
+    }
+
+    /**
+     * md5 + salt + rehash:1024
+     * @param str
+     * @return
+     */
+    public static String getMd5HashSaltStr3(String str){
+        //md5 + salt + rehash:1024
+        Md5Hash md5Hash3 = new Md5Hash(str,"qlv*%(",1024);
+        String md5Str3 = md5Hash3.toString();
+        return md5Str3;
+    }
     /**
      * 比较传入的密码经过md5加密之后的字符串与数据库中的加过密的密码是否一致
      * @param password
@@ -71,8 +111,12 @@ public class Md5Util {
         String str = "123456";
         String md5Str = Md5Util.getMd5String(str);
         System.out.println("加密后的字符串是：" + md5Str);
-        boolean flag = Md5Util.compareMd5Password(str,md5Str);
-        System.out.println("新密码和经过MD5加密之后的密码是否相等" + flag);
+        String md5Str1 = Md5Util.getMd5HashString1(str);
+        System.out.println("加密后的字符串1是：" + md5Str1);
+        String md5Str3 = Md5Util.getMd5HashSaltStr3(str);
+        System.out.println("加密后的字符串3是：" + md5Str3);
+//        boolean flag = Md5Util.compareMd5Password(str,md5Str1);
+//        System.out.println("新密码和经过MD5加密之后的密码是否相等" + flag);
 
     }
 }
