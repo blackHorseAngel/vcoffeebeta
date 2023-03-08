@@ -75,27 +75,37 @@ public class UserServiceImpl implements UserService {
             int num = userDAO.insert(user);
             if(num > 0){
                 User newUser = userDAO.findByUserNumberAndCompanyId(user);
+                log.info("新增之后的newUser实体类数据：" + JSON.toJSONString(newUser));
                 long newUserId = newUser.getId();
+                log.info("新增user之后获取的userId： " + newUserId);
                 Account account = handleAccount(newUserId,user);
+                log.info("新建用户账户之前构造好的账户实体类信息：" + JSON.toJSONString(account));
                 int accountNum = accountDAO.insert(account);
                 Account oldAccount = null;
                 if(accountNum > 0){
                     oldAccount = accountDAO.findByUserId(newUserId);
                     long oldAccountId = oldAccount.getId();
+                    log.info("获取新增用户账户成功之后的账户id： " + oldAccountId);
                     newUser.setAccountId(oldAccountId);
                     int updateUserNum = userDAO.update(newUser);
                     if(updateUserNum > 0){
+                        log.info("更新用户信息中的账户id成功");
                         return true;
                     }else{
+                        log.info("更新用户信息中的账户id失败");
                         return false;
                     }
                 }else{
+                    log.info("新增用户账户失败");
                     return false;
                 }
             }else{
+                log.info("新增用户失败");
                 return false;
             }
         }catch(Exception e){
+            log.info("新增用户失败报错，",e);
+            e.printStackTrace();
             return false;
         }
     }
