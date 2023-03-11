@@ -1,5 +1,6 @@
 package com.vcoffeebeta.service;
 
+import com.alibaba.fastjson.JSON;
 import com.vcoffeebeta.DAO.AccountDAO;
 import com.vcoffeebeta.DAO.ConsumeDAO;
 import com.vcoffeebeta.DAO.UserDAO;
@@ -43,8 +44,10 @@ public class ConsumeServiceImpl implements ConsumeService{
         try{
             num = consumeDAO.insert(consume);
             Account account = accountDAO.findByUserId(consume.getUserId());
+            log.info("根据用户id查询出的当前用户的账户是： " + JSON.toJSONString(account));
             BigDecimal remaining = account.getRemaining();
             List<Consume>consumeList = consumeDAO.queryForList(consume);
+            log.info("根据userId查询出来的当前用户的全部的消费记录是： " + JSON.toJSONString(account));
             for(Consume c : consumeList){
                 int type = c.getType();
                 if(type == 0){
@@ -64,6 +67,7 @@ public class ConsumeServiceImpl implements ConsumeService{
             User u = (User) userDAO.findById(consume.getUserId());
             account.setModified(u.getUsername());
             account.setModifiedTime(new Date());
+            log.info("更新之前的"+JSON.toJSONString(account));
             int count = accountDAO.update(account);
             return (num > 0) && (count > 0) ? true : false;
         }catch (Exception e){

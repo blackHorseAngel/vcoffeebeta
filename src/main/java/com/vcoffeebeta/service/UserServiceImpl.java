@@ -8,8 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 /**
  * loginService实现类
@@ -87,6 +93,7 @@ public class UserServiceImpl implements UserService {
                     long oldAccountId = oldAccount.getId();
                     log.info("获取新增用户账户成功之后的账户id： " + oldAccountId);
                     newUser.setAccountId(oldAccountId);
+                    newUser.setModifiedTime(new Date());
                     int updateUserNum = userDAO.update(newUser);
                     if(updateUserNum > 0){
                         log.info("更新用户信息中的账户id成功");
@@ -280,11 +287,103 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void writeUserInfoToFile() {
+        long startTime = System.currentTimeMillis();
+        System.out.println("开始时间： " + startTime);
+        File file = new File("D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo.txt");
+        try {
+                if(file.exists()) {
+                    file.delete();
+                }
+                file.createNewFile();
+                FileWriter fw = new FileWriter(file,true);
+                for(int i = 0 ; i < 10000000 ; i++){
+                    long num = generateRandomNumber(1100L);
+                    User user = userDAO.findById(num);
+                    long oneDay = TimeUnit.DAYS.toMillis(1);
+                    long now = new Date().getTime();
+                    long start = now - oneDay * 365 * 5;
+                    Date neededDate = generateRandomDate(start,now);
+                    if(i%2 == 0){
+                        user.setEmail("714680900@sina.cn");
+                    } else if (i%3 == 0) {
+                        user.setNewPassword("121212");
+                    }else if(i%5 == 0){
+                        user.setTelephoneNumber("010123123123");
+                    }else if(i%7 == 0){
+                        user.setUserNumber("010111111111");
+                    }
+                    user.setModified(user.getUserNumber());
+                    user.setModifiedTime(neededDate);
+                    fw.write(JSON.toJSONString(user));
+                }
+                long endTime = System.currentTimeMillis();
+            System.out.println("结束时间：" + endTime);
+            System.out.println("耗时：" + (endTime-startTime)/1000);
+            } catch (IOException e) {
+                log.error("写用户信息文件报错",e);
+                throw new RuntimeException(e);
+            }
+
+    }
+
+    /**
+     * 生成[20,num+20)的随机数
+     * @param num
+     * @return
+     */
+    private long generateRandomNumber(long num){
+        return ThreadLocalRandom.current().nextLong(num)+20;
+    }
+
+    /**
+     * 生成随机日期
+     * @param //startDate
+     * @param //endDate
+     * @return
+     */
+    private Date generateRandomDate(long startTime,Long endTime){
+//        long startTime = startDate.getTime();
+//        long endTime = endDate.getTime();
+        long neededTime = ThreadLocalRandom.current().nextLong(startTime,endTime);
+        Date neededDate = new Date(neededTime);
+        return neededDate;
+    }
+    @Override
     public boolean isExist(User user) {
         User u = userDAO.queryByNameAndPassword(user);
         if(u != null){
             return true;
         }
         return false;
+    }
+
+    public static void main(String[] args) {
+        //        long oneDay = TimeUnit.DAYS.toMillis(1);
+        //        long now = new Date().getTime();
+        //        long startTime = now - oneDay * 365 * 5;
+        //        for(int i = 0 ; i < 2000 ; i++){
+        //            long neededTime = ThreadLocalRandom.current().nextLong(startTime,now);
+        //            Date randomDate =  new Date(neededTime);
+        //            long randomTime = randomDate.getTime();
+        //            if(randomTime > now){
+        //                System.out.println("第"+i+"个日期大于当前日期："+randomDate);
+        //            }
+        //        }
+        System.out.println("test begin");
+        long time1 = System.currentTimeMillis();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        System.out.println("start date:" + sdf.format(time1));
+        try {
+            System.out.println("");
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        long time2 = System.currentTimeMillis();
+        System.out.println("end date:" + sdf.format(time2));
+//        String dateStr = sdf.format(time2-time1);
+        System.out.println(time2-time1);
+
     }
 }

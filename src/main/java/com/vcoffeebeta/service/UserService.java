@@ -108,4 +108,13 @@ public interface UserService {
      * @return boolean
      */
     boolean changePassword(User user);
+
+    /**
+     * 新增用户信息到文件
+     * @author zhangshenming
+     * @date 2023/3/9 22:42
+     * @param
+     * @return
+     */
+    void writeUserInfoToFile();
 }

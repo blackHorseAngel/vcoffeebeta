@@ -148,10 +148,10 @@
             isAdmin = #{isAdmin},
         </if>
         <if test="accountId != 0">
-            account_id = #{accountId}
+            account_id = #{accountId},
         </if>
         <if test="modified != null">
-            modified = #{modified}
+            modified = #{modified},
         </if>
         <if test="modifiedTime != null">
             modified_time = #{modifiedTime}

@@ -104,12 +104,6 @@
         <if test="companyId != 0">
            and company_id = #{companyId}
         </if>
-        <if test="serialNumber != null and serialNumber!=''">
-           and serial_number = #{serialNumber}
-        </if>
-        <if test="equipmentName != null and equipmentName != ''">
-          and equipment_name like concat('%',#{equipmentName},"%")
-        </if>
         and isUsed != 2  order by modified_time desc
         </where>
     </select>
