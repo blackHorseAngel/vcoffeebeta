@@ -152,15 +152,14 @@ public class UserServiceImpl implements UserService {
                 if(equipmentId == 0){
                     user1.setEquipmentName("");
                 }else{
-                    long equipmentIdNum = equipmentId%10;
                     StringBuilder equipmentNameBuilder = new StringBuilder();
                     String equipmentNameStr = "";
-                    while(equipmentIdNum%10 != 0){
-                        long num = equipmentIdNum % 10;
+                    while(equipmentId%10 != 0){
+                        long num = equipmentId % 10;
                         Equipment e = (Equipment) equipmentDAO.findById(num);
                         equipmentNameBuilder.append(e.getEquipmentName());
                         equipmentNameBuilder.append("|");
-                        equipmentIdNum = equipmentIdNum / 10;
+                        equipmentId = equipmentId / 10;
                     }
                     equipmentNameStr = equipmentNameBuilder.toString();
                     equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
@@ -245,12 +244,12 @@ public class UserServiceImpl implements UserService {
                 long equipmentIds = u.getEquipmentId();
                 StringBuilder builder = new StringBuilder();
                 String equipmentNameStr = "";
-                while(equipmentIds%10 != 0){
-                    long equipmentId = equipmentIds%10;
+                while(equipmentIds % 10 != 0){
+                    long equipmentId = equipmentIds % 10;
                     Equipment e = (Equipment) equipmentDAO.findById(equipmentId);
                     builder.append(e.getEquipmentName());
                     builder.append("|");
-                    equipmentIds = equipmentIds/10;
+                    equipmentIds = equipmentIds / 10;
                 }
 
                 equipmentNameStr = builder.toString();
@@ -669,8 +668,6 @@ public class UserServiceImpl implements UserService {
         }
     }
     public static void main(String[] args) {
-            int a = 123;
-        System.out.println(a%10);
 
     }
 }
