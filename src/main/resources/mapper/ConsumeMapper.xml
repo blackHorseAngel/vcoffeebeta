@@ -41,7 +41,6 @@
     <select id="findAll" parameterType="long" resultMap="consumeMap">
         select <include refid="consumeContent"/> from consume
         <where>
-            1=1
             <if test="userId != null">
                 and user_id = #{userId}
             </if>
@@ -55,12 +54,13 @@
                 and operate_date = #{operateDate}
             </if>
         </where>
+        order by modified_time desc
     </select>
     <!-- 条件查询消费记录信息 -->
     <select id="queryForList" parameterType="com.vcoffeebeta.domain.Consume" resultMap="consumeMap">
        select <include refid="consumeContent"/> from consume
        <where>
-           1=1
+
            <if test="userId != null &amp;&amp; userId != 0">
                and user_id = #{userId}
            </if>

@@ -45,4 +45,10 @@ public interface UserDAO extends BaseDAO<User, UserQuery> {
      * @return int
      */
     int changePassword(User user);
+
+    /**
+     *
+     * @return
+     */
+    User findByUserNameAndCompanyId(User user);
 }

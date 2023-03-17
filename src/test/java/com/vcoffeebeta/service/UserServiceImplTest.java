@@ -6,7 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 @SpringBootTest(classes = VcoffeebetaApplication.class) //webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class UserServiceImplTest {
@@ -39,47 +42,11 @@ class UserServiceImplTest {
         user.setUserNumber("1100000001");
         boolean flag = userService.insertUser(user);
         System.out.println(flag);*/
-        System.out.println("创建新用户开始：" + System.currentTimeMillis());
-        for(int i = 10 ; i <= 1200 ; i++){
-            generateUser(i);
-        }
+
         System.out.println("创建新用户结束： " + System.currentTimeMillis());
 
     }
 
-    private void generateUser(int num){
-        User user = new User();
-        user.setPassword("123456");
-        user.setCompanyId(4L);
-        user.setCompanyName(companyService.queryById(4L).getCompanyName());
-        user.setCreated("admin");
-        user.setCreatedTime(new Date());
-        user.setModified("admin");
-        user.setModifiedTime(new Date());
-        user.setConfirmPassword("123456");
-        user.setUsername("employee" + num);
-        user.setEmail("714680900@qq.com");
-        user.setIsAdmin((byte) 0);
-        user.setState(0);
-        user.setTelephoneNumber("12345123458");
-        String userNumber = handleUserNumberTooLong(num);
-        user.setUserNumber(userNumber);
-        boolean flag = userService.insertUser(user);
-        if(flag){
-            System.out.println("第" + num + "个用户创建成功");
-        }else{
-            System.out.println("第" + num + "个用户创建失败");
-        }
-    }
-    private String handleUserNumberTooLong(int num){
-        String index = "400000000";
-        String userNumber =index + num;
-        while(userNumber.length() > 10){
-            index = index.substring(0,10-String.valueOf(num).length());
-            userNumber = index + num;
-        }
-        return userNumber;
-    }
     @Test
     void findAllUsers() {
     }
@@ -122,6 +89,26 @@ class UserServiceImplTest {
 
     @Test
     void writeUserInfoToFile() {
-        userService.writeUserInfoToFile();
+        userService.writeUserInfoToFile(100);
+    }
+
+    @Test
+    void insertUserFromFileToDb() {
+        userService.insertUserFromFileToDb();
+    }
+
+    @Test
+    void insertUserFromFileToDbNew() {
+        userService.insertUserFromFileToDbNew();
+    }
+
+    @Test
+    void writeUserInfoToFileNew() {
+        userService.writeUserInfoToFileNew(100);
+    }
+
+    @Test
+    void insertUserFromFileToDbNew2() {
+        userService.insertUserFromFileToDbNew2();
     }
 }

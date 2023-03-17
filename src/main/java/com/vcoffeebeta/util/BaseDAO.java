@@ -17,6 +17,15 @@ public interface BaseDAO<E,Q> {
      * @return int
      */
     public int insert(E entity);
+
+    /**
+     * 批量插入数据
+     * @author zhangshenming
+     * @date 2023/3/11
+     * @param list
+     * @return int
+     */
+    public int insertBatch(List<E>list);
     /**
      * 根据id删除一条数据
      * @author zhangshenming

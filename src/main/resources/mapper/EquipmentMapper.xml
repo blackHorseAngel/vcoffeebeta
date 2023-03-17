@@ -58,14 +58,13 @@
     <select id="findAll" resultMap="com.vcoffeebeta.DAO.EquipmentDAO.equipmentMap">
         select <include refid="equipmentContent"/> from equipment
         <where>
-            1=1
+            isUsed != 2
             <if test="serialNumber != null and serialNumber!=''">
                 and serial_number = #{serialNumber}
             </if>
             <if test="equipmentName != null and equipmentName != ''">
                 and equipment_name like concat('%',#{equipmentName},"%")
             </if>
-            and isUsed != 2
         </where>
         order by modified_time desc
     </select>
@@ -100,11 +99,11 @@
     <select id="findAllEquipmentsByCompanyId" parameterType="long" resultType="com.vcoffeebeta.domain.Equipment">
         select <include refid="equipmentContent"/> from equipment
         <where>
-        1 = 1
+            isUsed != 2
         <if test="companyId != 0">
            and company_id = #{companyId}
         </if>
-        and isUsed != 2  order by modified_time desc
+        order by modified_time desc
         </where>
     </select>
     <!-- 更新设备信息 -->

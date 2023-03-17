@@ -41,11 +41,10 @@
     <select id="findByUserId" parameterType="long" resultMap="accountMap">
         select <include refid="accountContent"/> from account
         <where>
-            1=1
+            state = 0
             <if test="userId != null">
                 and user_id = #{userId}
             </if>
-            and state = 0
         </where>
     </select>
     <!-- 根据id更新账户信息 -->

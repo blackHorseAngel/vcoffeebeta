@@ -58,15 +58,14 @@
         <include refid="userContent"/>
         from user
         <where>
-          1=1
           <if test="username != null">
-            and username = #{username}
+             username = #{username} and
           </if>
           <if test="password != null">
-              and password = #{password}
+              password = #{password} and
           </if>
-          and state = 0
         </where>
+        state = 0
         order by modified_time desc
     </select>
     <!-- 查询全部用户信息 -->
@@ -111,26 +110,39 @@
     <select id="queryForAmount" resultType="int">
         select count(1) from user
         <where>
-            1=1
+            isAdmin != 2
             <if test="username != null">
                and username like concat('%',#{username},'%')
             </if>
-            and isAdmin != 2
         </where>
     </select>
     <!-- 根据用户编号和公司id查找用户 -->
     <select id="findByUserNumberAndCompanyId" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
         select <include refid="userContent"/> from user
         <where>
+            state = 0
             <if test="userNumber != 0">
                 user_number = #{userNumber}
             </if>
             <if test="companyId != 0">
                 and company_id = #{companyId}
             </if>
-            and state = 0
         </where>
     </select>
+    <!-- 根据用户姓名和公司id查找用户信息 -->
+    <select id = "findByUserNameAndCompanyId" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
+        select <include refid="userContent"/> from user
+        <where>
+            state = 0
+                <if test="username != null">
+                   and username = #{username}
+                </if>
+                <if test="companyId != 0">
+                    and company_id = #{companyId}
+                </if>
+        </where>
+    </select>
+
     <!-- 更新单个用户信息 -->
     <update id="update" parameterType="com.vcoffeebeta.domain.User">
         update user

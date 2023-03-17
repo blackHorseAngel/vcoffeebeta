@@ -61,7 +61,7 @@ public class  User implements Serializable {
     /**
      * 用户常用设备id
      */
-    private String equipmentId;
+    private long equipmentId;
     /**
      * 创建人
      */

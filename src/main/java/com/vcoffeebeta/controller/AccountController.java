@@ -46,22 +46,21 @@ public class AccountController{
             User u = (User) session.getAttribute("user");
             long userId = u.getId();
             Account account = accountService.findByUserId(userId);
+            StringBuilder builder = new StringBuilder();
+            Company company = null;
             if(account == null){
                 return new Result(ResultCodeEnum.QUERYACCOUNTDETAILERROR.getCode(),ResultCodeEnum.QUERYACCOUNTDETAILERROR.getMessage());
             }else{
-                Company company = companyService.queryById(u.getCompanyId());
-                String equipmentIdStr = u.getEquipmentId();
-                String[]equipmentIds = equipmentIdStr.split("|");
-                StringBuilder builder = new StringBuilder();
-                for(String s : equipmentIds){
-                    long equipmentId = Integer.parseInt(s);
-                    if(equipmentId == 0){
-                        break;
-                    }
-                    Equipment equipment = equipmentService.findById(equipmentId);
+                company = companyService.queryById(u.getCompanyId());
+                long equipmentId = u.getEquipmentId();
+                while(equipmentId%10 != 0){
+                    long equipmentIdNum = equipmentId % 10;
+                    Equipment equipment = equipmentService.findById(equipmentIdNum);
                     builder.append(equipment.getEquipmentName());
                     builder.append("|");
+                    equipmentId = equipmentId / 10;;
                 }
+            }
                 String equipmentName = builder.toString();
                 if(equipmentName.length() > 0){
                     equipmentName = equipmentName.substring(0,equipmentName.length() - 1);
@@ -71,7 +70,6 @@ public class AccountController{
                 account.setCompanyName(company.getCompanyName());
                 account.setEquipmentName(equipmentName);
                 return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),account);
-            }
         }catch(Exception e){
             log.error("查询账户信息报错，",e);
             e.printStackTrace();

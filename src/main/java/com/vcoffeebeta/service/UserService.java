@@ -110,11 +110,47 @@ public interface UserService {
     boolean changePassword(User user);
 
     /**
-     * 新增用户信息到文件
+     * 新增用户信息到文件(采用字符流的方式写入)
      * @author zhangshenming
      * @date 2023/3/9 22:42
      * @param
      * @return
      */
-    void writeUserInfoToFile();
+    void writeUserInfoToFile(int num);
+
+    /**
+     * 新增用户信息到文件（采用字节流的方式写入）
+     * @author zhangshenming
+     * @date 2023/03/16 21:07
+     * @param
+     * @return
+     */
+    void writeUserInfoToFileNew(int num);
+
+    /**
+     * 新增将写入文件的用户信息同步到数据库（采用json的方式序列化）
+     * @author zhangshenming
+     * @date 2023/03/15 18:20
+     * @param
+     * @return
+     */
+    void insertUserFromFileToDb();
+
+    /**
+     * 新增将写入文件的用户信息同步到数据库（采用反射的方式获取属性值）
+     * @author zhangshenming
+     * @date 2023/03/15 20:20
+     * @param
+     * @return
+     */
+    void insertUserFromFileToDbNew();
+
+    /**
+     * 新增将写入文件的用户信息同步到数据库（采用读取字节流的方式反序列化）
+     * @author zhangshenming
+     * @date 2023/03/16 21:10
+     * @param
+     * @return
+     */
+    void insertUserFromFileToDbNew2();
 }

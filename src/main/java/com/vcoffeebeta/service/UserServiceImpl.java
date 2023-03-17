@@ -1,6 +1,7 @@
 package com.vcoffeebeta.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.vcoffeebeta.DAO.*;
 import com.vcoffeebeta.domain.*;
 import lombok.extern.slf4j.Slf4j;
@@ -8,13 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -59,22 +60,18 @@ public class UserServiceImpl implements UserService {
             if(c == null){
                 return false;
             }else{
-                StringBuilder equipmentIdBuilder = new StringBuilder();
                 List<Equipment> equipmentList = equipmentDAO.findAllEquipmentsByCompanyId(companyId);
                 log.info("当前登录用户u所在公司下的所有的设备信息：" + JSON.toJSONString(equipmentList));
                 //若新增用户所在的公司名下没有暂时没有设备，按0处理进行新增
+                long equipmentIdSum = 0;
                 if(equipmentList.size() == 0){
-                    user.setEquipmentId("0");
+                    user.setEquipmentId(0);
                 }else{
                     for(Equipment e : equipmentList){
-                        long equipmentId = e.getId();
-                        equipmentIdBuilder.append(equipmentId);
-                        equipmentIdBuilder.append("|");
+                         long equipmentId = e.getId();
+                         equipmentIdSum = equipmentIdSum * 10 + equipmentId;
                     }
-                    String equipmentIdStr = equipmentIdBuilder.toString();
-                    equipmentIdStr = equipmentIdStr.substring(0,equipmentIdStr.length()-1);
-                    user.setEquipmentId(equipmentIdStr);
-                    equipmentIdBuilder.setLength(0);
+                    user.setEquipmentId(equipmentIdSum);
                 }
             }
             log.info("userService中新增前user数据是： " + JSON.toJSONString(user));
@@ -151,24 +148,19 @@ public class UserServiceImpl implements UserService {
                    return null;
                 }
                 user1.setCompanyName(c.getCompanyName());
-                String equipmentIdStr = user1.getEquipmentId();
-                if(equipmentIdStr == null || "0".equals(equipmentIdStr)){
+                long equipmentId = user1.getEquipmentId();
+                if(equipmentId == 0){
                     user1.setEquipmentName("");
                 }else{
-                    String[]equipmentIds = equipmentIdStr.split("|");
+                    long equipmentIdNum = equipmentId%10;
                     StringBuilder equipmentNameBuilder = new StringBuilder();
                     String equipmentNameStr = "";
-                    for(String idStr : equipmentIds){
-                        if("|".equals(idStr)){
-                            continue;
-                        }
-                        long id = Long.parseLong(idStr);
-                        Equipment e = (Equipment) equipmentDAO.findById(id);
-                        if(e == null){
-                           return null;
-                       }
+                    while(equipmentIdNum%10 != 0){
+                        long num = equipmentIdNum % 10;
+                        Equipment e = (Equipment) equipmentDAO.findById(num);
                         equipmentNameBuilder.append(e.getEquipmentName());
                         equipmentNameBuilder.append("|");
+                        equipmentIdNum = equipmentIdNum / 10;
                     }
                     equipmentNameStr = equipmentNameBuilder.toString();
                     equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
@@ -250,19 +242,17 @@ public class UserServiceImpl implements UserService {
             for(User u : userList){
                 Company c = (Company) companyDAO.findById(u.getCompanyId());
                 u.setCompanyName(c.getCompanyName());
-                String equipmentIdStr = u.getEquipmentId();
-                String[] equipmentIds = equipmentIdStr.split("|");
+                long equipmentIds = u.getEquipmentId();
                 StringBuilder builder = new StringBuilder();
                 String equipmentNameStr = "";
-                for(String s : equipmentIds){
-                    if("|".equals(s)){
-                        continue;
-                    }
-                    long equipmentId = Long.parseLong(s);
+                while(equipmentIds%10 != 0){
+                    long equipmentId = equipmentIds%10;
                     Equipment e = (Equipment) equipmentDAO.findById(equipmentId);
                     builder.append(e.getEquipmentName());
                     builder.append("|");
+                    equipmentIds = equipmentIds/10;
                 }
+
                 equipmentNameStr = builder.toString();
                 equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
                 u.setEquipmentName(equipmentNameStr);
@@ -287,54 +277,345 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void writeUserInfoToFile() {
-        long startTime = System.currentTimeMillis();
-        System.out.println("开始时间： " + startTime);
+    public void writeUserInfoToFile(int num) {
         File file = new File("D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo.txt");
         try {
-                if(file.exists()) {
-                    file.delete();
-                }
-                file.createNewFile();
-                FileWriter fw = new FileWriter(file,true);
-                for(int i = 0 ; i < 10000000 ; i++){
-                    long num = generateRandomNumber(1100L);
-                    User user = userDAO.findById(num);
-                    long oneDay = TimeUnit.DAYS.toMillis(1);
-                    long now = new Date().getTime();
-                    long start = now - oneDay * 365 * 5;
-                    Date neededDate = generateRandomDate(start,now);
-                    if(i%2 == 0){
-                        user.setEmail("714680900@sina.cn");
-                    } else if (i%3 == 0) {
-                        user.setNewPassword("121212");
-                    }else if(i%5 == 0){
-                        user.setTelephoneNumber("010123123123");
-                    }else if(i%7 == 0){
-                        user.setUserNumber("010111111111");
-                    }
-                    user.setModified(user.getUserNumber());
-                    user.setModifiedTime(neededDate);
-                    fw.write(JSON.toJSONString(user));
-                }
-                long endTime = System.currentTimeMillis();
-            System.out.println("结束时间：" + endTime);
-            System.out.println("耗时：" + (endTime-startTime)/1000);
-            } catch (IOException e) {
-                log.error("写用户信息文件报错",e);
-                throw new RuntimeException(e);
+            if(file.exists()) {
+                file.delete();
             }
+            file.createNewFile();
+            FileWriter fw = new FileWriter(file,true);
+//            BufferedWriter bw = new BufferedWriter(fw);
+            List<Company>companyList = companyDAO.findAll(new Company());
+            Random random = new Random();
+            long startTime = System.currentTimeMillis();
+            System.out.println("开始时间： " + startTime);
+            for(int i = 0 ; i < num ; i++){
+                Company company =  getRandomCompany(companyList,random);
+                User user = generateUser(company,random);
+//                bw.append(JSON.toJSONString(user));
+//                bw.flush();
+//                bw.append(user.toString());
+//                bw.newLine();
+                fw.write(user.toString());
+                fw.write("\r\n");
+            }
+//            bw.close();
+            fw.close();
+            long endTime = System.currentTimeMillis();
+            System.out.println("结束时间：" + endTime);
+            System.out.println("耗时：" + (endTime-startTime));
+            //100条 64ms
+        } catch (IOException e) {
+            log.error("写用户信息文件报错",e);
+            throw new RuntimeException(e);
+        }
 
     }
 
+    @Override
+    public void writeUserInfoToFileNew(int num) {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
+        File file = new File(fileName);
+        FileOutputStream fos = null;
+        ObjectOutputStream oos = null;
+        try {
+            if(file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            fos = new FileOutputStream(file,true);
+            oos = new ObjectOutputStream(fos);
+            List<Company>companyList = companyDAO.findAll(new Company());
+            Random random = new Random();
+            long startTime = System.currentTimeMillis();
+            System.out.println("开始时间： " + startTime);
+            for(int i = 0 ; i < num ; i++){
+                Company company =  getRandomCompany(companyList,random);
+                User user = generateUser(company,random);
+                oos.writeObject(user);
+            }
+            oos.writeObject(null);
+            oos.close();
+            fos.close();
+            long endTime = System.currentTimeMillis();
+            System.out.println("结束时间：" + endTime);
+            System.out.println("耗时：" + (endTime-startTime));
+            //100条 49ms
+        } catch (IOException e) {
+            log.error("写用户信息文件报错",e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Company getRandomCompany(List<Company>companyList,Random random) {
+        return companyList.get(random.nextInt(companyList.size()));
+    }
+
+    @Override
+    public void insertUserFromFileToDb() {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo.txt";
+        FileReader fr = null;
+        BufferedReader  br = null;
+        try {
+             fr = new FileReader(fileName);
+             br = new BufferedReader(fr);
+             int insertCount = 0;
+             int updateCount = 0;
+             String jsonStr = "";
+             while ((jsonStr = br.readLine()) != null){
+                 User user = JSONObject.parseObject(jsonStr,User.class);
+
+                     User oldUser = userDAO.queryByNameAndPassword(user);
+                     if(oldUser != null){
+                         Date modifiedTime = user.getModifiedTime();
+                         Date oldModifiedTime = oldUser.getModifiedTime();
+                         if(modifiedTime.after(oldModifiedTime)){
+                             user.setId(oldUser.getId());
+                             user.setUserNumber(handleUserNumber(user.getCompanyId()));
+                             user.setEquipmentId(oldUser.getEquipmentId());
+                             user.setEquipmentName(oldUser.getEquipmentName());
+                             int updateResult = userDAO.update(user);
+                             if(updateResult > 0){
+                                 updateCount++;
+//                                 log.info("更新成功" + jsonStr);
+                             }else{
+                                 log.error("更新失败" + jsonStr);
+                                 //TODO 更新失败数据处理
+                             }
+                         }
+                     }else{
+                        int insertResult = userDAO.insert(user);
+                        if(insertResult > 0){
+                            insertCount++;
+//                            log.info("插入成功" + jsonStr);
+                        }else{
+                            log.error("插入失败" + jsonStr);
+                            //TODO 插入数据失败处理
+                        }
+                     }
+             }
+             log.info("实际插入的条数是：" + insertCount);
+             log.info("实际修改的条数是：" + updateCount);
+        } catch (FileNotFoundException e) {
+            log.error("输入的文件不存在",e);
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            log.error("读文件异常",e);
+            throw new RuntimeException(e);
+        } catch(Exception e){
+            log.error("其他报错",e);
+            e.printStackTrace();
+        }finally {
+            try {
+                br.close();
+                fr.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    @Override
+    public void insertUserFromFileToDbNew() {
+            String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo.txt";
+            FileReader fr = null;
+            BufferedReader  br = null;
+            try {
+                fr = new FileReader(fileName);
+                br = new BufferedReader(fr);
+                int insertCount = 0;
+                int updateCount = 0;
+                String str = "";
+                SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+                Class userClass = User.class;
+                User user = (User) userClass.getDeclaredConstructor().newInstance();
+                Field[]fields = userClass.getDeclaredFields();
+                long startTime = System.currentTimeMillis();
+                log.info("解析文件数据兵插入数据库： " + startTime);
+                while ((str = br.readLine()) != null){
+                    str = str.substring(str.indexOf("(")+1,str.indexOf(")"));
+                    String[]strArray = str.split(",");
+                    for(int i = 0 ; i < strArray.length ; i++){
+                        String stringArrayValue = strArray[i].substring(strArray[i].indexOf("=")+1);
+                        String fieldName = fields[i].getName();
+                        String fieldType = fields[i].getType().getSimpleName();
+                            fields[i].setAccessible(true);
+                            if("long".equals(fieldType)){
+                                fields[i].set(user,Long.parseLong(stringArrayValue));
+                            }else if("int".equals(fieldType)){
+                                fields[i].set(user,Integer.parseInt(stringArrayValue));
+                            }else if("Date".equals(fieldType)){
+                                fields[i].set(user,sdf.parse(stringArrayValue));
+                            }else if("byte".equals(fieldType)){
+                                fields[i].set(user,Byte.valueOf(stringArrayValue));
+                            }else{
+                                fields[i].set(user,stringArrayValue);
+                            }
+                    }
+                        User oldUser = userDAO.queryByNameAndPassword(user);
+                        if(oldUser != null){
+                            Date modifiedTime = user.getModifiedTime();
+                            Date oldModifiedTime = oldUser.getModifiedTime();
+                            if(modifiedTime.after(oldModifiedTime)){
+                                user.setId(oldUser.getId());
+                                user.setEquipmentId(oldUser.getEquipmentId());
+                                user.setEquipmentName(oldUser.getEquipmentName());
+                                int updateResult = userDAO.update(user);
+                                if(updateResult > 0){
+                                    updateCount++;
+//                                    log.info("更新成功" + str);
+                                }else{
+                                    log.error("更新失败" + str);
+                                    //TODO 更新失败数据处理
+                                    break;
+                                }
+                            }
+                        }else{
+                            int insertResult = userDAO.insert(user);
+                            if(insertResult > 0){
+                                insertCount++;
+//                                log.info("插入成功" + str);
+                            }else{
+                                log.error("插入失败" + str);
+                                //TODO 插入数据失败处理
+                                break;
+                            }
+                        }
+            }
+                long endTime = System.currentTimeMillis();
+                log.info("从文件到数据库的操作耗时：" + (endTime - startTime));
+                log.info("实际插入的条数是：" + insertCount);
+                log.info("实际修改的条数是：" + updateCount);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void insertUserFromFileToDbNew2() {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
+        FileInputStream fis = null;
+        ObjectInputStream  ois = null;
+            try {
+                fis = new FileInputStream(fileName);
+                ois = new ObjectInputStream(fis);
+                int insertCount = 0;
+                int updateCount = 0;
+                SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+                long startTime = System.currentTimeMillis();
+                User user = null;
+                log.info("开始计时：" + startTime);
+                while((user = (User) ois.readObject()) != null){
+                    User oldUser = userDAO.findByUserNameAndCompanyId(user);
+                    if(oldUser != null){
+                        Date modifiedTime = user.getModifiedTime();
+                        Date oldModifiedTime = oldUser.getModifiedTime();
+                        if(modifiedTime.after(oldModifiedTime)){
+                            user.setId(oldUser.getId());
+                            user.setEquipmentId(oldUser.getEquipmentId());
+                            user.setEquipmentName(oldUser.getEquipmentName());
+                            int updateResult = userDAO.update(user);
+                            if(updateResult > 0){
+                                updateCount++;
+//                                log.info("更新成功");
+                            }else{
+                                log.error("更新失败" + user.toString());
+                                //TODO 更新失败数据处理
+                                break;
+                            }
+                        }
+                    }else{
+                        int insertResult = userDAO.insert(user);
+                        if(insertResult > 0){
+                            insertCount++;
+//                            log.info("插入成功");
+                        }else{
+                            log.error("插入失败" + user.toString());
+                            //TODO 插入数据失败处理
+                            break;
+                        }
+                    }
+                }
+                long endTime = System.currentTimeMillis();
+                log.info("从文件到数据库的操作耗时：" + (endTime - startTime));
+                log.info("实际插入的条数是：" + insertCount);
+                log.info("实际修改的条数是：" + updateCount);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+    }
+
+    private User generateUser(Company company,Random random){
+        User user = new User();
+        Date date = new Date();
+        long companyId = company.getId();
+        user.setPassword("123456");
+        user.setCompanyId(companyId);
+        user.setCompanyName(company.getCompanyName());
+        user.setCreated("admin");
+        user.setCreatedTime(date);
+        user.setModified("admin");
+        user.setModifiedTime(date);
+        user.setConfirmPassword("123456");
+        int num = random.nextInt(2000);
+        user.setUsername("employee" + num);
+        user.setEmail("714680900@qq.com");
+        user.setIsAdmin((byte) 0);
+        user.setState(0);
+        user.setTelephoneNumber("12345123458");
+        //TODO 设备信息处理
+        user.setEquipmentId(0);
+        String userNumber = handleUsernumberForFile(random);
+        user.setUserNumber(userNumber);
+        long oneDay = TimeUnit.DAYS.toMillis(1);
+        long now = date.getTime();
+        long end = now + oneDay * 30 * 8;
+        Date neededDate = generateRandomDate(now,end);
+        user.setModified(user.getUsername());
+        user.setModifiedTime(neededDate);
+        return user;
+    }
+    //TODO 从文件读取插入数据中的时候使用
+    private String handleUserNumber(long companyId) {
+        int userNum = userDAO.queryForAmountByCompanyId(companyId);
+        userNum = userNum + 1;
+        StringBuilder builder = new StringBuilder();
+        builder.append(companyId);
+        builder.append("");
+        builder.append(userNum);
+        for(int i = 0 ; i < 10-builder.length() ; i++){
+            builder.append(0);
+        }
+        String userNumber = builder.toString();
+        builder.setLength(0);
+        return userNumber;
+    }
+    private String handleUsernumberForFile(Random random){
+        return String.valueOf(random.nextInt(10000000));
+    }
     /**
      * 生成[20,num+20)的随机数
      * @param num
      * @return
      */
-    private long generateRandomNumber(long num){
-        return ThreadLocalRandom.current().nextLong(num)+20;
-    }
 
     /**
      * 生成随机日期
@@ -343,9 +624,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     private Date generateRandomDate(long startTime,Long endTime){
-//        long startTime = startDate.getTime();
-//        long endTime = endDate.getTime();
-        long neededTime = ThreadLocalRandom.current().nextLong(startTime,endTime);
+        long neededTime = (long) (startTime + (Math.random() * (endTime - startTime)));
         Date neededDate = new Date(neededTime);
         return neededDate;
     }
@@ -358,32 +637,40 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
-    public static void main(String[] args) {
-        //        long oneDay = TimeUnit.DAYS.toMillis(1);
-        //        long now = new Date().getTime();
-        //        long startTime = now - oneDay * 365 * 5;
-        //        for(int i = 0 ; i < 2000 ; i++){
-        //            long neededTime = ThreadLocalRandom.current().nextLong(startTime,now);
-        //            Date randomDate =  new Date(neededTime);
-        //            long randomTime = randomDate.getTime();
-        //            if(randomTime > now){
-        //                System.out.println("第"+i+"个日期大于当前日期："+randomDate);
-        //            }
-        //        }
-        System.out.println("test begin");
-        long time1 = System.currentTimeMillis();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        System.out.println("start date:" + sdf.format(time1));
+    /**
+     * 测试FileWriter和BufferedWriter的缓存值
+     * @author zhangshenming
+     * @date 2023/03/16 18:10
+     * @param
+     * @return
+     */
+    private static void testFileWriterOrBufferedWriterFlush(){
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\testFileWriter.txt";
+        File file = new File(fileName);
+        FileWriter fw = null;
+        BufferedWriter bw = null;
+        int count = 0;
         try {
-            System.out.println("");
-            Thread.sleep(30000);
-        } catch (InterruptedException e) {
+            if(file.exists()){
+                file.delete();
+            }
+            file.createNewFile();
+            fw = new FileWriter(file);
+//            bw = new BufferedWriter(fw);
+            while(file.length() <= 0){
+                fw.write("a");
+                count++;
+            }
+            //fileWriter:8193个a
+            //bufferedWriter:16384个a
+            System.out.println("一共写入了" + count + "个a自动刷新");
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        long time2 = System.currentTimeMillis();
-        System.out.println("end date:" + sdf.format(time2));
-//        String dateStr = sdf.format(time2-time1);
-        System.out.println(time2-time1);
+    }
+    public static void main(String[] args) {
+            int a = 123;
+        System.out.println(a%10);
 
     }
 }
