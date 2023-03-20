@@ -196,6 +196,12 @@ public class UserServiceImpl implements UserService {
         int num = userDAO.update(user);
         return num > 0 ? true : false;
     }
+
+    @Override
+    public int batchUpdate(List<User> list) {
+        return userDAO.updateBatch(list);
+    }
+
     @Override
     public User findById(long id) {
         log.info("进入userService的findById方法内");
@@ -585,8 +591,6 @@ public class UserServiceImpl implements UserService {
         String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
         FileInputStream fis = null;
         ObjectInputStream  ois = null;
-        Set<String>userNameSet = new HashSet<>();
-        Set<Long>companyIdSet = new HashSet<>();
         Map<String,Map<Long,User>>insertUserMap = new HashMap<>();
         Map<String,Map<Long,User>>updateUserMap = new HashMap<>();
         Map<Long,User>userMap = new HashMap<>();
@@ -598,99 +602,86 @@ public class UserServiceImpl implements UserService {
             int insertCount = 0;
             int updateCount = 0;
             SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
-            long startTime = System.currentTimeMillis();
             User user = null;
+            long startTime = System.currentTimeMillis();
             log.info("开始计时：" + startTime);
             while((user = (User) ois.readObject()) != null){
-                //userNameSet中没有返回true，有返回false
-                boolean flagForUserName = userNameSet.add(user.getUsername());
-                //companyIdSet中没有返回true，有返回false
-                boolean flagForCompanyId = companyIdSet.add(user.getCompanyId());
-                User oldUser = userDAO.findByUserNameAndCompanyId(user);
                 String userName = user.getUsername();
-                long companyId = user.getCompanyId();
-                //数据库中没有
+                long companyId= user.getCompanyId();
+                long modifiedTime = user.getModifiedTime();
+                User oldUser = userDAO.findByUserNameAndCompanyId(user);
+                /**
+                 * 思路：如果数据库中没有user数据，判断insertUserMap中是否含有新读取的用户的用户名，
+                 * 如果含有相同用户名，继续判断是否含有相同的公司id，
+                 * 如果含有相同的公司id，从insertUserMap中拿到这个用户数据，比较两个用户的修改时间，修改时间较大者所对应的用户数据更新到insertUserMap中；
+                 * 如果不含有相同的公司id，直接增加到insertUsermap中；
+                 * 如果不含有相同用户名，直接增加到insertUsermap中；
+                 * 如果数据库中有user数据，判断updateUserMap中是否含有新都区的用户的用户名，
+                 * 如果含有相同的用户名，继续判断是否含有相同的公司id，
+                 * 如果含有相同的公司id，从updateUserMap中拿到这个用户数据，比较三个用户的修改时间，修改时间较大者所对应的用户数据更新到updateUserMap中；
+                 * 如果不含有相同的公司id，比较数据库中的user和新读取的user额度修改时间，较大者所对应的用户数据更新到updateUserMap中；
+                 * 如果不含有相同的用户名，比较数据库中的user和新读取的user额度修改时间，较大者所对应的用户数据更新到updateUserMap中；
+                 * 在新增和更新之前，分别将insertUserMap和updateUserMap中的用户数据转成List形式，分别调用userDAO的insertBatch和updateBatch方法
+                 */
                 if(oldUser == null){
-                    //userNameSet中没有且companyIdSet中没有，insert
-                    if(flagForUserName && flagForCompanyId){
-                        userNameSet.add(userName);
-                        companyIdSet.add(companyId);
-                        userMap.put(companyId,user);
-                        insertUserMap.put(userName,userMap);
-                    //userNameSet中有且companyIdSet中有，update
-                    }else if((!flagForUserName) && (!flagForCompanyId)){
-                        long modifiedTime = user.getModifiedTime();
-                        //判断这条数据在insertUserMap中还是updateUserMap中
-                        if(insertUserMap.containsKey(userName)){
-                            User fileOldUserForInsert = insertUserMap.get(userName).get(companyId);
-                            long fileOldUserForInsertModifiedTime = fileOldUserForInsert.getModifiedTime();
-                            //文件中的数是最新的,否则已经保存在insertUserMap中的是最新的数据
-                            if(modifiedTime - fileOldUserForInsertModifiedTime < 0){
-                                userMap.put(companyId,user);
-                                insertUserMap.put(userName,userMap);
+                    if(insertUserMap.containsKey(userName)){
+                        if(insertUserMap.get(userName).containsKey(companyId)){
+                            User insertUser = insertUserMap.get(userName).get(companyId);
+                            long insertUserModifiedTime = insertUser.getModifiedTime();
+                            if(modifiedTime - insertUserModifiedTime > 0){
+                                insertUserMap.get(userName).put(companyId,user);
                             }
-                        }else if(updateUserMap.containsKey(userName)){
-                            User fileOldUserForUpdate = updateUserMap.get(userName).get(companyId);
-                            long fileOldUserForUpdateModifiedTime = fileOldUserForUpdate.getModifiedTime();
-                            if(modifiedTime - fileOldUserForUpdateModifiedTime < 0){
-                                userMap.put(companyId,user);
-                                updateUserMap.put(userName,userMap);
+                        }else{
+                            insertUserMap.get(userName).put(companyId,user);
+                        }
+                    }else{
+                        Map<Long,User>map = new HashMap<>();
+                        map.put(companyId,user);
+                        insertUserMap.put(userName,map);
+                    }
+                }else{
+                    long oldUserModifiedTime = oldUser.getModifiedTime();
+                    if(updateUserMap.containsKey(userName)){
+                        if(updateUserMap.get(userName).containsKey(companyId)){
+                            User updateUser = updateUserMap.get(userName).get(companyId);
+                            long updateUserModifiedTime = updateUser.getModifiedTime();
+                            long max = ((max = (modifiedTime > oldUserModifiedTime) ? modifiedTime : oldUserModifiedTime) > updateUserModifiedTime ? max : updateUserModifiedTime);
+                            if(max == modifiedTime){
+                                updateUserMap.get(userName).put(companyId,user);
+                            }
+//                            else if(max == oldUserModifiedTime){
+//                                Map<Long,User>map = new HashMap<>();
+//                                map.put(companyId,updateUser);
+//                                updateUserMap.remove(userName,map);
+//                            }
+                        }else{
+                            if(modifiedTime - oldUserModifiedTime > 0){
+                                updateUserMap.get(userName).put(companyId,user);
                             }
                         }
                     }else{
-                     //userNameSet中有或companyId中有，insert
-                        userNameSet.add(userName);
-                        companyIdSet.add(companyId);
-                        userMap.put(companyId,user);
-                        insertUserMap.put(userName,userMap);
-                    }
-                }else{
-                    //只要数据库中有，剩下的几种情况一定是update
-                    long modifiedTime = user.getModifiedTime();
-                    long oldUserForModifiedTime = oldUser.getModifiedTime();
-                    if(insertUserMap.containsKey(userName)){
-                        //如果insertUserMap中数据，比较modifiedTime，oldUserForModifiedTime和insertUserMap中的modifiedTime这三者的大小，取最大值
-                        long fileOldUserForInsertModifiedTime = insertUserMap.get(userName).get(companyId).getModifiedTime();
-                        long max = ((max = (modifiedTime > oldUserForModifiedTime) ? modifiedTime : oldUserForModifiedTime) > fileOldUserForInsertModifiedTime ? max : fileOldUserForInsertModifiedTime);
-                        //如果modifiedTime最大，用读文件出来的user的数据替换掉insertUserMap中的数据，如果oldUserForModifiedTime最大，保持现有的insertUserMap中的user，如果fileOldUserForInsertModifiedTime最大，保持数据库中的数据不变
-                        if(max == modifiedTime){
-                            userMap.put(companyId,user);
-                            insertUserMap.put(userName,userMap);
-                        }
-
-                    }else if(updateUserMap.containsKey(userName)){
-                        //如果updateUserMap中数据，比较modifiedTime，oldUserForModifiedTime和updateUserMap中的modifiedTime这三者的大小，取最大值
-                        long fileOldUserForUpdateModifiedTime = updateUserMap.get(userName).get(companyId).getModifiedTime();
-                        long max = ((max = (modifiedTime > oldUserForModifiedTime) ? modifiedTime : oldUserForModifiedTime) > fileOldUserForUpdateModifiedTime ? max : fileOldUserForUpdateModifiedTime);
-                        //如果modifiedTime最大，用读文件出来的user的数据替换掉updateUserMap中的数据，如果oldUserForModifiedTime最大，保持现有的updateUserMap中的user，如果fileOldUserForUpdateModifiedTime最大，保持数据库中的数据不变
-                        if(max == modifiedTime){
-                            userMap.put(companyId,user);
-                            updateUserMap.put(userName,userMap);
+                        if(modifiedTime - oldUserModifiedTime > 0){
+                            Map<Long,User>map = new HashMap<>();
+                            map.put(companyId,user);
+                            updateUserMap.put(userName,map);
                         }
                     }
                 }
             }
-            for(String userName: insertUserMap.keySet()){
-                Map<Long,User>map = insertUserMap.get(userName);
-                for(long l: map.keySet()){
-                    insertUserList.add(map.get(l));
-                }
+            insertUserList = transferToUserList(insertUserList,insertUserMap);
+            updateUserlist = transferToUserList(updateUserlist,updateUserMap);
+            if(insertUserList.size() != 0){
+                int insertNum = userDAO.insertBatch(insertUserList);
+                log.info("批量新增成功的条数是：" + insertNum);
             }
-            for(String userName:updateUserMap.keySet()){
-                Map<Long,User>map = updateUserMap.get(userName);
-                for(long l:map.keySet()){
-                    updateUserlist.add(map.get(l));
-                }
+            if(updateUserlist.size() != 0){
+                int updateNum = userDAO.updateBatch(updateUserlist);
+                log.info("批量更新成功的条数： " + updateNum);
             }
-            int insertNum = userDAO.insertBatch(insertUserList);
-            log.info("批量更新成功的条数是：" + insertNum);
-            //TODO userDAO的批量更新
-            int updateNum = userDAO.update(updateUserlist);
             long endTime = System.currentTimeMillis();
             log.info("从文件到数据库的操作耗时：" + (endTime - startTime));
-            //100条  516ms
-            log.info("实际插入的条数是：" + insertCount);
-            log.info("实际修改的条数是：" + updateCount);
+            //单条提交 100条  516ms
+            //批量提交 200条  588ms
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -698,6 +689,15 @@ public class UserServiceImpl implements UserService {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private List<User> transferToUserList(List<User> list, Map<String, Map<Long, User>> map) {
+        for(String userName:map.keySet()){
+            for(long l:map.get(userName).keySet()){
+                list.add(map.get(userName).get(l));
+            }
+        }
+        return list;
     }
 
     private User generateUser(Company company,Random random){
@@ -712,7 +712,7 @@ public class UserServiceImpl implements UserService {
         user.setModified("admin");
         user.setModifiedTime(date.getTime());
         user.setConfirmPassword("123456");
-        int num = random.nextInt(2000);
+        int num = random.nextInt(50);
         user.setUsername("employee" + num);
         user.setEmail("714680900@qq.com");
         user.setIsAdmin((byte) 0);
@@ -805,13 +805,6 @@ public class UserServiceImpl implements UserService {
         }
     }
     public static void main(String[] args) {
-        User user1 = new User();
-        user1.setUsername("aaa");
-        User user2 = new User();
-        user2.setUsername("aaa");
-        Set<String>set = new HashSet<>();
-        System.out.println(set.add(user1.getUsername()));
-        System.out.println(set.add(user2.getUsername()));
 
     }
 

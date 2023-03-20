@@ -59,21 +59,21 @@
             <include refid="userContentForInsert"/>
         </trim>
         values
-        <foreach collection="list" item="item" separator=",">
-            (#{userNumber},
-            #{username},
-            #{password},
-            #{telephoneNumber},
-            #{email},
-            #{isAdmin},
-            #{companyId},
-            #{accountId},
-            #{equipmentId},
-            #{state},
-            #{created},
-            #{modified},
-            #{createdTime},
-            #{modifiedTime})
+        <foreach collection="list" item="item" index="index" separator="," open="" close="">
+            (#{item.userNumber},
+            #{item.username},
+            #{item.password},
+            #{item.telephoneNumber},
+            #{item.email},
+            #{item.isAdmin},
+            #{item.companyId},
+            #{item.accountId},
+            #{item.equipmentId},
+            #{item.state},
+            #{item.created},
+            #{item.modified},
+            #{item.createdTime},
+            #{item.modifiedTime})
         </foreach>
     </insert>
     <!-- 根据条件查询用户信息-->
@@ -198,6 +198,39 @@
             </if>
             and state = 0
         </where>
+    </update>
+    <!-- 批量更新用户 -->
+    <update id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";" close="" open="" >
+            update  user
+            <set>
+                <if test="item.email != null">
+                   email = #{item.email},
+                </if>
+                <if test="item.telephoneNumber != null">
+                    telephone_number = #{item.telephoneNumber},
+                </if>
+                <if test="item.modified != null">
+                    modified = #{item.modified},
+                </if>
+                <if test="item.modifiedTime != null">
+                    modified_time = #{item.modifiedTime},
+                </if>
+            </set>
+            <where>
+                state = 0
+                <if test="item.id != 0">
+                   and id = #{item.id}
+                </if>
+                <if test="item.username != null">
+                    and username = #{item.username}
+                </if>
+                <if test="item.companyId != 0">
+                    and company_id = #{item.companyId}
+                </if>
+            </where>
+        </foreach>
+
     </update>
     <!-- 删除用户信息，实际上修改用户状态，0：正常用户；1：删除用户 -->
     <update id="deleteById" parameterType="long">

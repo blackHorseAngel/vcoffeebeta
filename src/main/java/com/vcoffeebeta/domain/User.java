@@ -92,12 +92,6 @@ public class  User implements Serializable {
      */
     private String equipmentName;
     /**
-     * 页面展示修改时间需要
-     */
-    private String modifiedTimeNew;
-
-    private String createTimeNew;
-    /**
      * 用户状态，0：正常；1：删除
      */
     private int state;

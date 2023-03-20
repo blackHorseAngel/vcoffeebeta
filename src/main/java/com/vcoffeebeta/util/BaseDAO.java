@@ -42,6 +42,13 @@ public interface BaseDAO<E,Q> {
      * @return int
      */
     public int update(E entity);
+
+    /**
+     * 批量更新用户
+     * @param list
+     * @return
+     */
+    public int updateBatch(List<E>list);
     /**
      * 查询分页
      * @author zhangshenming

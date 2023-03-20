@@ -8,9 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
 
 @SpringBootTest(classes = VcoffeebetaApplication.class) //webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class UserServiceImplTest {
@@ -105,19 +103,48 @@ class UserServiceImplTest {
 
     @Test
     void writeUserInfoToFileNew() {
-        userService.writeUserInfoToFileNew(100);
+        userService.writeUserInfoToFileNew(200);
     }
 
     @Test
     void insertUserFromFileToDbNew2() {
         userService.insertUserFromFileToDbNew2();
     }
+    @Test
+    void insertBatchUsersFromFileToDb() {
+        userService.insertBatchUsersFromFileToDb();
+    }
+    @Test
+    void batchUpdate() {
+        List<User> list = new ArrayList<>();
+        User u = new User();
+        u.setUsername("employee26");
+        u.setCompanyId(1087);
+        u.setEmail("11111@qq.com");
+        u.setTelephoneNumber("111111111");
+        u.setModified("employee26");
+        u.setModifiedTime(1690903356770L);
+        list.add(u);
+        User u2 = new User();
+        u2.setUsername("employee48");
+        u2.setCompanyId(1102L);
+        u2.setEmail("22222@qq.com");
+        u2.setTelephoneNumber("222222222");
+        u2.setModified("employee48");
+        u2.setModifiedTime(1692572985244L);
+        list.add(u2);
+        int num =  userService.batchUpdate(list);
+        System.out.println(num);
 
+    }
     public static void main(String[] args) {
-        Calendar c = Calendar.getInstance();
-        c.set(2023,3,17,15,28,33);
-        System.out.println(c.getTimeInMillis());
+//        Calendar c = Calendar.getInstance();
+//        c.set(2023,3,17,15,28,33);
+//        System.out.println(c.getTimeInMillis());
 
 
     }
+
+
+
 }

@@ -62,6 +62,8 @@ public interface UserService {
      * @return boolean
      */
     boolean updateUser(User user);
+
+    int batchUpdate(List<User>list);
     /**
      * 通过id查找用户信息
      * @author zhangshenming
