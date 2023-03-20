@@ -103,7 +103,7 @@ class UserServiceImplTest {
 
     @Test
     void writeUserInfoToFileNew() {
-        userService.writeUserInfoToFileNew(200);
+        userService.writeUserInfoToFileNew(30000);
     }
 
     @Test

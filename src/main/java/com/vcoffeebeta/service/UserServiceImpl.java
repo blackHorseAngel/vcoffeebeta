@@ -587,6 +587,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insertBatchUsersFromFileToDb() {
         String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
         FileInputStream fis = null;
@@ -595,8 +596,9 @@ public class UserServiceImpl implements UserService {
         Map<String,Map<Long,User>>updateUserMap = new HashMap<>();
         Map<Long,User>userMap = new HashMap<>();
         List<User>insertUserList = new ArrayList<>();
-        List<User>updateUserlist = new ArrayList<>();
+        List<User>updateUserList = new ArrayList<>();
         try {
+            int count = userDAO.queryForAmountByCompanyId(1L);
             fis = new FileInputStream(fileName);
             ois = new ObjectInputStream(fis);
             int insertCount = 0;
@@ -609,7 +611,10 @@ public class UserServiceImpl implements UserService {
                 String userName = user.getUsername();
                 long companyId= user.getCompanyId();
                 long modifiedTime = user.getModifiedTime();
+//                long start1 = System.currentTimeMillis();
                 User oldUser = userDAO.findByUserNameAndCompanyId(user);
+//                long end1 = System.currentTimeMillis();
+//                log.info("每次查询数据库中旧数据耗时： " + (end1-start1));
                 /**
                  * 思路：如果数据库中没有user数据，判断insertUserMap中是否含有新读取的用户的用户名，
                  * 如果含有相同用户名，继续判断是否含有相同的公司id，
@@ -668,14 +673,20 @@ public class UserServiceImpl implements UserService {
                     }
                 }
             }
+//            long start2 = System.currentTimeMillis();
             insertUserList = transferToUserList(insertUserList,insertUserMap);
-            updateUserlist = transferToUserList(updateUserlist,updateUserMap);
+//            long end2 = System.currentTimeMillis();
+//            log.info("insertUsermap转成list耗时：" + (end2 - start2));
+            updateUserList = transferToUserList(updateUserList,updateUserMap);
             if(insertUserList.size() != 0){
+//                long start3 = System.currentTimeMillis();
                 int insertNum = userDAO.insertBatch(insertUserList);
+                long end3 = System.currentTimeMillis();
+//                log.info("插入insertUserList耗时：" + (end3 - start3));
                 log.info("批量新增成功的条数是：" + insertNum);
             }
-            if(updateUserlist.size() != 0){
-                int updateNum = userDAO.updateBatch(updateUserlist);
+            if(updateUserList.size() != 0){
+                int updateNum = userDAO.updateBatch(updateUserList);
                 log.info("批量更新成功的条数： " + updateNum);
             }
             long endTime = System.currentTimeMillis();
@@ -712,7 +723,7 @@ public class UserServiceImpl implements UserService {
         user.setModified("admin");
         user.setModifiedTime(date.getTime());
         user.setConfirmPassword("123456");
-        int num = random.nextInt(50);
+        int num = random.nextInt(100);
         user.setUsername("employee" + num);
         user.setEmail("714680900@qq.com");
         user.setIsAdmin((byte) 0);

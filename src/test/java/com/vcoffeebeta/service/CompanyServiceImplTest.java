@@ -95,7 +95,7 @@ class CompanyServiceImplTest {
         int count = 0;
         List<Company>companyList = new ArrayList<>();
         long start = System.currentTimeMillis();
-        while(count < 850){
+        while(count < 750){
             while(companyList.size() < size){
                 Company company = new Company();
                 Date date = new Date();
