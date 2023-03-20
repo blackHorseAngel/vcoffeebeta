@@ -63,15 +63,15 @@ public class UserServiceImpl implements UserService {
                 List<Equipment> equipmentList = equipmentDAO.findAllEquipmentsByCompanyId(companyId);
                 log.info("当前登录用户u所在公司下的所有的设备信息：" + JSON.toJSONString(equipmentList));
                 //若新增用户所在的公司名下没有暂时没有设备，按0处理进行新增
-                long equipmentIdSum = 0;
+                String equipmentIdStr = "";
                 if(equipmentList.size() == 0){
-                    user.setEquipmentId(0);
+                    user.setEquipmentId("0");
                 }else{
                     for(Equipment e : equipmentList){
                          long equipmentId = e.getId();
-                         equipmentIdSum = equipmentIdSum * 10 + equipmentId;
+                         equipmentIdStr = String.valueOf(equipmentId);
                     }
-                    user.setEquipmentId(equipmentIdSum);
+                    user.setEquipmentId(equipmentIdStr);
                 }
             }
             log.info("userService中新增前user数据是： " + JSON.toJSONString(user));
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
                     long oldAccountId = oldAccount.getId();
                     log.info("获取新增用户账户成功之后的账户id： " + oldAccountId);
                     newUser.setAccountId(oldAccountId);
-                    newUser.setModifiedTime(new Date());
+                    newUser.setModifiedTime(new Date().getTime());
                     int updateUserNum = userDAO.update(newUser);
                     if(updateUserNum > 0){
                         log.info("更新用户信息中的账户id成功");
@@ -112,6 +112,11 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    public int insertBatchUser(List<User> userList) {
+        return userDAO.insertBatch(userList);
     }
 
     /**
@@ -148,23 +153,32 @@ public class UserServiceImpl implements UserService {
                    return null;
                 }
                 user1.setCompanyName(c.getCompanyName());
-                long equipmentId = user1.getEquipmentId();
-                if(equipmentId == 0){
+                String equipmentIdStr = user1.getEquipmentId();
+                if(equipmentIdStr.length() == 0){
                     user1.setEquipmentName("");
                 }else{
                     StringBuilder equipmentNameBuilder = new StringBuilder();
                     String equipmentNameStr = "";
-                    while(equipmentId%10 != 0){
-                        long num = equipmentId % 10;
-                        Equipment e = (Equipment) equipmentDAO.findById(num);
-                        equipmentNameBuilder.append(e.getEquipmentName());
-                        equipmentNameBuilder.append("|");
-                        equipmentId = equipmentId / 10;
+                    String[]equipmentIds = equipmentIdStr.split("|");
+                    for(int i = 0 ; i < equipmentIds.length ; i++){
+                        if(equipmentIds[i].matches("\\d")){
+                            long num = Integer.parseInt(equipmentIds[i]);
+                            Equipment e = (Equipment) equipmentDAO.findById(num);
+                            if(e == null){
+                                break;
+                            }
+                            equipmentNameBuilder.append(e.getEquipmentName());
+                            equipmentNameBuilder.append("|");
+                        }
                     }
                     equipmentNameStr = equipmentNameBuilder.toString();
-                    equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
-                    user1.setEquipmentName(equipmentNameStr);
-                    equipmentNameBuilder.setLength(0);
+                    if(equipmentNameStr.length() != 0){
+                        equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
+                        user1.setEquipmentName(equipmentNameStr);
+                        equipmentNameBuilder.setLength(0);
+                    }else{
+                        user1.setEquipmentName("");
+                    }
                 }
             }
             return userList;
@@ -237,21 +251,21 @@ public class UserServiceImpl implements UserService {
         log.info("进入userService的queryForList方法");
         try{
             List<User>userList = userDAO.queryForList(userQuery);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             log.info("条件查询后的userList数据是：" + JSON.toJSONString(userList));
             for(User u : userList){
                 Company c = (Company) companyDAO.findById(u.getCompanyId());
                 u.setCompanyName(c.getCompanyName());
-                long equipmentIds = u.getEquipmentId();
+                String equipmentIdStr = u.getEquipmentId();
+                String[]equipmentIds = equipmentIdStr.split("|");
                 StringBuilder builder = new StringBuilder();
                 String equipmentNameStr = "";
-                while(equipmentIds % 10 != 0){
-                    long equipmentId = equipmentIds % 10;
+                for (int i = 0 ; i < equipmentIds.length;i++){
+                    long equipmentId = Integer.parseInt(equipmentIds[i]);
                     Equipment e = (Equipment) equipmentDAO.findById(equipmentId);
                     builder.append(e.getEquipmentName());
                     builder.append("|");
-                    equipmentIds = equipmentIds / 10;
                 }
-
                 equipmentNameStr = builder.toString();
                 equipmentNameStr = equipmentNameStr.substring(0,equipmentNameStr.length() - 1);
                 u.setEquipmentName(equipmentNameStr);
@@ -278,6 +292,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void writeUserInfoToFile(int num) {
         File file = new File("D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo.txt");
+       //根据系统自动匹配换行符
+        String separator = System.getProperty("line.separator");
         try {
             if(file.exists()) {
                 file.delete();
@@ -297,7 +313,7 @@ public class UserServiceImpl implements UserService {
 //                bw.append(user.toString());
 //                bw.newLine();
                 fw.write(user.toString());
-                fw.write("\r\n");
+                fw.write(separator);
             }
 //            bw.close();
             fw.close();
@@ -318,6 +334,7 @@ public class UserServiceImpl implements UserService {
         File file = new File(fileName);
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
+        OutputStreamWriter osw = null;
         try {
             if(file.exists()) {
                 file.delete();
@@ -325,6 +342,7 @@ public class UserServiceImpl implements UserService {
             file.createNewFile();
             fos = new FileOutputStream(file,true);
             oos = new ObjectOutputStream(fos);
+//            osw = new OutputStreamWriter(fos,"utf-8");
             List<Company>companyList = companyDAO.findAll(new Company());
             Random random = new Random();
             long startTime = System.currentTimeMillis();
@@ -340,7 +358,7 @@ public class UserServiceImpl implements UserService {
             long endTime = System.currentTimeMillis();
             System.out.println("结束时间：" + endTime);
             System.out.println("耗时：" + (endTime-startTime));
-            //100条 49ms
+            //100条 36ms
         } catch (IOException e) {
             log.error("写用户信息文件报错",e);
             throw new RuntimeException(e);
@@ -367,9 +385,9 @@ public class UserServiceImpl implements UserService {
 
                      User oldUser = userDAO.queryByNameAndPassword(user);
                      if(oldUser != null){
-                         Date modifiedTime = user.getModifiedTime();
-                         Date oldModifiedTime = oldUser.getModifiedTime();
-                         if(modifiedTime.after(oldModifiedTime)){
+                         long modifiedTime = user.getModifiedTime();
+                         long oldModifiedTime = oldUser.getModifiedTime();
+                         if(modifiedTime - oldModifiedTime < 0){
                              user.setId(oldUser.getId());
                              user.setUserNumber(handleUserNumber(user.getCompanyId()));
                              user.setEquipmentId(oldUser.getEquipmentId());
@@ -454,9 +472,9 @@ public class UserServiceImpl implements UserService {
                     }
                         User oldUser = userDAO.queryByNameAndPassword(user);
                         if(oldUser != null){
-                            Date modifiedTime = user.getModifiedTime();
-                            Date oldModifiedTime = oldUser.getModifiedTime();
-                            if(modifiedTime.after(oldModifiedTime)){
+                            long modifiedTime = user.getModifiedTime();
+                            long oldModifiedTime = oldUser.getModifiedTime();
+                            if(modifiedTime - oldModifiedTime < 0){
                                 user.setId(oldUser.getId());
                                 user.setEquipmentId(oldUser.getEquipmentId());
                                 user.setEquipmentName(oldUser.getEquipmentName());
@@ -504,7 +522,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void insertUserFromFileToDbNew2() {
         String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
         FileInputStream fis = null;
@@ -521,16 +538,16 @@ public class UserServiceImpl implements UserService {
                 while((user = (User) ois.readObject()) != null){
                     User oldUser = userDAO.findByUserNameAndCompanyId(user);
                     if(oldUser != null){
-                        Date modifiedTime = user.getModifiedTime();
-                        Date oldModifiedTime = oldUser.getModifiedTime();
-                        if(modifiedTime.after(oldModifiedTime)){
+                        long modifiedTime = user.getModifiedTime();
+                        long oldModifiedTime = oldUser.getModifiedTime();
+                        if(modifiedTime - oldModifiedTime < 0){
                             user.setId(oldUser.getId());
                             user.setEquipmentId(oldUser.getEquipmentId());
                             user.setEquipmentName(oldUser.getEquipmentName());
                             int updateResult = userDAO.update(user);
                             if(updateResult > 0){
                                 updateCount++;
-//                                log.info("更新成功");
+//                                log.info("更新成功"+user.toString());
                             }else{
                                 log.error("更新失败" + user.toString());
                                 //TODO 更新失败数据处理
@@ -541,7 +558,7 @@ public class UserServiceImpl implements UserService {
                         int insertResult = userDAO.insert(user);
                         if(insertResult > 0){
                             insertCount++;
-//                            log.info("插入成功");
+//                            log.info("插入成功"+user.toString());
                         }else{
                             log.error("插入失败" + user.toString());
                             //TODO 插入数据失败处理
@@ -551,6 +568,7 @@ public class UserServiceImpl implements UserService {
                 }
                 long endTime = System.currentTimeMillis();
                 log.info("从文件到数据库的操作耗时：" + (endTime - startTime));
+                //100条  516ms
                 log.info("实际插入的条数是：" + insertCount);
                 log.info("实际修改的条数是：" + updateCount);
             } catch (FileNotFoundException e) {
@@ -560,6 +578,126 @@ public class UserServiceImpl implements UserService {
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
+    }
+
+    @Override
+    public void insertBatchUsersFromFileToDb() {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
+        FileInputStream fis = null;
+        ObjectInputStream  ois = null;
+        Set<String>userNameSet = new HashSet<>();
+        Set<Long>companyIdSet = new HashSet<>();
+        Map<String,Map<Long,User>>insertUserMap = new HashMap<>();
+        Map<String,Map<Long,User>>updateUserMap = new HashMap<>();
+        Map<Long,User>userMap = new HashMap<>();
+        List<User>insertUserList = new ArrayList<>();
+        List<User>updateUserlist = new ArrayList<>();
+        try {
+            fis = new FileInputStream(fileName);
+            ois = new ObjectInputStream(fis);
+            int insertCount = 0;
+            int updateCount = 0;
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+            long startTime = System.currentTimeMillis();
+            User user = null;
+            log.info("开始计时：" + startTime);
+            while((user = (User) ois.readObject()) != null){
+                //userNameSet中没有返回true，有返回false
+                boolean flagForUserName = userNameSet.add(user.getUsername());
+                //companyIdSet中没有返回true，有返回false
+                boolean flagForCompanyId = companyIdSet.add(user.getCompanyId());
+                User oldUser = userDAO.findByUserNameAndCompanyId(user);
+                String userName = user.getUsername();
+                long companyId = user.getCompanyId();
+                //数据库中没有
+                if(oldUser == null){
+                    //userNameSet中没有且companyIdSet中没有，insert
+                    if(flagForUserName && flagForCompanyId){
+                        userNameSet.add(userName);
+                        companyIdSet.add(companyId);
+                        userMap.put(companyId,user);
+                        insertUserMap.put(userName,userMap);
+                    //userNameSet中有且companyIdSet中有，update
+                    }else if((!flagForUserName) && (!flagForCompanyId)){
+                        long modifiedTime = user.getModifiedTime();
+                        //判断这条数据在insertUserMap中还是updateUserMap中
+                        if(insertUserMap.containsKey(userName)){
+                            User fileOldUserForInsert = insertUserMap.get(userName).get(companyId);
+                            long fileOldUserForInsertModifiedTime = fileOldUserForInsert.getModifiedTime();
+                            //文件中的数是最新的,否则已经保存在insertUserMap中的是最新的数据
+                            if(modifiedTime - fileOldUserForInsertModifiedTime < 0){
+                                userMap.put(companyId,user);
+                                insertUserMap.put(userName,userMap);
+                            }
+                        }else if(updateUserMap.containsKey(userName)){
+                            User fileOldUserForUpdate = updateUserMap.get(userName).get(companyId);
+                            long fileOldUserForUpdateModifiedTime = fileOldUserForUpdate.getModifiedTime();
+                            if(modifiedTime - fileOldUserForUpdateModifiedTime < 0){
+                                userMap.put(companyId,user);
+                                updateUserMap.put(userName,userMap);
+                            }
+                        }
+                    }else{
+                     //userNameSet中有或companyId中有，insert
+                        userNameSet.add(userName);
+                        companyIdSet.add(companyId);
+                        userMap.put(companyId,user);
+                        insertUserMap.put(userName,userMap);
+                    }
+                }else{
+                    //只要数据库中有，剩下的几种情况一定是update
+                    long modifiedTime = user.getModifiedTime();
+                    long oldUserForModifiedTime = oldUser.getModifiedTime();
+                    if(insertUserMap.containsKey(userName)){
+                        //如果insertUserMap中数据，比较modifiedTime，oldUserForModifiedTime和insertUserMap中的modifiedTime这三者的大小，取最大值
+                        long fileOldUserForInsertModifiedTime = insertUserMap.get(userName).get(companyId).getModifiedTime();
+                        long max = ((max = (modifiedTime > oldUserForModifiedTime) ? modifiedTime : oldUserForModifiedTime) > fileOldUserForInsertModifiedTime ? max : fileOldUserForInsertModifiedTime);
+                        //如果modifiedTime最大，用读文件出来的user的数据替换掉insertUserMap中的数据，如果oldUserForModifiedTime最大，保持现有的insertUserMap中的user，如果fileOldUserForInsertModifiedTime最大，保持数据库中的数据不变
+                        if(max == modifiedTime){
+                            userMap.put(companyId,user);
+                            insertUserMap.put(userName,userMap);
+                        }
+
+                    }else if(updateUserMap.containsKey(userName)){
+                        //如果updateUserMap中数据，比较modifiedTime，oldUserForModifiedTime和updateUserMap中的modifiedTime这三者的大小，取最大值
+                        long fileOldUserForUpdateModifiedTime = updateUserMap.get(userName).get(companyId).getModifiedTime();
+                        long max = ((max = (modifiedTime > oldUserForModifiedTime) ? modifiedTime : oldUserForModifiedTime) > fileOldUserForUpdateModifiedTime ? max : fileOldUserForUpdateModifiedTime);
+                        //如果modifiedTime最大，用读文件出来的user的数据替换掉updateUserMap中的数据，如果oldUserForModifiedTime最大，保持现有的updateUserMap中的user，如果fileOldUserForUpdateModifiedTime最大，保持数据库中的数据不变
+                        if(max == modifiedTime){
+                            userMap.put(companyId,user);
+                            updateUserMap.put(userName,userMap);
+                        }
+                    }
+                }
+            }
+            for(String userName: insertUserMap.keySet()){
+                Map<Long,User>map = insertUserMap.get(userName);
+                for(long l: map.keySet()){
+                    insertUserList.add(map.get(l));
+                }
+            }
+            for(String userName:updateUserMap.keySet()){
+                Map<Long,User>map = updateUserMap.get(userName);
+                for(long l:map.keySet()){
+                    updateUserlist.add(map.get(l));
+                }
+            }
+            int insertNum = userDAO.insertBatch(insertUserList);
+            log.info("批量更新成功的条数是：" + insertNum);
+            //TODO userDAO的批量更新
+            int updateNum = userDAO.update(updateUserlist);
+            long endTime = System.currentTimeMillis();
+            log.info("从文件到数据库的操作耗时：" + (endTime - startTime));
+            //100条  516ms
+            log.info("实际插入的条数是：" + insertCount);
+            log.info("实际修改的条数是：" + updateCount);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private User generateUser(Company company,Random random){
@@ -572,7 +710,7 @@ public class UserServiceImpl implements UserService {
         user.setCreated("admin");
         user.setCreatedTime(date);
         user.setModified("admin");
-        user.setModifiedTime(date);
+        user.setModifiedTime(date.getTime());
         user.setConfirmPassword("123456");
         int num = random.nextInt(2000);
         user.setUsername("employee" + num);
@@ -581,15 +719,15 @@ public class UserServiceImpl implements UserService {
         user.setState(0);
         user.setTelephoneNumber("12345123458");
         //TODO 设备信息处理
-        user.setEquipmentId(0);
+        user.setEquipmentId("0");
         String userNumber = handleUsernumberForFile(random);
         user.setUserNumber(userNumber);
         long oneDay = TimeUnit.DAYS.toMillis(1);
         long now = date.getTime();
         long end = now + oneDay * 30 * 8;
-        Date neededDate = generateRandomDate(now,end);
+        long neededTime = generateRandomDate(now,end);
         user.setModified(user.getUsername());
-        user.setModifiedTime(neededDate);
+        user.setModifiedTime(neededTime);
         return user;
     }
     //TODO 从文件读取插入数据中的时候使用
@@ -622,10 +760,9 @@ public class UserServiceImpl implements UserService {
      * @param //endDate
      * @return
      */
-    private Date generateRandomDate(long startTime,Long endTime){
+    private long generateRandomDate(long startTime,Long endTime){
         long neededTime = (long) (startTime + (Math.random() * (endTime - startTime)));
-        Date neededDate = new Date(neededTime);
-        return neededDate;
+        return neededTime;
     }
     @Override
     public boolean isExist(User user) {
@@ -668,6 +805,14 @@ public class UserServiceImpl implements UserService {
         }
     }
     public static void main(String[] args) {
+        User user1 = new User();
+        user1.setUsername("aaa");
+        User user2 = new User();
+        user2.setUsername("aaa");
+        Set<String>set = new HashSet<>();
+        System.out.println(set.add(user1.getUsername()));
+        System.out.println(set.add(user2.getUsername()));
 
     }
+
 }

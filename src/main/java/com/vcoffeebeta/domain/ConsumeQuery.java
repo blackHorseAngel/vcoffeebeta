@@ -2,6 +2,7 @@ package com.vcoffeebeta.domain;
 
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -14,6 +15,8 @@ import java.io.Serializable;
 @Getter
 @ToString
 public class ConsumeQuery extends Consume implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 6750931070631781997L;
     /**
      * 分页数据
      */

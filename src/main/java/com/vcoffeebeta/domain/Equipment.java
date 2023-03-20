@@ -2,6 +2,8 @@ package com.vcoffeebeta.domain;
 
 import lombok.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -13,7 +15,9 @@ import java.util.Date;
 @Setter
 @Getter
 @ToString
-public class Equipment {
+public class Equipment implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -8691167514989473760L;
     /**
      * 主键id
      */

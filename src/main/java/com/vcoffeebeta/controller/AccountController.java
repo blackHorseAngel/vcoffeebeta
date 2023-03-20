@@ -52,13 +52,13 @@ public class AccountController{
                 return new Result(ResultCodeEnum.QUERYACCOUNTDETAILERROR.getCode(),ResultCodeEnum.QUERYACCOUNTDETAILERROR.getMessage());
             }else{
                 company = companyService.queryById(u.getCompanyId());
-                long equipmentId = u.getEquipmentId();
-                while(equipmentId%10 != 0){
-                    long equipmentIdNum = equipmentId % 10;
+                String equipmentIdStr = u.getEquipmentId();
+                String[]equipmentIds = equipmentIdStr.split("|");
+                for(int i = 0 ; i < equipmentIds.length ; i++){
+                    long equipmentIdNum = Long.parseLong(equipmentIds[i]);
                     Equipment equipment = equipmentService.findById(equipmentIdNum);
                     builder.append(equipment.getEquipmentName());
                     builder.append("|");
-                    equipmentId = equipmentId / 10;;
                 }
             }
                 String equipmentName = builder.toString();

@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -18,6 +19,9 @@ import java.util.List;
 @Getter
 @ToString
 public class  User implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 2118465423437300279L;
     /**
      * 用户id
      */
@@ -61,7 +65,7 @@ public class  User implements Serializable {
     /**
      * 用户常用设备id
      */
-    private long equipmentId;
+    private String equipmentId;
     /**
      * 创建人
      */
@@ -77,7 +81,8 @@ public class  User implements Serializable {
     /**
      * 修改时间
      */
-    private Date modifiedTime;
+    private long modifiedTime;
+
     /**
      * 公司名称
      */
@@ -87,6 +92,12 @@ public class  User implements Serializable {
      */
     private String equipmentName;
     /**
+     * 页面展示修改时间需要
+     */
+    private String modifiedTimeNew;
+
+    private String createTimeNew;
+    /**
      * 用户状态，0：正常；1：删除
      */
     private int state;
@@ -94,4 +105,5 @@ public class  User implements Serializable {
      * 新密码
      */
     private String newPassword;
+
 }

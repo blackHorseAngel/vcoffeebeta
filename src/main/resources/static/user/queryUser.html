@@ -289,6 +289,16 @@
             equipmentNameCell.innerHTML = res.data[i].equipmentName;
             rowElement.appendChild(equipmentNameCell);
 
+            let createdTimeCell = document.createElement("td");
+            console.log("用户"+res.data[i]+"创建时间："+res.data[i].createdTimeStr);
+            createdTimeCell.innerHTML = res.data[i].createdTimeStr;
+            rowElement.appendChild(createdTimeCell);
+
+            let modifiedTimeCell = document.createElement("td");
+            console.log("用户"+res.data[i]+"修改时间："+res.data[i].modifiedTimeStr);
+            modifiedTimeCell.innerHTML = res.data[i].modifiedTimeStr;
+            rowElement.appendChild(modifiedTimeCell);
+
             let operateCell = document.createElement("td");
 
             let btnUpdate = document.createElement("button");
@@ -404,6 +414,8 @@
            <td>是否有管理权限</td>
            <td>所在公司名称</td>
            <td>可使用设备名称</td>
+           <td>创建时间</td>
+           <td>修改时间</td>
            <td>操作</td>
        </tr>
     </thead>

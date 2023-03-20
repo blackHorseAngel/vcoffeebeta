@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -16,7 +18,9 @@ import java.util.Date;
 @Setter
 @Getter
 @ToString
-public class Consume {
+public class Consume implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -3847299854030004575L;
     /**
      * 主键id
      */

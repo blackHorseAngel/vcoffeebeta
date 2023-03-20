@@ -125,8 +125,9 @@ public class LoginController {
         requestUser.setIsAdmin((byte) 1);
         requestUser.setCreated(requestUser.getUsername());
         requestUser.setModified(requestUser.getUsername());
-        requestUser.setCreatedTime(new Date());
-        requestUser.setModifiedTime(new Date());
+        Date date = new Date();
+        requestUser.setCreatedTime(date);
+        requestUser.setModifiedTime(date.getTime());
         boolean flag = false;
         try{
             flag = userService.insertUser(requestUser);
@@ -177,7 +178,7 @@ public class LoginController {
           }
           u.setPassword(newPassword);
           u.setModified(u.getUsername());
-          u.setModifiedTime(new Date());
+          u.setModifiedTime(new Date().getTime());
           boolean flagForChangePassword = userService.changePassword(u);
           if(flagForChangePassword){
               return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage());

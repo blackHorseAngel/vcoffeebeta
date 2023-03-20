@@ -52,6 +52,30 @@
             #{modifiedTime}
          </trim>
     </insert>
+    <!--批量插入用户-->
+    <insert id="insertBatch" useGeneratedKeys="true" keyProperty="id">
+        insert into user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <include refid="userContentForInsert"/>
+        </trim>
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{userNumber},
+            #{username},
+            #{password},
+            #{telephoneNumber},
+            #{email},
+            #{isAdmin},
+            #{companyId},
+            #{accountId},
+            #{equipmentId},
+            #{state},
+            #{created},
+            #{modified},
+            #{createdTime},
+            #{modifiedTime})
+        </foreach>
+    </insert>
     <!-- 根据条件查询用户信息-->
     <select id="queryByNameAndPassword" parameterType="com.vcoffeebeta.domain.User" resultMap="userMap">
         select

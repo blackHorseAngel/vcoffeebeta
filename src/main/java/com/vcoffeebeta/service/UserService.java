@@ -36,6 +36,8 @@ public interface UserService {
      * @return int
      */
     public boolean insertUser(User user);
+
+    public int insertBatchUser(List<User>userList);
     /**
      * 查询全部用户信息
      * @author zhangshenming
@@ -153,4 +155,6 @@ public interface UserService {
      * @return
      */
     void insertUserFromFileToDbNew2();
+
+    void insertBatchUsersFromFileToDb();
 }

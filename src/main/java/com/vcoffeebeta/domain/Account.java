@@ -20,6 +20,8 @@ import java.util.List;
 @Getter
 @ToString
 public class Account implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -6727119777586853345L;
     /**
      * 主键id
      */

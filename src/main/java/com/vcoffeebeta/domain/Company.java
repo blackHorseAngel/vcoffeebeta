@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -17,6 +18,8 @@ import java.util.Date;
 @Getter
 @ToString
 public class Company implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -9092306002469941868L;
     /**
      * 公司id
      */

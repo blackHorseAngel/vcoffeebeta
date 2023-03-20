@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -110,5 +111,13 @@ class UserServiceImplTest {
     @Test
     void insertUserFromFileToDbNew2() {
         userService.insertUserFromFileToDbNew2();
+    }
+
+    public static void main(String[] args) {
+        Calendar c = Calendar.getInstance();
+        c.set(2023,3,17,15,28,33);
+        System.out.println(c.getTimeInMillis());
+
+
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -74,8 +75,9 @@ public class UserController {
         user.setPassword("123456");
         user.setCreated(u.getUsername());
         user.setModified(u.getUsername());
-        user.setCreatedTime(new Date());
-        user.setModifiedTime(new Date());
+        Date date = new Date();
+        user.setCreatedTime(date);
+        user.setModifiedTime(date.getTime());
         return user;
     }
 
@@ -92,20 +94,14 @@ public class UserController {
             long companyId = u.getCompanyId();
             int isAdmin = u.getIsAdmin();
             int amount = 0;
-            if(companyId == 0){
-                if(isAdmin == 2){
-                    //超级管理员查询全部的用户数
-                     amount = userService.queryForAmount(userQuery);
-                    log.info("当前用户是超级管理员，查询所有的用户数：" + amount);
-                }else{
-                    //除了超级管理员之外，一般管理员和普通员工都必须有公司id
-                    log.error("session用户信息中缺少companyId报错");
-                    return new Result(ResultCodeEnum.SESSIONFORCOMPANYID.getCode(),ResultCodeEnum.SESSIONFORCOMPANYID.getMessage());
-                }
+            if(isAdmin == 2){
+              //超级管理员查询全部的用户数
+              amount = userService.queryForAmount(userQuery);
+              log.info("当前用户是超级管理员，查询所有的用户数：" + amount);
             }else{
-                //其他管理员查询的用户总数为其所在公司下的用户总数
-                 amount = userService.queryForAmountByCompanyId(companyId);
-                log.info("当前用户是一般管理员。查询自己所在公司的用户数：" + amount);
+              //其他管理员查询的用户总数为其所在公司下的用户总数
+              amount = userService.queryForAmountByCompanyId(companyId);
+             log.info("当前用户是一般管理员。查询自己所在公司的用户数：" + amount);
             }
             Page page = handlePage(amount,userQuery);
             if(page == null){
@@ -113,13 +109,54 @@ public class UserController {
             }
             PageHelper.startPage(Integer.parseInt(page.getCurrentPage()),page.getLimit());
             List<User>userList = userService.findAllUsers(userQuery);
-            return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),userList,page);
+            List<UserQuery>userQueryList = transferUserList(userList);
+            return new Result(ResultCodeEnum.SUCCESS.getCode(),ResultCodeEnum.SUCCESS.getMessage(),userQueryList,page);
         }catch(Exception e){
             log.error("查询全部用户信息报错,",e);
             e.printStackTrace();
             return new Result(ResultCodeEnum.QUERYALLUSERS.getCode(),ResultCodeEnum.QUERYALLUSERS.getMessage());
         }
     }
+
+    /**
+     * 将数据库中的user的modified_time的long转换成date类型，然后输出到页面
+     * @param userList
+     * @return
+     */
+    private List<UserQuery> transferUserList(List<User> userList) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        List<UserQuery>userQueryList = new ArrayList<>();
+        UserQuery userQuery = null;
+        try{
+            for(User u : userList){
+                userQuery = new UserQuery();
+                userQuery.setId(u.getId());
+                userQuery.setUserNumber(u.getUserNumber());
+                userQuery.setPassword(u.getPassword());
+                userQuery.setUsername(u.getUsername());
+                userQuery.setEquipmentId(u.getEquipmentId());
+                userQuery.setEquipmentName(u.getEquipmentName());
+                userQuery.setCompanyId(u.getCompanyId());
+                userQuery.setCompanyName(u.getCompanyName());
+                userQuery.setCreated(u.getCreated());
+                userQuery.setModified(u.getModified());
+                userQuery.setIsAdmin(u.getIsAdmin());
+                userQuery.setTelephoneNumber(u.getTelephoneNumber());
+                userQuery.setEmail(u.getEmail());
+                userQuery.setState(u.getState());
+                userQuery.setAccountId(u.getAccountId());
+                userQuery.setCreatedTimeStr(sdf.format(u.getCreatedTime()));
+                userQuery.setModifiedTimeStr(sdf.format(new Date(u.getModifiedTime())));
+                userQueryList.add(userQuery);
+            }
+        }catch(Exception e){
+            log.error("转换用户中的修改日期报错" + e);
+            e.printStackTrace();
+        }
+
+        return userQueryList;
+    }
+
     /**
      * 查询全部用户时候，处理分页page对象
      * @author zhangshenming
@@ -185,7 +222,7 @@ public class UserController {
           log.info("修改用户信息的时候获取session信息：" + JSONObject.toJSONString(session));
           User sessionUser = (User) session.getAttribute("user");
           user.setModified(sessionUser.getUsername());
-          user.setModifiedTime(new Date());
+          user.setModifiedTime(new Date().getTime());
           long userId = (long) session.getAttribute("oldUserId");
           user.setId(userId);
           boolean flag = userService.updateUser(user);
