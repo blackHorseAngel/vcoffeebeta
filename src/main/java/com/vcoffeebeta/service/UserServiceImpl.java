@@ -16,7 +16,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * loginService实现类
@@ -537,19 +538,16 @@ public class UserServiceImpl implements UserService {
                 ois = new ObjectInputStream(fis);
                 int insertCount = 0;
                 int updateCount = 0;
-                SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
+                int count  = userDAO.queryForAmountByCompanyId(1);
                 long startTime = System.currentTimeMillis();
                 User user = null;
                 log.info("开始计时：" + startTime);
                 while((user = (User) ois.readObject()) != null){
                     User oldUser = userDAO.findByUserNameAndCompanyId(user);
+                    long modifiedTime = user.getModifiedTime();
                     if(oldUser != null){
-                        long modifiedTime = user.getModifiedTime();
                         long oldModifiedTime = oldUser.getModifiedTime();
-                        if(modifiedTime - oldModifiedTime < 0){
-                            user.setId(oldUser.getId());
-                            user.setEquipmentId(oldUser.getEquipmentId());
-                            user.setEquipmentName(oldUser.getEquipmentName());
+                        if(modifiedTime - oldModifiedTime > 0){
                             int updateResult = userDAO.update(user);
                             if(updateResult > 0){
                                 updateCount++;
@@ -594,16 +592,12 @@ public class UserServiceImpl implements UserService {
         ObjectInputStream  ois = null;
         Map<String,Map<Long,User>>insertUserMap = new HashMap<>();
         Map<String,Map<Long,User>>updateUserMap = new HashMap<>();
-        Map<Long,User>userMap = new HashMap<>();
         List<User>insertUserList = new ArrayList<>();
         List<User>updateUserList = new ArrayList<>();
         try {
             int count = userDAO.queryForAmountByCompanyId(1L);
             fis = new FileInputStream(fileName);
             ois = new ObjectInputStream(fis);
-            int insertCount = 0;
-            int updateCount = 0;
-            SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
             User user = null;
             long startTime = System.currentTimeMillis();
             log.info("开始计时：" + startTime);
@@ -611,10 +605,7 @@ public class UserServiceImpl implements UserService {
                 String userName = user.getUsername();
                 long companyId= user.getCompanyId();
                 long modifiedTime = user.getModifiedTime();
-//                long start1 = System.currentTimeMillis();
                 User oldUser = userDAO.findByUserNameAndCompanyId(user);
-//                long end1 = System.currentTimeMillis();
-//                log.info("每次查询数据库中旧数据耗时： " + (end1-start1));
                 /**
                  * 思路：如果数据库中没有user数据，判断insertUserMap中是否含有新读取的用户的用户名，
                  * 如果含有相同用户名，继续判断是否含有相同的公司id，
@@ -654,11 +645,6 @@ public class UserServiceImpl implements UserService {
                             if(max == modifiedTime){
                                 updateUserMap.get(userName).put(companyId,user);
                             }
-//                            else if(max == oldUserModifiedTime){
-//                                Map<Long,User>map = new HashMap<>();
-//                                map.put(companyId,updateUser);
-//                                updateUserMap.remove(userName,map);
-//                            }
                         }else{
                             if(modifiedTime - oldUserModifiedTime > 0){
                                 updateUserMap.get(userName).put(companyId,user);
@@ -673,16 +659,10 @@ public class UserServiceImpl implements UserService {
                     }
                 }
             }
-//            long start2 = System.currentTimeMillis();
             insertUserList = transferToUserList(insertUserList,insertUserMap);
-//            long end2 = System.currentTimeMillis();
-//            log.info("insertUsermap转成list耗时：" + (end2 - start2));
             updateUserList = transferToUserList(updateUserList,updateUserMap);
             if(insertUserList.size() != 0){
-//                long start3 = System.currentTimeMillis();
                 int insertNum = userDAO.insertBatch(insertUserList);
-                long end3 = System.currentTimeMillis();
-//                log.info("插入insertUserList耗时：" + (end3 - start3));
                 log.info("批量新增成功的条数是：" + insertNum);
             }
             if(updateUserList.size() != 0){
@@ -691,8 +671,6 @@ public class UserServiceImpl implements UserService {
             }
             long endTime = System.currentTimeMillis();
             log.info("从文件到数据库的操作耗时：" + (endTime - startTime));
-            //单条提交 100条  516ms
-            //批量提交 200条  588ms
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -701,6 +679,93 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void insertUserFromFileToDbByThread() {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
+        FileInputStream fis = null;
+        ObjectInputStream  ois = null;
+        try{
+            fis = new FileInputStream(fileName);
+            ois = new ObjectInputStream(fis);
+
+            /**
+             * 创建线程池，核心线程数：2，最大线程数:10 存活时间（单位）：3 s 任务队列：ArrayBlockingQueue 长度2 线程工厂：默认 拒绝策略：默认
+             */
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2,10,3,TimeUnit.SECONDS,new ArrayBlockingQueue<>(10));
+            AtomicInteger insertCount = new AtomicInteger(0);
+            AtomicInteger updateCount = new AtomicInteger(0);
+            User user = null;
+            long startTime = System.currentTimeMillis();
+            log.info("开始计时：" + startTime);
+            while((user = (User) ois.readObject())!= null){
+                User oldUser = userDAO.findByUserNameAndCompanyId(user);
+                User finalUser = user;
+//                log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() +"，公司id："+ user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
+                threadPoolExecutor.submit(()->{
+//                    log.info("开始运行线程的id:"+Thread.currentThread().getId()+"线程的名字："+Thread.currentThread().getName());
+                    dealWithUser(finalUser,oldUser,insertCount,updateCount);
+
+                });
+            }
+            long endTime = System.currentTimeMillis();
+            log.info("耗时：" + (endTime - startTime));
+            log.info("新增条数：" + insertCount);
+            log.info("修改条数：" + updateCount);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }catch(Exception e){
+            log.error("报错了" + e);
+            e.printStackTrace();
+
+        }
+    }
+
+    /**
+     * 多线程处理用户新增或修改
+     *
+     * @param finalUser
+     * @param num1
+     * @param num2
+     * @return
+     */
+     private void dealWithUser(User finalUser, User oldUser,AtomicInteger num1, AtomicInteger num2)  {
+        long modifiedTime = finalUser.getModifiedTime();
+        try{
+            if(oldUser != null){
+                long oldModifiedTime = oldUser.getModifiedTime();
+                if(modifiedTime - oldModifiedTime > 0){
+                    int updateResult = userDAO.update(finalUser);
+                    if(updateResult > 0){
+                        num2.getAndIncrement();
+//                        log.info("更新成功" + finalUser.toString());
+                    }else{
+                        log.error("更新失败" + finalUser.toString());
+                        //TODO 更新失败数据处理
+                    }
+                }
+            }else{
+                int insertResult = userDAO.insert(finalUser);
+                if(insertResult > 0){
+                    num1.getAndIncrement();
+//                    log.info("插入成功"+finalUser.toString());
+                }else{
+                    log.error("插入失败" + finalUser.toString());
+                    //TODO 插入数据失败处理
+                }
+            }
+
+        }catch(Exception e){
+            log.error("插入数据库报错了"+e);
+            e.printStackTrace();
+        }
+
+
+     }
 
     private List<User> transferToUserList(List<User> list, Map<String, Map<Long, User>> map) {
         for(String userName:map.keySet()){
@@ -816,7 +881,44 @@ public class UserServiceImpl implements UserService {
         }
     }
     public static void main(String[] args) {
+        Thread thread = new Thread();
+        User u = new User();
+        u.setUsername("employee60");
+        u.setCompanyId(21L);
+        u.setCreated("admin");
+        u.setModified("admin");
+        u.setPassword("123456");
+        u.setUserNumber("123123123");
+        u.setCreatedTime(new Date());
+        u.setModifiedTime(new Date().getTime());
+        u.setEmail("714680900@qq.com");
+        u.setIsAdmin((byte) 0);
+        u.setState(0);
+        thread.start();
 
     }
 
+      void handleUser(User u)  {
+        System.out.println(u.toString());
+    }
+
+/*class Runner implements Runnable{
+    User u = new User();
+        u.setUsername("employee60");
+        u.setCompanyId(21L);
+        u.setCreated("admin");
+        u.setModified("admin");
+        u.setPassword("123456");
+        u.setUserNumber("123123123");
+        u.setCreatedTime(new Date());
+        u.setModifiedTime(new Date().getTime());
+        u.setEmail("714680900@qq.com");
+        u.setIsAdmin((byte) 0);
+        u.setState(0);
+        thread.start();
+    @Override
+    public void run() {
+        handleUser(u);
+    }
+}*/
 }

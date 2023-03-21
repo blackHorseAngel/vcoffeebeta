@@ -103,7 +103,7 @@ class UserServiceImplTest {
 
     @Test
     void writeUserInfoToFileNew() {
-        userService.writeUserInfoToFileNew(30000);
+        userService.writeUserInfoToFileNew(50);
     }
 
     @Test
@@ -136,6 +136,10 @@ class UserServiceImplTest {
         int num =  userService.batchUpdate(list);
         System.out.println(num);
 
+    }
+    @Test
+    void insertUserFromFileToDbByThread() {
+        userService.insertUserFromFileToDbByThread();
     }
     public static void main(String[] args) {
 //        Calendar c = Calendar.getInstance();

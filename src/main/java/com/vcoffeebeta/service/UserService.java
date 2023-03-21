@@ -157,6 +157,21 @@ public interface UserService {
      * @return
      */
     void insertUserFromFileToDbNew2();
-
+    /**
+     * 读取文件中的用户批量增加到数据库
+     * @author zhangshenming
+     * @date 2023/03/20 13:12:19
+     * @param
+     * @return
+     */
     void insertBatchUsersFromFileToDb();
+
+    /**
+     * 多线程读取文件中的用户增加到数据库
+     * @author zhangshenming
+     * @date 2023/03/21 13:22:21
+     * @param
+     * @return
+     */
+    void insertUserFromFileToDbByThread();
 }
