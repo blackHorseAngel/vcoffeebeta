@@ -1,11 +1,13 @@
 package com.vcoffeebeta.util;
 
+import com.sun.mail.util.MailSSLSocketFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.security.GeneralSecurityException;
 import java.util.Properties;
 
 /**
@@ -19,9 +21,9 @@ public class MailUtil {
   public static boolean sendEmail(String fromMail,String toMail,String emailMessage) throws MessagingException {
       //1、创建session
       Properties prop = new Properties();
-      prop.setProperty("mail.host","stmp.qq.com");
-      prop.setProperty("mail.transport.protocol","stmp");
-      prop.setProperty("mail.stmp.auth","true");
+      prop.setProperty("mail.host","smtp.qq.com");
+      prop.setProperty("mail.transport.protocol","smtp");
+      prop.setProperty("mail.smtp.auth","true");
       Session session = Session.getInstance(prop);
       //2、通过session得到transport对象
       Transport transport = null;
@@ -91,7 +93,63 @@ public class MailUtil {
      * @param args
      */
     public static void main(String[] args) throws MessagingException {
-        boolean flag = sendEmail("1909924230","714680900","该用户已激活");
-        System.out.println(flag);
+//        boolean flag = sendEmail("1909924230","714680900","该用户已激活");
+//        System.out.println(flag);
+        //收件人邮箱
+        String to = "1909924230@qq.com";
+        //发送人邮箱
+        String from = "714680900@qq.com";
+        //发送邮箱主机
+        String host = "smtp.qq.com";
+        //获取系统属性
+        Properties properties = System.getProperties();
+        System.out.println("获取到的系统属性：" + properties.toString());
+        //设置邮件服务器
+        properties.setProperty("mail.smtp.host",host);
+        //设置传输协议
+        properties.setProperty("mail.transport.protocol","smtp");
+        //设置密钥
+        properties.setProperty("mail.smtp.auth","true");
+        //设置端口号为587
+        properties.setProperty("mail.smtp.socketFactory.port","587");
+
+        Transport transport = null;
+        try {
+            //对于QQ邮箱，还需要进行SSL加密
+            MailSSLSocketFactory sf = new MailSSLSocketFactory();
+            sf.setTrustAllHosts(true);
+            properties.put("mail.smtp.ssl.enable","true");
+            properties.put("mail.smtp.ssl.socketFactory",sf);
+//            properties.put("mail.smtp.ssl.protocols","TLSv1.2");
+            //获取默认的session对象
+            Session session = Session.getDefaultInstance(properties, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(from,"rfmcgesvyfgzbbhc");
+                }
+            });
+            session.setDebug(true);
+            //创建默认的MimeMessage对象
+            MimeMessage message = new MimeMessage(session);
+            //set from 头部字段
+            message.setFrom(new InternetAddress(from));
+            //set to 头部字段
+            message.addRecipient(Message.RecipientType.TO,new InternetAddress(to));
+            //set subject 头字段
+            message.setSubject("test mail transporting");
+            //设置消息体
+            message.setText("set message successfully");
+            //发送邮件
+            transport = session.getTransport();
+//            transport.connect("smtp.qq.com",587,"714680900@qq.com","rfmcgesvyfgzbbhc");
+            transport.connect("smtp.qq.com",465,from,"rfmcgesvyfgzbbhc");
+            transport.send(message);
+
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
+        }finally {
+            transport.close();
+        }
+
     }
 }
