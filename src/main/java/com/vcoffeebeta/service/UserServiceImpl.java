@@ -685,17 +685,23 @@ public class UserServiceImpl implements UserService {
         String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
         FileInputStream fis = null;
         ObjectInputStream  ois = null;
+        User user = null;
+//        Executors.newCachedThreadPool()
+//        Future future = null;
         try{
             fis = new FileInputStream(fileName);
             ois = new ObjectInputStream(fis);
-
             /**
              * 创建线程池，核心线程数：2，最大线程数:10 存活时间（单位）：3 s 任务队列：ArrayBlockingQueue 长度2 线程工厂：默认 拒绝策略：默认
              */
-            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2,10,3,TimeUnit.SECONDS,new ArrayBlockingQueue<>(10));
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 5, 3, TimeUnit.SECONDS, new ArrayBlockingQueue<>(5), Executors.defaultThreadFactory(), new RejectedExecutionHandler() {
+                @Override
+                public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                    new ThreadPoolExecutor.CallerRunsPolicy();
+                }
+            });
             AtomicInteger insertCount = new AtomicInteger(0);
             AtomicInteger updateCount = new AtomicInteger(0);
-            User user = null;
             long startTime = System.currentTimeMillis();
             log.info("开始计时：" + startTime);
             while((user = (User) ois.readObject())!= null){
@@ -703,10 +709,18 @@ public class UserServiceImpl implements UserService {
                 User finalUser = user;
 //                log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() +"，公司id："+ user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
                 threadPoolExecutor.submit(()->{
-//                    log.info("开始运行线程的id:"+Thread.currentThread().getId()+"线程的名字："+Thread.currentThread().getName());
                     dealWithUser(finalUser,oldUser,insertCount,updateCount);
-
+//                    log.info("当前正在执行任务的线程：" + threadPoolExecutor.getActiveCount());
+//                    log.info("当前池中线程数（正在执行任务的+休眠的）：" + threadPoolExecutor.getPoolSize());
+//                    log.info("当前任务数（运行的+排队的）：" + threadPoolExecutor.getTaskCount());
+//                    log.info("已经执行完的任务数：" + threadPoolExecutor.getCompletedTaskCount());
                 });
+            }
+//            if(threadPoolExecutor.getCompletedTaskCount() == threadPoolExecutor.getTaskCount()){
+//            }
+//            threadPoolExecutor.shutdown();
+            while(threadPoolExecutor.getActiveCount() != 0){
+                Thread.sleep(1);
             }
             long endTime = System.currentTimeMillis();
             log.info("耗时：" + (endTime - startTime));
@@ -719,12 +733,10 @@ public class UserServiceImpl implements UserService {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }catch(Exception e){
-            log.error("报错了" + e);
+            log.error("报错了" + user.toString());
             e.printStackTrace();
-
         }
     }
-
     /**
      * 多线程处理用户新增或修改
      *
@@ -734,6 +746,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
      private void dealWithUser(User finalUser, User oldUser,AtomicInteger num1, AtomicInteger num2)  {
+         int count = userDAO.queryForAmountByCompanyId(1);
         long modifiedTime = finalUser.getModifiedTime();
         try{
             if(oldUser != null){
@@ -763,10 +776,7 @@ public class UserServiceImpl implements UserService {
             log.error("插入数据库报错了"+e);
             e.printStackTrace();
         }
-
-
      }
-
     private List<User> transferToUserList(List<User> list, Map<String, Map<Long, User>> map) {
         for(String userName:map.keySet()){
             for(long l:map.get(userName).keySet()){
@@ -881,44 +891,6 @@ public class UserServiceImpl implements UserService {
         }
     }
     public static void main(String[] args) {
-        Thread thread = new Thread();
-        User u = new User();
-        u.setUsername("employee60");
-        u.setCompanyId(21L);
-        u.setCreated("admin");
-        u.setModified("admin");
-        u.setPassword("123456");
-        u.setUserNumber("123123123");
-        u.setCreatedTime(new Date());
-        u.setModifiedTime(new Date().getTime());
-        u.setEmail("714680900@qq.com");
-        u.setIsAdmin((byte) 0);
-        u.setState(0);
-        thread.start();
 
     }
-
-      void handleUser(User u)  {
-        System.out.println(u.toString());
-    }
-
-/*class Runner implements Runnable{
-    User u = new User();
-        u.setUsername("employee60");
-        u.setCompanyId(21L);
-        u.setCreated("admin");
-        u.setModified("admin");
-        u.setPassword("123456");
-        u.setUserNumber("123123123");
-        u.setCreatedTime(new Date());
-        u.setModifiedTime(new Date().getTime());
-        u.setEmail("714680900@qq.com");
-        u.setIsAdmin((byte) 0);
-        u.setState(0);
-        thread.start();
-    @Override
-    public void run() {
-        handleUser(u);
-    }
-}*/
 }
