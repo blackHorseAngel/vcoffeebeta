@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    * {padding: 0;margin: 0;}
+    h5 {width: 300px;height: 40px;margin: 10px auto;
+      text-align: center;font: normal 500 14px/40px '微软雅黑';
+      color: rgba(0, 0, 0, .8);border: 1px dashed #1c8b9e;
+      border-radius: 5px;box-shadow: 10px 10px 30px 2px #f00;}
+    img {width: 300px;height: 40px;}
+    div {text-align: center;border: 1px solid #f00;margin: auto;}
+  </style>
+</head>
+<body>
+<p>hello 欢迎加入 xxx 大家庭，您的入职信息如下：</p>
+<table border="1">
+  <tr>
+    <td>姓名</td>
+    <td th:text="${username}"></td>
+  </tr>
+  <tr>
+    <td>工号</td>
+    <td th:text="${num}"></td>
+  </tr>
+  <tr>
+    <td>薪酬</td>
+    <td th:text="${salary}"></td>
+  </tr>
+</table>
+<div style="color:#ff1a0e">一起努力创造辉煌</div>
+<!--注意这个资源一定要引用邮件发送关联的图片资源-->
+<!--<div><img src="cid:imgA" alt=""></div>-->
+</body>
+</html>
