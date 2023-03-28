@@ -307,7 +307,6 @@ public class UserServiceImpl implements UserService {
             }
             file.createNewFile();
             FileWriter fw = new FileWriter(file,true);
-//            BufferedWriter bw = new BufferedWriter(fw);
             List<Company>companyList = companyDAO.findAll(new Company());
             Random random = new Random();
             long startTime = System.currentTimeMillis();
@@ -315,14 +314,9 @@ public class UserServiceImpl implements UserService {
             for(int i = 0 ; i < num ; i++){
                 Company company =  getRandomCompany(companyList,random);
                 User user = generateUser(company,random);
-//                bw.append(JSON.toJSONString(user));
-//                bw.flush();
-//                bw.append(user.toString());
-//                bw.newLine();
                 fw.write(user.toString());
                 fw.write(separator);
             }
-//            bw.close();
             fw.close();
             long endTime = System.currentTimeMillis();
             System.out.println("结束时间：" + endTime);
@@ -337,11 +331,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void writeUserInfoToFileNew(int num) {
-        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
+//        测试大数据
+//        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
+//        测试大数据
+//        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo3.txt";
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo4.txt";
         File file = new File(fileName);
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
-        OutputStreamWriter osw = null;
+
         try {
             if(file.exists()) {
                 file.delete();
@@ -370,6 +368,45 @@ public class UserServiceImpl implements UserService {
             log.error("写用户信息文件报错",e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void writeToFileWithNoRepeatable(int num) {
+        File file = new File("D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo3.txt");
+        //根据系统自动匹配换行符
+        String separator = System.getProperty("line.separator");
+        FileOutputStream fos = null;
+        ObjectOutputStream oos = null;
+        OutputStreamWriter osw = null;
+        try {
+            if(file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            fos = new FileOutputStream(file,true);
+            oos = new ObjectOutputStream(fos);
+            Random random = new Random();
+            long startTime = System.currentTimeMillis();
+            System.out.println("开始时间： " + startTime);
+            List<Company>companyList = companyDAO.findAll(new Company());
+            Company company =getRandomCompany(companyList,random);
+            for(int i = 0 ; i < num ; i++){
+                User user = generateUser(company,random,i);
+                oos.writeObject(user);
+            }
+            oos.writeObject(null);
+            oos.close();
+            fos.close();
+            oos.close();
+            long endTime = System.currentTimeMillis();
+            System.out.println("结束时间：" + endTime);
+            System.out.println("耗时：" + (endTime-startTime));
+            //100条 64ms
+        } catch (IOException e) {
+            log.error("写用户信息文件报错",e);
+            throw new RuntimeException(e);
+        }
+
     }
 
     private Company getRandomCompany(List<Company>companyList,Random random) {
@@ -682,43 +719,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void insertUserFromFileToDbByThread() {
-        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
+//        测试大数据
+//        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
+//        测试大数据
+//        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo3.txt";
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo4.txt";
         FileInputStream fis = null;
         ObjectInputStream  ois = null;
         User user = null;
-//        Executors.newCachedThreadPool()
-//        Future future = null;
         try{
             fis = new FileInputStream(fileName);
             ois = new ObjectInputStream(fis);
             /**
-             * 创建线程池，核心线程数：2，最大线程数:10 存活时间（单位）：3 s 任务队列：ArrayBlockingQueue 长度2 线程工厂：默认 拒绝策略：默认
+             * 创建线程池，核心线程数：8，最大线程数:16 存活时间（单位）：3 s 任务队列：ArrayBlockingQueue 长度10 线程工厂：默认 拒绝策略：callerRunsPolicy
+             * 100条，无额外打印日志，运行时间：
              */
-            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(2, 5, 3, TimeUnit.SECONDS, new ArrayBlockingQueue<>(5), Executors.defaultThreadFactory(), new RejectedExecutionHandler() {
-                @Override
-                public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                    new ThreadPoolExecutor.CallerRunsPolicy();
-                }
-            });
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8, 16, 3, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), Executors.defaultThreadFactory(),  new ThreadPoolExecutor.CallerRunsPolicy());
+
             AtomicInteger insertCount = new AtomicInteger(0);
             AtomicInteger updateCount = new AtomicInteger(0);
+            AtomicInteger noOperation = new AtomicInteger(0);
+//            int count = 0;
             long startTime = System.currentTimeMillis();
             log.info("开始计时：" + startTime);
-            while((user = (User) ois.readObject())!= null){
-                User oldUser = userDAO.findByUserNameAndCompanyId(user);
-                User finalUser = user;
-//                log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() +"，公司id："+ user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
-                threadPoolExecutor.submit(()->{
-                    dealWithUser(finalUser,oldUser,insertCount,updateCount);
-//                    log.info("当前正在执行任务的线程：" + threadPoolExecutor.getActiveCount());
-//                    log.info("当前池中线程数（正在执行任务的+休眠的）：" + threadPoolExecutor.getPoolSize());
-//                    log.info("当前任务数（运行的+排队的）：" + threadPoolExecutor.getTaskCount());
-//                    log.info("已经执行完的任务数：" + threadPoolExecutor.getCompletedTaskCount());
-                });
-            }
-//            if(threadPoolExecutor.getCompletedTaskCount() == threadPoolExecutor.getTaskCount()){
-//            }
-//            threadPoolExecutor.shutdown();
+                while((user = (User) ois.readObject())!= null) {
+//                    count++;
+                    User oldUser = userDAO.findByUserNameAndCompanyId(user);
+                    User finalUser = user;
+//                    log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() + "，公司id：" + user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
+                    dealWithUserByThread(finalUser, oldUser, insertCount, updateCount,noOperation, threadPoolExecutor);
+                }
+
             while(threadPoolExecutor.getActiveCount() != 0){
                 Thread.sleep(1);
             }
@@ -726,6 +757,8 @@ public class UserServiceImpl implements UserService {
             log.info("耗时：" + (endTime - startTime));
             log.info("新增条数：" + insertCount);
             log.info("修改条数：" + updateCount);
+            log.info("不需要处理的条数：" + noOperation);
+//            log.info("读取文件总条数：" + count);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -737,45 +770,106 @@ public class UserServiceImpl implements UserService {
             e.printStackTrace();
         }
     }
-    /**
-     * 多线程处理用户新增或修改
-     *
-     * @param finalUser
-     * @param num1
-     * @param num2
-     * @return
-     */
-     private void dealWithUser(User finalUser, User oldUser,AtomicInteger num1, AtomicInteger num2)  {
-         int count = userDAO.queryForAmountByCompanyId(1);
-        long modifiedTime = finalUser.getModifiedTime();
-        try{
-            if(oldUser != null){
-                long oldModifiedTime = oldUser.getModifiedTime();
-                if(modifiedTime - oldModifiedTime > 0){
-                    int updateResult = userDAO.update(finalUser);
-                    if(updateResult > 0){
-                        num2.getAndIncrement();
-//                        log.info("更新成功" + finalUser.toString());
-                    }else{
-                        log.error("更新失败" + finalUser.toString());
-                        //TODO 更新失败数据处理
-                    }
-                }
-            }else{
-                int insertResult = userDAO.insert(finalUser);
-                if(insertResult > 0){
-                    num1.getAndIncrement();
-//                    log.info("插入成功"+finalUser.toString());
-                }else{
-                    log.error("插入失败" + finalUser.toString());
-                    //TODO 插入数据失败处理
-                }
-            }
 
-        }catch(Exception e){
-            log.error("插入数据库报错了"+e);
-            e.printStackTrace();
+    /**
+     * 处理文件中存在的数据库中也存在的数据的更新
+     * @param //finalUser
+     * @param //oldUser
+     * @param //updateCount
+     */
+    private void dealWithUserForUpdate(User finalUser, User oldUser, AtomicInteger updateCount,AtomicInteger noOperation) {
+        long modifiedTime = finalUser.getModifiedTime();
+        long oldModifiedTime = oldUser.getModifiedTime();
+        if(modifiedTime - oldModifiedTime > 0){
+            transferNewUserToOldUser(finalUser,oldUser);
+            int updateResult = userDAO.update(oldUser);
+            if(updateResult > 0){
+                updateCount.getAndIncrement();
+//                log.info("更新成功" + finalUser.toString());
+            }else{
+                log.error("更新失败" + finalUser.toString());
+                //TODO 更新失败数据处理
+            }
+        }else{
+            noOperation.getAndIncrement();
         }
+    }
+
+    /**
+     * 文件中的用户信息更新到数据中查到的用户信息
+     * @author zhangshenming
+     * @date 2023/03/27 16:16:21
+     * @param finalUser
+     * @param oldUser
+     */
+    private void transferNewUserToOldUser(User finalUser, User oldUser) {
+        oldUser.setEmail(finalUser.getEmail());
+        oldUser.setModifiedTime(finalUser.getModifiedTime());
+        oldUser.setTelephoneNumber(finalUser.getTelephoneNumber());
+        oldUser.setPassword(finalUser.getPassword());
+
+    }
+
+    /**
+     * 处理存在文件里的但是数据库里不存在的用户新增
+     * @param //finalUser
+     * @param //insertCount
+     */
+    private  void  dealWithUserForInsert(User finalUser, AtomicInteger insertCount) {
+        try {
+            int insertResult = userDAO.insert(finalUser);
+            if (insertResult > 0) {
+                insertCount.getAndIncrement();
+//                log.info("插入成功" + finalUser.toString());
+            } else {
+                log.error("插入失败" + finalUser.toString());
+                //TODO 插入数据失败处理
+            }
+        }
+        catch (Throwable t){
+            t.printStackTrace();;
+        }
+    }
+
+    /**
+     * 多线程处理新增和修改文件中的用户对象
+     * @param finalUser
+     * @param oldUser
+     * @param insertCount
+     * @param updateCount
+     * @param threadPoolExecutor
+     */
+    /*int submitCount = 0;
+    int threadCount = 0;
+    synchronized  void  countThread() {
+        threadCount ++;
+    }*/
+    private  void dealWithUserByThread(User finalUser, User oldUser,AtomicInteger insertCount, AtomicInteger updateCount,AtomicInteger noOperation, ThreadPoolExecutor threadPoolExecutor)  {
+            threadPoolExecutor.submit(()->{
+               User user = userDAO.findById(1);
+//                countThread();
+                try{
+                    if(oldUser != null){
+//                        long startForUpdate = System.currentTimeMillis();
+                        dealWithUserForUpdate(finalUser,oldUser,updateCount,noOperation);
+//                        long endForUpdate = System.currentTimeMillis();
+//                        log.info("修改一条耗时：" + (endForUpdate-startForUpdate));
+                    }else{
+//                        long startForInsert = System.currentTimeMillis();
+                        dealWithUserForInsert(finalUser,insertCount);
+//                        long endForInsert = System.currentTimeMillis();
+//                        log.info("新增一条耗时：" + (endForInsert-startForInsert));
+                    }
+                }catch(Exception e){
+                    log.error("数据库报错了"+e);
+                    e.printStackTrace();
+                }
+//                log.info("当前正在执行任务的线程：" + threadPoolExecutor.getActiveCount());
+//                log.info("当前池中线程数（正在执行任务的+休眠的）：" + threadPoolExecutor.getPoolSize());
+//                log.info("当前任务数（运行的+排队的）：" + threadPoolExecutor.getTaskCount());
+//                log.info("已经执行完的任务数：" + threadPoolExecutor.getCompletedTaskCount());
+            });
+//            submitCount ++;
      }
     private List<User> transferToUserList(List<User> list, Map<String, Map<Long, User>> map) {
         for(String userName:map.keySet()){
@@ -785,7 +879,6 @@ public class UserServiceImpl implements UserService {
         }
         return list;
     }
-
     private User generateUser(Company company,Random random){
         User user = new User();
         Date date = new Date();
@@ -798,7 +891,36 @@ public class UserServiceImpl implements UserService {
         user.setModified("admin");
         user.setModifiedTime(date.getTime());
         user.setConfirmPassword("123456");
-        int num = random.nextInt(100);
+        int num = random.nextInt(1000);
+        user.setUsername("employee" + num);
+        user.setEmail("714680900@qq.com");
+        user.setIsAdmin((byte) 0);
+        user.setState(0);
+        user.setTelephoneNumber("12345123458");
+        //TODO 设备信息处理
+        user.setEquipmentId("0");
+        String userNumber = handleUsernumberForFile(random);
+        user.setUserNumber(userNumber);
+        long oneDay = TimeUnit.DAYS.toMillis(1);
+        long now = date.getTime();
+        long end = now + oneDay * 30 * 8;
+        long neededTime = generateRandomDate(now,end);
+        user.setModified(user.getUsername());
+        user.setModifiedTime(neededTime);
+        return user;
+    }
+    private User generateUser(Company company,Random random,int num){
+        User user = new User();
+        Date date = new Date();
+        long companyId = company.getId();
+        user.setPassword("123456");
+        user.setCompanyId(companyId);
+        user.setCompanyName(company.getCompanyName());
+        user.setCreated("admin");
+        user.setCreatedTime(date);
+        user.setModified("admin");
+        user.setModifiedTime(date.getTime());
+        user.setConfirmPassword("123456");
         user.setUsername("employee" + num);
         user.setEmail("714680900@qq.com");
         user.setIsAdmin((byte) 0);

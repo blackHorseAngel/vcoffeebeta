@@ -132,6 +132,14 @@ public interface UserService {
     void writeUserInfoToFileNew(int num);
 
     /**
+     *
+     * @author
+     * @date
+     * @param num
+     * @return
+     */
+    void writeToFileWithNoRepeatable(int num);
+    /**
      * 新增将写入文件的用户信息同步到数据库（采用json的方式序列化）
      * @author zhangshenming
      * @date 2023/03/15 18:20
@@ -174,4 +182,5 @@ public interface UserService {
      * @return
      */
     void insertUserFromFileToDbByThread();
+
 }

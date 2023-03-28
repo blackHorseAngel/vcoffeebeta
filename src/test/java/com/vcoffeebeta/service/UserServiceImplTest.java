@@ -103,7 +103,7 @@ class UserServiceImplTest {
 
     @Test
     void writeUserInfoToFileNew() {
-        userService.writeUserInfoToFileNew(50);
+        userService.writeUserInfoToFileNew(100);
     }
 
     @Test
@@ -140,6 +140,10 @@ class UserServiceImplTest {
     @Test
     void insertUserFromFileToDbByThread() {
         userService.insertUserFromFileToDbByThread();
+    }
+    @Test
+    void writeToFileWithNoRepeatable() {
+    userService.writeToFileWithNoRepeatable(1000);
     }
     public static void main(String[] args) {
 //        Calendar c = Calendar.getInstance();
