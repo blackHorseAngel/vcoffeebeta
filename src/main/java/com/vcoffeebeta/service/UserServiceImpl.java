@@ -731,10 +731,19 @@ public class UserServiceImpl implements UserService {
             fis = new FileInputStream(fileName);
             ois = new ObjectInputStream(fis);
             /**
-             * 创建线程池，核心线程数：8，最大线程数:16 存活时间（单位）：3 s 任务队列：ArrayBlockingQueue 长度10 线程工厂：默认 拒绝策略：callerRunsPolicy
-             * 100条，无额外打印日志，运行时间：
+             * 创建线程池，核心线程数：8，最大线程数:128 存活时间（单位）：3 s 任务队列：ArrayBlockingQueue 长度10 线程工厂：默认 拒绝策略：callerRunsPolicy
+             * 100条，无额外打印日志，运行时间：377ms（max：16），360ms（max：32），331ms（max：64）,370ms(max:100),355ms(max:128)
+             * 1000条，无额外打印日志，运行时间：
+             * 1307ms(max:64,queue:10),1261ms(max:64,queue:20),1285ms(max:64,queue:40),1291ms(max:64,queue:80),1278ms(max:64,queue:80),1294ms(max:64,queue:160),
+             * 1288ms(max:64,queue:220),1322ms(max:64,queue:320),
+             * 1278ms(max:64,queue:160linked),1265ms(max:64,queue:220linked),1290ms(max:64,queue:270linked),1222ms(max:64,queue:320linked),1359ms(max:64,queue:360linked),
+             * 1282ms(max:64,queue:400linked),1277ms(max:64,queue:480linked),1322ms(max:64,queue:640linked)
+             * 1301ms(max:80,queue:220)
+             * 1492ms(max：128,queue:10)，1650ms(max:128,queue:20),1404ms(max:128,queue:40),1545ms(max:128,queue:80),1470ms(max:128,queue:160),1293ms(max:128,queue:220),
+             * 1496ms(max:128,queue:320)
+             * 1495ms(max:256,queue:10),1629ms(max:256,queue:20),1644(max:256,queue:40)
              */
-            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8, 16, 3, TimeUnit.SECONDS, new ArrayBlockingQueue<>(10), Executors.defaultThreadFactory(),  new ThreadPoolExecutor.CallerRunsPolicy());
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(320), Executors.defaultThreadFactory(),  new ThreadPoolExecutor.CallerRunsPolicy());
 
             AtomicInteger insertCount = new AtomicInteger(0);
             AtomicInteger updateCount = new AtomicInteger(0);

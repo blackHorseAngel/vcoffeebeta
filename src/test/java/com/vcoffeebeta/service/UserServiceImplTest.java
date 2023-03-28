@@ -103,7 +103,7 @@ class UserServiceImplTest {
 
     @Test
     void writeUserInfoToFileNew() {
-        userService.writeUserInfoToFileNew(100);
+        userService.writeUserInfoToFileNew(1000);
     }
 
     @Test
@@ -139,6 +139,8 @@ class UserServiceImplTest {
     }
     @Test
     void insertUserFromFileToDbByThread() {
+
+        userService.writeUserInfoToFileNew(1000);
         userService.insertUserFromFileToDbByThread();
     }
     @Test
