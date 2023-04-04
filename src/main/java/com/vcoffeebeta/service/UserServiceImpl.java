@@ -718,12 +718,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void insertUserFromFileToDbByThread() {
-//        测试大数据
-//        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
-//        测试大数据
-//        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo3.txt";
-        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo4.txt";
+    public  void insertUserFromFileToDbByThread() {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo3.txt";
         FileInputStream fis = null;
         ObjectInputStream  ois = null;
         User user = null;
@@ -736,28 +732,29 @@ public class UserServiceImpl implements UserService {
              * 1000条，无额外打印日志，运行时间：
              * 1307ms(max:64,queue:10),1261ms(max:64,queue:20),1285ms(max:64,queue:40),1291ms(max:64,queue:80),1278ms(max:64,queue:80),1294ms(max:64,queue:160),
              * 1288ms(max:64,queue:220),1322ms(max:64,queue:320),
-             * 1278ms(max:64,queue:160linked),1265ms(max:64,queue:220linked),1290ms(max:64,queue:270linked),1222ms(max:64,queue:320linked),1359ms(max:64,queue:360linked),
-             * 1282ms(max:64,queue:400linked),1277ms(max:64,queue:480linked),1322ms(max:64,queue:640linked)
+             * 1278ms(max:64,queue:160linked),1265ms(max:64,queue:220linked),1290ms(max:64,queue:270linked),1222ms(max:64,queue:320linked),1359ms(max:64,queue:360linked), 1282ms(max:64,queue:400linked),1277ms(max:64,queue:480linked),1322ms(max:64,queue:640linked)
              * 1301ms(max:80,queue:220)
-             * 1492ms(max：128,queue:10)，1650ms(max:128,queue:20),1404ms(max:128,queue:40),1545ms(max:128,queue:80),1470ms(max:128,queue:160),1293ms(max:128,queue:220),
-             * 1496ms(max:128,queue:320)
+             * 1492ms(max：128,queue:10)，1650ms(max:128,queue:20),1404ms(max:128,queue:40),1545ms(max:128,queue:80),1470ms(max:128,queue:160),1293ms(max:128,queue:220),             * 1496ms(max:128,queue:320)
              * 1495ms(max:256,queue:10),1629ms(max:256,queue:20),1644(max:256,queue:40)
              */
             ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(320), Executors.defaultThreadFactory(),  new ThreadPoolExecutor.CallerRunsPolicy());
-
             AtomicInteger insertCount = new AtomicInteger(0);
             AtomicInteger updateCount = new AtomicInteger(0);
             AtomicInteger noOperation = new AtomicInteger(0);
 //            int count = 0;
             long startTime = System.currentTimeMillis();
             log.info("开始计时：" + startTime);
+            synchronized (this){
                 while((user = (User) ois.readObject())!= null) {
 //                    count++;
-                    User oldUser = userDAO.findByUserNameAndCompanyId(user);
+//                    User oldUser = userDAO.findByUserNameAndCompanyId(user);
                     User finalUser = user;
-//                    log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() + "，公司id：" + user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
-                    dealWithUserByThread(finalUser, oldUser, insertCount, updateCount,noOperation, threadPoolExecutor);
+//                    synchronized (user){
+//                    }
+                    log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() + "，公司id：" + user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
+                    dealWithUserByThread(finalUser, insertCount, updateCount,noOperation, threadPoolExecutor);
                 }
+            }
 
             while(threadPoolExecutor.getActiveCount() != 0){
                 Thread.sleep(1);
@@ -843,7 +840,6 @@ public class UserServiceImpl implements UserService {
     /**
      * 多线程处理新增和修改文件中的用户对象
      * @param finalUser
-     * @param oldUser
      * @param insertCount
      * @param updateCount
      * @param threadPoolExecutor
@@ -853,9 +849,9 @@ public class UserServiceImpl implements UserService {
     synchronized  void  countThread() {
         threadCount ++;
     }*/
-    private  void dealWithUserByThread(User finalUser, User oldUser,AtomicInteger insertCount, AtomicInteger updateCount,AtomicInteger noOperation, ThreadPoolExecutor threadPoolExecutor)  {
+    private  void dealWithUserByThread(User finalUser, AtomicInteger insertCount, AtomicInteger updateCount,AtomicInteger noOperation, ThreadPoolExecutor threadPoolExecutor)  {
             threadPoolExecutor.submit(()->{
-               User user = userDAO.findById(1);
+               User oldUser = userDAO.findByUserNumberAndCompanyId(finalUser);
 //                countThread();
                 try{
                     if(oldUser != null){

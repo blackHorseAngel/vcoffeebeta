@@ -181,6 +181,6 @@ public interface UserService {
      * @param
      * @return
      */
-    void insertUserFromFileToDbByThread();
+     void insertUserFromFileToDbByThread();
 
 }
