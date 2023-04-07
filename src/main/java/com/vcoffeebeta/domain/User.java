@@ -17,7 +17,6 @@ import java.util.List;
  */
 @Setter
 @Getter
-@ToString
 public class  User implements Serializable {
 
     @Serial
@@ -100,4 +99,28 @@ public class  User implements Serializable {
      */
     private String newPassword;
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", userNumber='" + userNumber + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", confirmPassword='" + confirmPassword + '\'' +
+                ", telephoneNumber='" + telephoneNumber + '\'' +
+                ", email='" + email + '\'' +
+                ", isAdmin=" + isAdmin +
+                ", companyId=" + companyId +
+                ", accountId=" + accountId +
+                ", equipmentId='" + equipmentId + '\'' +
+                ", created='" + created + '\'' +
+                ", modified='" + modified + '\'' +
+                ", createdTime=" + createdTime.getTime()+
+                ", modifiedTime=" + modifiedTime +
+                ", companyName='" + companyName + '\'' +
+                ", equipmentName='" + equipmentName + '\'' +
+                ", state=" + state +
+                ", newPassword='" + newPassword + '\'' +
+                '}';
+    }
 }

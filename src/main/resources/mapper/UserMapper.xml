@@ -193,10 +193,16 @@
             modified_time = #{modifiedTime}
         </if>
         <where>
+             state = 0
             <if test="id != 0">
-                id = #{id}
+               and id = #{id}
             </if>
-            and state = 0
+            <if test="item.username != null">
+                and username = #{item.username}
+            </if>
+            <if test="item.companyId != 0">
+                and company_id = #{item.companyId}
+            </if>
         </where>
     </update>
     <!-- 批量更新用户 -->

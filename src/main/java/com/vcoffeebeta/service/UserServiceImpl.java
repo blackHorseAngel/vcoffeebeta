@@ -13,11 +13,16 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * loginService实现类
@@ -297,31 +302,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void writeUserInfoToFile(int num) {
-        File file = new File("D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo.txt");
-       //根据系统自动匹配换行符
-        String separator = System.getProperty("line.separator");
+    public void writeUserInfoToFile(int num) throws IOException {
         try {
+            File file = new File("D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo.txt");
+            //根据系统自动匹配换行符
+            String separator = System.getProperty("line.separator");
             if(file.exists()) {
                 file.delete();
             }
             file.createNewFile();
-            FileWriter fw = new FileWriter(file,true);
+            FileWriter fw = new FileWriter(file, StandardCharsets.UTF_8 ,false);
+//            BufferedWriter br = new BufferedWriter(fw);
             List<Company>companyList = companyDAO.findAll(new Company());
             Random random = new Random();
+            Company company =  getRandomCompany(companyList,random);
             long startTime = System.currentTimeMillis();
             System.out.println("开始时间： " + startTime);
+            //100W条，4205ms，3732ms，4019ms
             for(int i = 0 ; i < num ; i++){
-                Company company =  getRandomCompany(companyList,random);
-                User user = generateUser(company,random);
+                User user = generateUser(company,random,i);
                 fw.write(user.toString());
                 fw.write(separator);
             }
+//            br.close();
             fw.close();
             long endTime = System.currentTimeMillis();
             System.out.println("结束时间：" + endTime);
             System.out.println("耗时：" + (endTime-startTime));
-            //100条 64ms
         } catch (IOException e) {
             log.error("写用户信息文件报错",e);
             throw new RuntimeException(e);
@@ -331,11 +338,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void writeUserInfoToFileNew(int num) {
-//        测试大数据
-//        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
-//        测试大数据
-//        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo3.txt";
-        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo4.txt";
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo3.txt";
         File file = new File(fileName);
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
@@ -371,13 +374,92 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void writeUserInfoToFileByThread(int num) {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo4.txt";
+        File file = new File(fileName);
+        //根据系统自动匹配换行符
+        String separator = System.getProperty("line.separator");
+        Random random = new Random();
+        FileWriter fw = null;
+        ThreadPoolExecutor threadPoolExecutor;
+        ReentrantReadWriteLock readWriteLock  = null;
+        try {
+            if(file.exists()) {
+                file.delete();
+            }
+            file.createNewFile();
+            fw = new FileWriter(file, StandardCharsets.UTF_8,false);
+            List<Company>companyList = companyDAO.findAll(new Company());
+            /**
+             * 创建线程池 生成100W条数据
+             * core=8,max=8,queue=400,time=3384ms
+             * core=8,max=16,queue=400,time=4974ms
+             * core=8,max=24,queue=400,time=3476ms
+             * core=8,max=32,queue=200,time=ms
+             * core=8,max=32,queue=400,time=3355ms
+             * core=8,max=40,queue=400,time=3785ms
+             * core=8,max=48,queue=400,time=3480ms
+             * core=8,max=64,queue=400,time=3656ms
+             * core=8,max=80,queue=400,time=3893ms
+             * core=8,max=96,queue=400,time=3976ms
+             * core=8,max=128,queue=400,time=4423ms
+             */
+            threadPoolExecutor = new ThreadPoolExecutor(8,8,3,TimeUnit.SECONDS,new LinkedBlockingQueue<>(400), Executors.defaultThreadFactory(),  new ThreadPoolExecutor.CallerRunsPolicy());
+            //增加读写锁
+            readWriteLock = new ReentrantReadWriteLock();
+            Company company =  getRandomCompany(companyList,random);
+            StringBuilder builder = new StringBuilder();
+            Thread.sleep(1);
+            long startTime = System.currentTimeMillis();
+            System.out.println("开始时间： " + startTime);
+            for ( int count = 0 ; count < num ; count++){
+                FileWriter finalFw = fw;
+                ReentrantReadWriteLock finalReadWriteLock = readWriteLock;
+                User user = generateUser(company,random, count);
+                String userStr = user.toString();
+                builder.append(userStr);
+                builder.append(separator);
+                if(count % 800 == 0){
+                    String bigUserStr = builder.toString();
+                    builder.setLength(0);
+                    threadPoolExecutor.submit(()->{
+                        try {
+                            finalReadWriteLock.writeLock().lock();
+                            finalFw.write(bigUserStr);
+                            finalFw.write(separator);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }finally {
+                            finalReadWriteLock.writeLock().unlock();
+
+                        }
+                    });
+                }
+
+            }
+            while(threadPoolExecutor.getActiveCount() != 0){
+                Thread.sleep(1);
+            }
+            fw.close();
+            long endTime = System.currentTimeMillis();
+            System.out.println("结束时间：" + endTime);
+            System.out.println("耗时：" + (endTime-startTime));
+            Thread.sleep(1);
+        } catch (IOException e) {
+            log.error("写用户信息文件报错",e);
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void writeToFileWithNoRepeatable(int num) {
         File file = new File("D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo3.txt");
         //根据系统自动匹配换行符
-        String separator = System.getProperty("line.separator");
+//        String separator = System.getProperty("line.separator");
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
-        OutputStreamWriter osw = null;
         try {
             if(file.exists()) {
                 file.delete();
@@ -397,7 +479,6 @@ public class UserServiceImpl implements UserService {
             oos.writeObject(null);
             oos.close();
             fos.close();
-            oos.close();
             long endTime = System.currentTimeMillis();
             System.out.println("结束时间：" + endTime);
             System.out.println("耗时：" + (endTime-startTime));
@@ -433,7 +514,7 @@ public class UserServiceImpl implements UserService {
                          long oldModifiedTime = oldUser.getModifiedTime();
                          if(modifiedTime - oldModifiedTime < 0){
                              user.setId(oldUser.getId());
-                             user.setUserNumber(handleUserNumber(user.getCompanyId()));
+                             user.setUserNumber(handleUsernumberForFile(new Random()));
                              user.setEquipmentId(oldUser.getEquipmentId());
                              user.setEquipmentName(oldUser.getEquipmentName());
                              int updateResult = userDAO.update(user);
@@ -565,6 +646,181 @@ public class UserServiceImpl implements UserService {
             }
     }
 
+    @Override
+    public void insertUserFromFileToDbNewByThread() {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo4.txt";
+        FileReader fr = null;
+        BufferedReader  br = null;
+        try {
+            fr = new FileReader(fileName);
+            br = new BufferedReader(fr);
+            AtomicInteger insertCount = new AtomicInteger(0);
+            AtomicInteger updateCount = new AtomicInteger(0);
+            AtomicInteger noOperation = new AtomicInteger(0);
+            String str = "";
+            Class userClass = User.class;
+            User user = (User) userClass.getDeclaredConstructor().newInstance();
+            Field[]fields = userClass.getDeclaredFields();
+            long startTime = System.currentTimeMillis();
+            log.info("解析文件数据并插入数据库： " + startTime);
+            /**
+             *
+             */
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8,8,3,TimeUnit.SECONDS,new LinkedBlockingQueue<>(20),Executors.defaultThreadFactory(),new ThreadPoolExecutor.CallerRunsPolicy());
+            while ((str = br.readLine()) != null) {
+                user = reflectFromStringToUser(str,user,fields);
+                User finalUser = user;
+                threadPoolExecutor.submit(() -> {
+                    User oldUser = userDAO.queryByNameAndPassword(finalUser);
+                    if (oldUser != null) {
+                        dealWithUserForUpdate(finalUser,oldUser,updateCount,noOperation);
+                    } else {
+                        dealWithUserForInsert(finalUser,insertCount);
+                    }
+                });
+            }
+            while(threadPoolExecutor.getActiveCount() != 0){
+                Thread.sleep(1);
+            }
+            long endTime = System.currentTimeMillis();
+            log.info("从文件到数据库的操作耗时：" + (endTime - startTime));
+            log.info("实际插入的条数是：" + insertCount);
+            log.info("实际修改的条数是：" + updateCount);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Override
+    public void insertUserFromFileToDbNewByThreadWithObjectMapper() {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo4.txt";
+        FileReader fr = null;
+        BufferedReader  br = null;
+        try {
+            fr = new FileReader(fileName);
+            br = new BufferedReader(fr);
+            AtomicInteger insertCount = new AtomicInteger(0);
+            AtomicInteger updateCount = new AtomicInteger(0);
+            String str = "";
+            Class userClass = User.class;
+            User user = (User) userClass.getDeclaredConstructor().newInstance();
+            Field[]fields = userClass.getDeclaredFields();
+            long startTime = System.currentTimeMillis();
+            log.info("解析文件数据兵插入数据库： " + startTime);
+            /**
+             *
+             */
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8,8,3,TimeUnit.SECONDS,new LinkedBlockingQueue<>(20),Executors.defaultThreadFactory(),new ThreadPoolExecutor.CallerRunsPolicy());
+            while ((str = br.readLine()) != null) {
+                //TODO 使用objectMapper来转换
+//                user = ;
+                User finalUser = user;
+                String finalStr = str;
+                threadPoolExecutor.submit(() -> {
+                    User oldUser = userDAO.queryByNameAndPassword(finalUser);
+                    if (oldUser != null) {
+                        long modifiedTime = finalUser.getModifiedTime();
+                        long oldModifiedTime = oldUser.getModifiedTime();
+                        if (modifiedTime - oldModifiedTime < 0) {
+                            finalUser.setId(oldUser.getId());
+                            finalUser.setEquipmentId(oldUser.getEquipmentId());
+                            finalUser.setEquipmentName(oldUser.getEquipmentName());
+                            int updateResult = userDAO.update(finalUser);
+                            if (updateResult > 0) {
+                                updateCount.getAndIncrement();
+//                                    log.info("更新成功" + str);
+                            } else {
+                                log.error("更新失败" + finalStr);
+                                //TODO 更新失败数据处理
+
+                            }
+                        }
+                    } else {
+                        int insertResult = userDAO.insert(finalUser);
+                        if (insertResult > 0) {
+                            insertCount.getAndIncrement();
+//                                log.info("插入成功" + str);
+                        } else {
+                            log.error("插入失败" + finalStr);
+                            //TODO 插入数据失败处理
+                        }
+                    }
+                });
+            }
+            while(threadPoolExecutor.getActiveCount() != 0){
+                Thread.sleep(1);
+            }
+            long endTime = System.currentTimeMillis();
+            log.info("从文件到数据库的操作耗时：" + (endTime - startTime));
+            log.info("实际插入的条数是：" + insertCount);
+            log.info("实际修改的条数是：" + updateCount);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 使用反射将读取到的字符串转成user
+     * @param str
+     * @param user
+     * @param fields
+     * @return
+     */
+    private User reflectFromStringToUser(String str,User user,Field[]fields){
+        str = str.substring(str.indexOf("{") + 1, str.indexOf("}"));
+        String[] strArray = str.split(",");
+        for (int i = 1; i < strArray.length; i++) {
+            String stringArrayValue = strArray[i-1].substring(strArray[i-1].indexOf("=") + 1);
+            String fieldName = fields[i].getName();
+            String fieldType = fields[i].getType().getSimpleName();
+            fields[i].setAccessible(true);
+            try {
+                if ("long".equals(fieldType)) {
+                    fields[i].set(user, Long.parseLong(stringArrayValue));
+                } else if ("int".equals(fieldType)) {
+                    fields[i].set(user, Integer.parseInt(stringArrayValue));
+                } else if ("Date".equals(fieldType)) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String dateStr = sdf.format(Long.parseLong(stringArrayValue));
+                    fields[i].set(user, sdf.parse(dateStr));
+                } else if ("byte".equals(fieldType)) {
+                    fields[i].set(user, Byte.valueOf(stringArrayValue));
+                } else {
+                    fields[i].set(user, stringArrayValue);
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return user;
+    }
     @Override
     public void insertUserFromFileToDbNew2() {
         String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo2.txt";
@@ -741,20 +997,15 @@ public class UserServiceImpl implements UserService {
             AtomicInteger insertCount = new AtomicInteger(0);
             AtomicInteger updateCount = new AtomicInteger(0);
             AtomicInteger noOperation = new AtomicInteger(0);
-//            int count = 0;
+            int count = 0;
             long startTime = System.currentTimeMillis();
             log.info("开始计时：" + startTime);
-            synchronized (this){
                 while((user = (User) ois.readObject())!= null) {
-//                    count++;
-//                    User oldUser = userDAO.findByUserNameAndCompanyId(user);
+                    count++;
                     User finalUser = user;
-//                    synchronized (user){
-//                    }
-                    log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() + "，公司id：" + user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
+//                  log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() + "，公司id：" + user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
                     dealWithUserByThread(finalUser, insertCount, updateCount,noOperation, threadPoolExecutor);
                 }
-            }
 
             while(threadPoolExecutor.getActiveCount() != 0){
                 Thread.sleep(1);
@@ -764,7 +1015,7 @@ public class UserServiceImpl implements UserService {
             log.info("新增条数：" + insertCount);
             log.info("修改条数：" + updateCount);
             log.info("不需要处理的条数：" + noOperation);
-//            log.info("读取文件总条数：" + count);
+            log.info("读取文件总条数：" + count);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -777,11 +1028,64 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public void readAndInsertUserFromFileToDbByThread() {
+        String fileName = "D:\\eclipseWorkspace\\vcoffeebeta\\src\\main\\resources\\datas\\userInfo4.txt";
+        FileReader fr = null;
+        BufferedReader  br = null;
+        User user = null;
+        try{
+            fr = new FileReader(fileName,Charset.defaultCharset());
+            br = new BufferedReader(fr);
+            /**
+             * 创建线程池，核心线程数：8，最大线程数:128 存活时间（单位）：3 s 任务队列：ArrayBlockingQueue 长度10 线程工厂：默认 拒绝策略：callerRunsPolicy
+             * 100条，无额外打印日志，运行时间：377ms（max：16），360ms（max：32），331ms（max：64）,370ms(max:100),355ms(max:128)
+             * 1000条，无额外打印日志，运行时间：
+             * 1307ms(max:64,queue:10),1261ms(max:64,queue:20),1285ms(max:64,queue:40),1291ms(max:64,queue:80),1278ms(max:64,queue:80),1294ms(max:64,queue:160),
+             * 1288ms(max:64,queue:220),1322ms(max:64,queue:320),
+             * 1278ms(max:64,queue:160linked),1265ms(max:64,queue:220linked),1290ms(max:64,queue:270linked),1222ms(max:64,queue:320linked),1359ms(max:64,queue:360linked), 1282ms(max:64,queue:400linked),1277ms(max:64,queue:480linked),1322ms(max:64,queue:640linked)
+             * 1301ms(max:80,queue:220)
+             * 1492ms(max：128,queue:10)，1650ms(max:128,queue:20),1404ms(max:128,queue:40),1545ms(max:128,queue:80),1470ms(max:128,queue:160),1293ms(max:128,queue:220),             * 1496ms(max:128,queue:320)
+             * 1495ms(max:256,queue:10),1629ms(max:256,queue:20),1644(max:256,queue:40)
+             */
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8, 64, 3, TimeUnit.SECONDS, new LinkedBlockingQueue<>(320), Executors.defaultThreadFactory(),  new ThreadPoolExecutor.CallerRunsPolicy());
+            AtomicInteger insertCount = new AtomicInteger(0);
+            AtomicInteger updateCount = new AtomicInteger(0);
+            AtomicInteger noOperation = new AtomicInteger(0);
+            int count = 0;
+            long startTime = System.currentTimeMillis();
+            log.info("开始计时：" + startTime);
+            while(br.readLine() != null) {
+                count++;
+                User finalUser = user;
+//                  log.info("准备开始运行线程池中的线程,用户名字：" + user.getUsername() + "，公司id：" + user.getCompanyId() + ",修改时间：" + user.getModifiedTime());
+                dealWithUserByThread(finalUser, insertCount, updateCount,noOperation, threadPoolExecutor);
+            }
+
+            while(threadPoolExecutor.getActiveCount() != 0){
+                Thread.sleep(1);
+            }
+            long endTime = System.currentTimeMillis();
+            log.info("耗时：" + (endTime - startTime));
+            log.info("新增条数：" + insertCount);
+            log.info("修改条数：" + updateCount);
+            log.info("不需要处理的条数：" + noOperation);
+            log.info("读取文件总条数：" + count);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch(Exception e){
+            log.error("报错了" + user.toString());
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 处理文件中存在的数据库中也存在的数据的更新
-     * @param //finalUser
-     * @param //oldUser
-     * @param //updateCount
+     * @param finalUser
+     * @param oldUser
+     * @param updateCount
      */
     private void dealWithUserForUpdate(User finalUser, User oldUser, AtomicInteger updateCount,AtomicInteger noOperation) {
         long modifiedTime = finalUser.getModifiedTime();
@@ -851,7 +1155,7 @@ public class UserServiceImpl implements UserService {
     }*/
     private  void dealWithUserByThread(User finalUser, AtomicInteger insertCount, AtomicInteger updateCount,AtomicInteger noOperation, ThreadPoolExecutor threadPoolExecutor)  {
             threadPoolExecutor.submit(()->{
-               User oldUser = userDAO.findByUserNumberAndCompanyId(finalUser);
+               User oldUser = userDAO.findByUserNameAndCompanyId(finalUser);
 //                countThread();
                 try{
                     if(oldUser != null){
@@ -926,7 +1230,8 @@ public class UserServiceImpl implements UserService {
         user.setModified("admin");
         user.setModifiedTime(date.getTime());
         user.setConfirmPassword("123456");
-        user.setUsername("employee" + num);
+        String username = "employee" + num;
+        user.setUsername(username);
         user.setEmail("714680900@qq.com");
         user.setIsAdmin((byte) 0);
         user.setState(0);
@@ -942,21 +1247,6 @@ public class UserServiceImpl implements UserService {
         user.setModified(user.getUsername());
         user.setModifiedTime(neededTime);
         return user;
-    }
-    //TODO 从文件读取插入数据中的时候使用
-    private String handleUserNumber(long companyId) {
-        int userNum = userDAO.queryForAmountByCompanyId(companyId);
-        userNum = userNum + 1;
-        StringBuilder builder = new StringBuilder();
-        builder.append(companyId);
-        builder.append("");
-        builder.append(userNum);
-        for(int i = 0 ; i < 10-builder.length() ; i++){
-            builder.append(0);
-        }
-        String userNumber = builder.toString();
-        builder.setLength(0);
-        return userNumber;
     }
     private String handleUsernumberForFile(Random random){
         return String.valueOf(random.nextInt(10000000));
@@ -1010,14 +1300,14 @@ public class UserServiceImpl implements UserService {
                 fw.write("a");
                 count++;
             }
-            //fileWriter:8193个a
-            //bufferedWriter:16384个a
+            //fileWriter:8193个a,约等于8个字节
+            //bufferedWriter:16384个a，约等于16字节
             System.out.println("一共写入了" + count + "个a自动刷新");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
 
     }
 }

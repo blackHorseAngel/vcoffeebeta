@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -88,7 +89,11 @@ class UserServiceImplTest {
 
     @Test
     void writeUserInfoToFile() {
-        userService.writeUserInfoToFile(100);
+        try {
+            userService.writeUserInfoToFile(1000000);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -139,18 +144,25 @@ class UserServiceImplTest {
     }
     @Test
     void insertUserFromFileToDbByThread() {
-
-//        userService.writeToFileWithNoRepeatable(100000);
         userService.insertUserFromFileToDbByThread();
     }
     @Test
     void writeToFileWithNoRepeatable() {
-    userService.writeToFileWithNoRepeatable(1000000);
+    userService.writeToFileWithNoRepeatable(10000);
+    }
+    @Test
+    void writeUserInfoToFileByThread() {
+    userService.writeUserInfoToFileByThread(100);
+    }
+    @Test
+    void readAndInsertUserFromFileToDbByThread() {
+        userService.readAndInsertUserFromFileToDbByThread();
+    }
+    @Test
+    void insertUserFromFileToDbNewByThread() {
+        userService.insertUserFromFileToDbNewByThread();
     }
     public static void main(String[] args) {
-//        Calendar c = Calendar.getInstance();
-//        c.set(2023,3,17,15,28,33);
-//        System.out.println(c.getTimeInMillis());
 
 
     }

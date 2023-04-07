@@ -3,6 +3,7 @@ package com.vcoffeebeta.service;
 import com.vcoffeebeta.domain.User;
 import com.vcoffeebeta.domain.UserQuery;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -120,7 +121,7 @@ public interface UserService {
      * @param
      * @return
      */
-    void writeUserInfoToFile(int num);
+    void writeUserInfoToFile(int num) throws IOException;
 
     /**
      * 新增用户信息到文件（采用字节流的方式写入）
@@ -131,6 +132,11 @@ public interface UserService {
      */
     void writeUserInfoToFileNew(int num);
 
+    /**
+     * 用多线程把用户信息写入文件
+     * @param num
+     */
+    void writeUserInfoToFileByThread(int num);
     /**
      *
      * @author
@@ -149,13 +155,32 @@ public interface UserService {
     void insertUserFromFileToDb();
 
     /**
-     * 新增将写入文件的用户信息同步到数据库（采用反射的方式获取属性值）
+     * 将写入文件的用户信息读取并新增到数据库（采用反射的方式获取属性值）
      * @author zhangshenming
      * @date 2023/03/15 20:20
      * @param
      * @return
      */
     void insertUserFromFileToDbNew();
+
+    /**
+     * 多线程将写入文件的用户信息插入到数据库(读采用bufferReader，转换使用反射)
+     * @author zhangshenming
+     * @date 2023/04/06 16:01
+     * @param
+     * @return
+     */
+    void insertUserFromFileToDbNewByThread();
+
+    /**
+     * 多线程将写入文件的用户信息插入到数据库(读采用bufferReader,转换使用objectMapper)
+     * @author zhangshenming
+     * @date 2023/04/07 16:12
+     * @param
+     * @return
+     *
+     */
+    void insertUserFromFileToDbNewByThreadWithObjectMapper();
 
     /**
      * 新增将写入文件的用户信息同步到数据库（采用读取字节流的方式反序列化）
@@ -182,5 +207,14 @@ public interface UserService {
      * @return
      */
      void insertUserFromFileToDbByThread();
+
+    /**
+     * 多线程读取文件中的用户并且多线程增加到数据库
+     * @author zhangshenming
+     * @date 2023/03/21 13:22:21
+     * @param
+     * @return
+     */
+    void readAndInsertUserFromFileToDbByThread();
 
 }
